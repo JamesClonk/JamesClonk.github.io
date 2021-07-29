@@ -4,16 +4,16 @@ description: The Open Service Broker API spec and what it's good for
 tags: [osbapi,cloud foundry,service broker,kubernetes]
 authors: [Fabio Berchtold]
 date: 2019-12-31T11:23:54+02:00
-draft: true
+draft: false
 ---
 
 ## OSBAPI?
 
-The Open Service Broker API (OSBAPI) is a specification that defines a common language for service providers that your cloud native applications can use to manage cloud services without lockin.
+The [Open Service Broker API](https://www.openservicebrokerapi.org/) (OSBAPI) is a specification that defines a common language for service providers that your cloud native applications can use to manage cloud services without lockin.
 
-OSBAPI allows independent software vendors, service providers and developers to easily integrate and consume services for workloads running on cloud native platforms such as the Swisscom Application Cloud, which is based on Cloud Foundry and Kubernetes. The specification describes a simple set of API endpoints which can be used to provision, access and manage various service offerings, and has been adopted by many different platforms and thousands of service providers by now.
+OSBAPI allows independent software vendors, service providers and developers to easily integrate and consume services for workloads running on cloud native platforms such as the [Swisscom Application Cloud](https://developer.swisscom.com/), which is based on [Cloud Foundry](https://cloudfoundry.org/) and [Kubernetes](https://kubernetes.io/). The specification describes a simple set of API endpoints which can be used to provision, access and manage various service offerings, and has been adopted by many different platforms and thousands of service providers by now.
 
-The specification itself can be found on GitHub under https://github.com/openservicebrokerapi/servicebroker
+The specification itself can be found on GitHub under https://github.com/openservicebrokerapi/servicebroker     
 As you can see it is very simple and only has a handful of endpoints, each having to support only a couple of methods.
 
 To use the OSBAPI and integrate a new service into your cloud platform you will need to implement it through a service broker.
@@ -26,14 +26,14 @@ Service brokers compliant with the OSBAPI specification can provision new instan
 
 Service brokers implementing the OSBAPI specification usually provide some of these lifecycle commands:
 
-    Provide a catalog of services that the service broker offers
-    The service catalog describes all of the services that can be provisioned through the service broker, and each of these services is made up of one or more plans. These plans typically represent the costs and benefits for a given variant of the service. Many services use plans to “T-Shirt size” the service offering (such as small, medium, and large for example).
-    Provision new service instances
-    A service instance is a provisioned instance of a service and plan as described in the service brokers catalog. This could be anything, a database, a message queue, or a configuration server.
-    Bind those service instances to applications
-    After a service instance is provisioned, you will want your application to connect to that instance. Such a service binding is done by returning all the necessary information back to your application that is required to be able to connect to and consume the service instance.
-    Deprovision service instances
-    The service broker can delete and remove all the resources created upon initial provisioning of the service instance.
+- **Provide a catalog of services that the service broker offers**      
+  The service catalog describes all of the services that can be provisioned through the service broker, and each of these services is made up of one or more plans. These plans typically represent the costs and benefits for a given variant of the service. Many services use plans to “T-Shirt size” the service offering (such as small, medium, and large for example).
+- **Provision new service instances**       
+  A service instance is a provisioned instance of a service and plan as described in the service brokers catalog. This could be anything, a database, a message queue, or a configuration server.
+- **Bind those service instances to applications**      
+  After a service instance is provisioned, you will want your application to connect to that instance. Such a service binding is done by returning all the necessary information back to your application that is required to be able to connect to and consume the service instance.
+- **Deprovision service instances**     
+  The service broker can delete and remove all the resources created upon initial provisioning of the service instance.
 
  
 ## What is Kubernetes Service Catalog?
@@ -49,23 +49,23 @@ Review the Kubernetes [documentation on Service Catalog](https://kubernetes.io/d
 There is a multitude of service brokers already out there for a wide array of different types of services, all implementing the OSBAPI specification to make these services consumable by Cloud Foundry or Kubernetes. Through the OSBAPI specification it is possible to extend your service marketplace inside the Swisscom Application Cloud to any number of additional third-party service offerings.
 
 Have a look at some of these examples:
-- **Open Service Broker for Azure** 
-  OSBA lets you provision Azure Cloud Services directly from Kubernetes or Cloud Foundry
+- **Open Service Broker for Azure**     
+  OSBA lets you provision Azure Cloud Services directly from Kubernetes or Cloud Foundry        
   https://osba.sh/
-- **AWS Service Broker**    
-  Allows native AWS services to be exposed directly through Cloud Foundry and Kubernetes
+- **AWS Service Broker**        
+  Allows native AWS services to be exposed directly through Cloud Foundry and Kubernetes        
   https://aws.amazon.com/partners/servicebroker/
-- **ElephantSQL Broker** 🐘 
-  A service broker for provisioning PostgreSQL databases on AWS, Azure or GCP via ElephantSQL managed PostgreSQL-as-a-Service
+- **ElephantSQL Broker** 🐘     
+  A service broker for provisioning PostgreSQL databases on AWS, Azure or GCP via ElephantSQL managed PostgreSQL-as-a-Service       
   https://github.com/JamesClonk/elephantsql-broker
-- **GCP Service Broker**    
-  A service broker for Google Cloud Platform, to be used with Cloud Foundry and Kubernetes
+- **GCP Service Broker**        
+  A service broker for Google Cloud Platform, to be used with Cloud Foundry and Kubernetes      
   https://github.com/GoogleCloudPlatform/gcp-service-broker
-- **Compose.io Broker** 
-  A service broker for Cloud Foundry and Kubernetes, provisioning managed services such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, etc.
+- **Compose.io Broker**     
+  A service broker for Cloud Foundry and Kubernetes, provisioning managed services such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, etc.     
   https://github.com/JamesClonk/compose-broker
-- **Kubernetes Minibroker** 
-  A service broker that provisions services via Helm Charts on your Minikube Kubernetes cluster, supporting PostgreSQL, MySQL and MongoDB
+- **Kubernetes Minibroker**     
+  A service broker that provisions services via Helm Charts on your Minikube Kubernetes cluster, supporting PostgreSQL, MySQL and MongoDB       
   https://github.com/kubernetes-sigs/minibroker
 
 In particular the AWS, Azure and GCP service brokers immediately open up a huge array of databases and services to your platform, giving your developers a big toolbox to work with when developing new applications. ?️
@@ -147,7 +147,7 @@ Here are a few example libraries:
 - **Java**  
   The **Spring Cloud Open Service Broker** framework for building Spring Boot applications that implement the Open Service Broker API   
   https://spring.io/projects/spring-cloud-open-service-broker
-- **Java / Groovy** 
+- **Java / Groovy**     
   The **Swisscom Open Service Broker** enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services     
   https://github.com/swisscom/open-service-broker
 - **Golang**  
