@@ -145,10 +145,10 @@ If you are interested in developing and providing your own service broker then y
 
 Here are a few example libraries:
 - **Java**  
-  The **Spring Cloud Open Service Broker** framework for building Spring Boot applications that implement the Open Service Broker API  
+  The **Spring Cloud Open Service Broker** framework for building Spring Boot applications that implement the Open Service Broker API   
   https://spring.io/projects/spring-cloud-open-service-broker
 - **Java / Groovy** 
-  The **Swisscom Open Service Broker** enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services 
+  The **Swisscom Open Service Broker** enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services     
   https://github.com/swisscom/open-service-broker
 - **Golang**  
   https://github.com/pmorie/osb-starter-pack  
