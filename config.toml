@@ -32,26 +32,9 @@ paginate = 5
     name = "GitHub"
     url = "https://github.com/JamesClonk"
 
-  # Default theme
-  #[params.style]
-  #  darkestColor = "#242930"
-  #  darkColor = "#353b43"
-  #  lightColor = "#afbac4"
-  #  lightestColor = "#ffffff"
-  #  primaryColor = "#57cc8a"
-
-  # Green theme
-  #[params.style]
-  #  darkestColor = "#315659"
-  #  darkColor = "#253031"
-  #  lightColor = "#96a879"
-  #  lightestColor = "#fff"
-  #  primaryColor = "#dad865"
-
-  # Red theme
   [params.style]
-    darkestColor = "#d35050"
-    darkColor = "#212121"
-    lightColor = "#d6d6d6"
-    lightestColor = "#d3d3d3"
-    primaryColor = "#ffffff"
+    darkestColor = "#242930"
+    darkColor = "#353b43"
+    lightColor = "#afbac4"
+    lightestColor = "#ffffff"
+    primaryColor = "#578acc"
