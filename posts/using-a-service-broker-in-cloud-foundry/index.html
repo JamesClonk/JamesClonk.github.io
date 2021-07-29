@@ -1,0 +1,178 @@
+<!doctype html><html lang=en-us>
+<head>
+<title>Using a Service Broker in Cloud Foundry // Ramblings about all things technical</title>
+<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
+<meta charset=utf-8>
+<meta name=generator content="Hugo 0.86.0">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=author content="Fabio Berchtold">
+<meta name=description content="The Open Service Broker API spec and what it's good for">
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Using a Service Broker in Cloud Foundry">
+<meta name=twitter:description content="The Open Service Broker API spec and what it's good for">
+<meta property="og:title" content="Using a Service Broker in Cloud Foundry">
+<meta property="og:description" content="The Open Service Broker API spec and what it's good for">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.jamesclonk.io/posts/using-a-service-broker-in-cloud-foundry/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2019-12-31T11:23:54+02:00">
+<meta property="article:modified_time" content="2019-12-31T11:23:54+02:00">
+</head>
+<body>
+<header class=app-header>
+<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src="https://avatars.githubusercontent.com/u/3172084?v=4" alt="Fabio Berchtold"></a>
+<h1>Ramblings about all things technical</h1>
+<nav class=app-header-menu>
+<a class=app-header-menu-item href=/>Home</a>
+-
+<a class=app-header-menu-item href=/tags/>Tags</a>
+-
+<a class=app-header-menu-item href=/about/>About</a>
+</nav>
+<p>Working with tech is fun!</p>
+<div class=app-header-social>
+<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
+</a>
+</div>
+</header>
+<main class=app-container>
+<article class=post>
+<header class=post-header>
+<h1 class=post-title>Using a Service Broker in Cloud Foundry</h1>
+<div class=post-meta>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+Dec 31, 2019
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+8 min read
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+<a class=tag href=https://blog.jamesclonk.io/tags/osbapi/>osbapi</a>
+<a class=tag href=https://blog.jamesclonk.io/tags/kubernetes/>kubernetes</a>
+</div>
+</div>
+</header>
+<div class=post-content>
+<h2 id=osbapi>OSBAPI?</h2>
+<p>The <a href=https://www.openservicebrokerapi.org/>Open Service Broker API</a> (OSBAPI) is a specification that defines a common language for service providers that your cloud native applications can use to manage cloud services without lockin.</p>
+<p>OSBAPI allows independent software vendors, service providers and developers to easily integrate and consume services for workloads running on cloud native platforms such as the <a href=https://developer.swisscom.com/>Swisscom Application Cloud</a>, which is based on <a href=https://cloudfoundry.org/>Cloud Foundry</a> and <a href=https://kubernetes.io/>Kubernetes</a>. The specification describes a simple set of API endpoints which can be used to provision, access and manage various service offerings, and has been adopted by many different platforms and thousands of service providers by now.</p>
+<p>The specification itself can be found on GitHub under <a href=https://github.com/openservicebrokerapi/servicebroker>https://github.com/openservicebrokerapi/servicebroker</a> <br>
+As you can see it is very simple and only has a handful of endpoints, each having to support only a couple of methods.</p>
+<p>To use the OSBAPI and integrate a new service into your cloud platform you will need to implement it through a service broker.</p>
+<h3 id=a-service-broker-is-what-you-need>A Service Broker is what you need!</h3>
+<p>Service brokers manage the lifecycle of services, and platforms interact with service brokers to provision, get access to and manage the services they offer. OSBAPI defines these interactions, and therefore allows software providers to offer their services to anyone, regardless of the technology or infrastructure those software providers wish to utilise.</p>
+<p>Service brokers compliant with the OSBAPI specification can provision new instances of services that they provide, and in turn provide all of the necessary information that your application needs to connect to it. Your application can directly connect to the service instance, regardless of how or where the service is running.</p>
+<p>Service brokers implementing the OSBAPI specification usually provide some of these lifecycle commands:</p>
+<ul>
+<li><strong>Provide a catalog of services that the service broker offers</strong> <br>
+The service catalog describes all of the services that can be provisioned through the service broker, and each of these services is made up of one or more plans. These plans typically represent the costs and benefits for a given variant of the service. Many services use plans to “T-Shirt size” the service offering (such as small, medium, and large for example).</li>
+<li><strong>Provision new service instances</strong> <br>
+A service instance is a provisioned instance of a service and plan as described in the service brokers catalog. This could be anything, a database, a message queue, or a configuration server.</li>
+<li><strong>Bind those service instances to applications</strong> <br>
+After a service instance is provisioned, you will want your application to connect to that instance. Such a service binding is done by returning all the necessary information back to your application that is required to be able to connect to and consume the service instance.</li>
+<li><strong>Deprovision service instances</strong> <br>
+The service broker can delete and remove all the resources created upon initial provisioning of the service instance.</li>
+</ul>
+<h2 id=what-is-kubernetes-service-catalog>What is Kubernetes Service Catalog?</h2>
+<p>As the OSBAPI specification is a platform agnostic way of delivering services it has also been adopted by the Kubernetes ecosystem via the Service Catalog project. <a href=https://svc-cat.io/>Service Catalog</a> is a Kubernetes component that lets you provision services provided by OSBAPI compliant service brokers directly from the comfort of native Kubernetes tooling, just as you would in Cloud Foundry over the service marketplace. Service Catalog integrates the OSBAPI, letting you connect service brokers for any service providers to your Kubernetes cluster. Using Service Catalog, a Kubernetes cluster operator can browse the list of managed services offered by the service broker, provision instances of managed services, and bind them to make them available to applications running inside the cluster.</p>
+<p>Review the Kubernetes <a href=https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/>documentation on Service Catalog</a> for further information on getting it up and running on your cluster, and how the overall architecture and interactions with a service broker are implemented.</p>
+<p><img src=https://ict.swisscom.ch/wp-content/uploads/2019/12/svc.png alt=SVC></p>
+<h2 id=brokers-a-plenty>Brokers a-plenty</h2>
+<p>There is a multitude of service brokers already out there for a wide array of different types of services, all implementing the OSBAPI specification to make these services consumable by Cloud Foundry or Kubernetes. Through the OSBAPI specification it is possible to extend your service marketplace inside the Swisscom Application Cloud to any number of additional third-party service offerings.</p>
+<p>Have a look at some of these examples:</p>
+<ul>
+<li><strong>Open Service Broker for Azure</strong> <br>
+OSBA lets you provision Azure Cloud Services directly from Kubernetes or Cloud Foundry <br>
+<a href=https://osba.sh/>https://osba.sh/</a></li>
+<li><strong>AWS Service Broker</strong> <br>
+Allows native AWS services to be exposed directly through Cloud Foundry and Kubernetes <br>
+<a href=https://aws.amazon.com/partners/servicebroker/>https://aws.amazon.com/partners/servicebroker/</a></li>
+<li><strong>ElephantSQL Broker</strong> 🐘 <br>
+A service broker for provisioning PostgreSQL databases on AWS, Azure or GCP via ElephantSQL managed PostgreSQL-as-a-Service <br>
+<a href=https://github.com/JamesClonk/elephantsql-broker>https://github.com/JamesClonk/elephantsql-broker</a></li>
+<li><strong>GCP Service Broker</strong> <br>
+A service broker for Google Cloud Platform, to be used with Cloud Foundry and Kubernetes <br>
+<a href=https://github.com/GoogleCloudPlatform/gcp-service-broker>https://github.com/GoogleCloudPlatform/gcp-service-broker</a></li>
+<li><strong>Compose.io Broker</strong> <br>
+A service broker for Cloud Foundry and Kubernetes, provisioning managed services such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, etc. <br>
+<a href=https://github.com/JamesClonk/compose-broker>https://github.com/JamesClonk/compose-broker</a></li>
+<li><strong>Kubernetes Minibroker</strong> <br>
+A service broker that provisions services via Helm Charts on your Minikube Kubernetes cluster, supporting PostgreSQL, MySQL and MongoDB <br>
+<a href=https://github.com/kubernetes-sigs/minibroker>https://github.com/kubernetes-sigs/minibroker</a></li>
+</ul>
+<p>In particular the AWS, Azure and GCP service brokers immediately open up a huge array of databases and services to your platform, giving your developers a big toolbox to work with when developing new applications. ?️</p>
+<h2 id=using-a-custom-service-broker-in-cloud-foundry>Using a custom service broker in Cloud Foundry</h2>
+<p>Lets take a closer look at the above mentioned <em>compose-broker</em> and <em>elephantsql-broker</em>, two very similar community written third-party service brokers for managing these public Database-as-a-Service offerings in your platform:</p>
+<ul>
+<li><strong><a href=https://compose.io/>Compose.io</a></strong><br>
+offers developers hosting for managed databases, such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, RabbitMQ, etc.</li>
+<li><strong><a href=https://www.elephantsql.com/>ElephantSQL</a></strong><br>
+offers fully managed and highly available PostgreSQL databases as a service on any AWS, Azure or GCP datacenter of your choice.</li>
+</ul>
+<h3 id=the-service-catalog>The service catalog</h3>
+<p>Both of these service brokers come with a <code>catalog.yml</code> configuration file included, that specifies all their whole service catalog and lists all their service offerings and plans that they can integrate into the cf marketplace. You can freely modify these to adjust what service offerings you plan on using. Lets have a quick look at the elephantsql-broker&rsquo;s catalog:
+<a href=https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/catalog.yml>https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/catalog.yml</a></p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>services</span>:
+- <span style=color:#f92672>id</span>: <span style=color:#ae81ff>8ff5d1c8-c6eb-4f04-928c-6a422e0ea330</span>
+  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>elephantsql</span>
+  <span style=color:#f92672>description</span>: <span style=color:#ae81ff>PostgreSQL as a Service</span>
+  <span style=color:#f92672>bindable</span>: <span style=color:#66d9ef>true</span>
+</code></pre></div><p>The main catalog element is an array of <a href=https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-offering-object>service offerings</a>, with each element having an ID, name and various other properties as described in the OSBAPI spec.
+A service offering also contains one or more <a href=https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-plan-object>service plans</a>. In our case there is only one service offering which contains a list of all plans, with each of them representing and corresponding directly to a database instance plan from <a href=https://www.elephantsql.com/plans.html>ElephantSQL.com/plans</a>, for example:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>plans</span>:
+- <span style=color:#f92672>id</span>: <span style=color:#ae81ff>6203b8e7-9ef4-44ef-bb0b-48b50409794d</span>
+  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>spider</span>
+  <span style=color:#f92672>description</span>: <span style=color:#ae81ff>Simple Spider - shared instance</span>
+  <span style=color:#f92672>free</span>: <span style=color:#66d9ef>false</span>
+  <span style=color:#f92672>bindable</span>: <span style=color:#66d9ef>true</span>
+  <span style=color:#f92672>metadata</span>:
+    <span style=color:#f92672>displayName</span>: <span style=color:#ae81ff>Simple Spider</span>
+    <span style=color:#f92672>imageUrl</span>: <span style=color:#ae81ff>https://www.elephantsql.com/images/spider_256.png</span>
+    <span style=color:#f92672>costs</span>:
+    - <span style=color:#f92672>amount</span>:
+        <span style=color:#f92672>usd</span>: <span style=color:#ae81ff>5.0</span>
+      <span style=color:#f92672>unit</span>: <span style=color:#ae81ff>Monthly</span>
+    <span style=color:#f92672>bullets</span>:
+    - <span style=color:#ae81ff>Shared high performance server</span>
+    - <span style=color:#ae81ff>500</span> <span style=color:#ae81ff>MB data</span>
+    - <span style=color:#ae81ff>10</span> <span style=color:#ae81ff>concurrent connections</span>
+    <span style=color:#f92672>dedicatedService</span>: <span style=color:#66d9ef>false</span>
+    <span style=color:#f92672>highAvailability</span>: <span style=color:#66d9ef>false</span>
+</code></pre></div><h3 id=deploying-the-service-broker-to-cloud-foundry>Deploying the service broker to Cloud Foundry</h3>
+<p>First you are going to need an account on one of these service providers you intend to use. For example for ElephantSQL you can just hop over to their <a href=https://customer.elephantsql.com/login>login page</a> and sign-in with your GitHub account. Next you will need to create an API key that service broker can use for direct API access to provision and manage database instances. Create a new <a href=https://customer.elephantsql.com/apikeys>API key</a> now and keep it for later.</p>
+<p>In order to deploy the service broker onto the Swisscom Application Cloud then open and modify the included <a href=https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/manifest.yml>manifest.yml</a> to your liking and run <code>cf push</code>. You can either add the previously mentioned API key directly to your <code>manifest.yml</code>, or provide it via the cf-cli during pushing.</p>
+<p>Deployment of these service brokers works just like any other app on Cloud Foundry:</p>
+<p><img src=https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/setup-min.gif alt=Deployment></p>
+<p>Once the service broker application has been deployed you have to register it with Cloud Foundry. You do this by running the <code>cf create-service-broker</code> command, by giving it the <code>--space-scoped</code> flag. This will register the service broker for your current space and its services will be available from the marketplace when in that space. If you are not an administrator of your Cloud Foundry platform then all you can do is register space-scoped service brokers, but if by chance you are in fact an admin or know the admins then you could also <a href=https://docs.cloudfoundry.org/services/access-control.html#enable-access>enable-service-access</a> or register the service broker globally to make its services available to specific orgs or even platform-wide to anyone.</p>
+<p>Have a look at the documentation on <a href=https://docs.cloudfoundry.org/services/managing-service-brokers.html>managing service brokers</a> on Cloud Foundry for further information on this topic.</p>
+<h3 id=provisioning-new-database-services>Provisioning new database services</h3>
+<p>Once the service broker has been registered on the Swisscom Application Cloud and its services are available to you in the marketplace, you can then proceed as if it were any other platform provided service and start to create, bind and consume service instances via <code>cf create-service</code> and <code>cf bind-service</code>:</p>
+<p><img src=https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/provisioning-min.gif alt=Provisioning></p>
+<p>While looking at such a newly created service instance via <code>cf service &lt;instance-name></code> you will notice that it also displays a <em>dashboard</em> url. This will take you back to the admin dashboard of the service provider itself where you can inspect and also manage these database instances directly, in case of ElephantSQL for example it would allow you to manage backups, look at metrics, setup alarms, etc. Just be careful to not rename (or accidentally delete) them, as their GUID name is the reference for Cloud Foundry and the service broker to be able to identify them.</p>
+<h2 id=building-your-own>Building your own</h2>
+<p>If you are interested in developing and providing your own service broker then you could also use one of the many already existing frameworks and libraries available out there to develop your own service broker in no time, instead of rolling your own implementation.</p>
+<p>Here are a few example libraries:</p>
+<ul>
+<li><strong>Java</strong><br>
+The <strong>Spring Cloud Open Service Broker</strong> framework for building Spring Boot applications that implement the Open Service Broker API<br>
+<a href=https://spring.io/projects/spring-cloud-open-service-broker>https://spring.io/projects/spring-cloud-open-service-broker</a></li>
+<li><strong>Java / Groovy</strong> <br>
+The <strong>Swisscom Open Service Broker</strong> enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services <br>
+<a href=https://github.com/swisscom/open-service-broker>https://github.com/swisscom/open-service-broker</a></li>
+<li><strong>Golang</strong><br>
+<a href=https://github.com/pmorie/osb-starter-pack>https://github.com/pmorie/osb-starter-pack</a><br>
+<a href=https://github.com/pivotal-cf/brokerapi>https://github.com/pivotal-cf/brokerapi</a></li>
+<li><strong>Python</strong><br>
+<a href=https://pypi.org/project/openbrokerapi/>https://pypi.org/project/openbrokerapi/</a></li>
+<li><strong>.NET</strong><br>
+<a href=https://github.com/AXOOM/OpenServiceBroker>https://github.com/AXOOM/OpenServiceBroker</a></li>
+</ul>
+<p>But even if you don&rsquo;t like to use one of these libraries, writing your own service broker should be a piece of cake given how simple the API specification actually is.</p>
+<p>Happy brokering! 🥳</p>
+</div>
+<div class=post-footer>
+</div>
+</article>
+</main>
+</body>
+</html>
