@@ -1,5 +1,8 @@
 ---
 title: "My Tonkatsu Recipe"
+description: How to cook Tonkatsu at home
+tags: [recipe,cooking]
+authors: [Fabio Berchtold]
 date: 2019-11-23T20:30:35+02:00
 draft: false
 ---
