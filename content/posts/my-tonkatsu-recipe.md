@@ -82,4 +82,5 @@ This is neither a technical blog post, nor is it written in English, I know. But
 	- In Stäbchen-gerechte Stücke schneiden mit möglichst scharfem Messer (Um den Mantel nicht zu sehr zu beschädigen)
 	- Salat mit Sauce zu Essteller hinzufügen
 	- Tonkatsu Sauce übers Fleisch geben
+	- Reis in kleiner Schüssel dazustellen
 	- Servieren
