@@ -42,7 +42,7 @@ As the OSBAPI specification is a platform agnostic way of delivering services it
 
 Review the Kubernetes [documentation on Service Catalog](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/) for further information on getting it up and running on your cluster, and how the overall architecture and interactions with a service broker are implemented.
 
-![SVC](https://ict.swisscom.ch/wp-content/uploads/2019/12/svc.png)
+![SVC](/images/svc.png)
  
 ## Brokers a-plenty
 
@@ -123,7 +123,7 @@ In order to deploy the service broker onto the Swisscom Application Cloud then o
 
 Deployment of these service brokers works just like any other app on Cloud Foundry:
 
-![Deployment](https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/setup-min.gif)
+![Deployment](/images/setup-min.gif)
 
 Once the service broker application has been deployed you have to register it with Cloud Foundry. You do this by running the `cf create-service-broker` command, by giving it the `--space-scoped` flag. This will register the service broker for your current space and its services will be available from the marketplace when in that space. If you are not an administrator of your Cloud Foundry platform then all you can do is register space-scoped service brokers, but if by chance you are in fact an admin or know the admins then you could also [enable-service-access](https://docs.cloudfoundry.org/services/access-control.html#enable-access) or register the service broker globally to make its services available to specific orgs or even platform-wide to anyone.
 
@@ -134,7 +134,7 @@ Have a look at the documentation on [managing service brokers](https://docs.clou
 
 Once the service broker has been registered on the Swisscom Application Cloud and its services are available to you in the marketplace, you can then proceed as if it were any other platform provided service and start to create, bind and consume service instances via `cf create-service` and `cf bind-service`:
 
-![Provisioning](https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/provisioning-min.gif)
+![Provisioning](/images/provisioning-min.gif)
 
 While looking at such a newly created service instance via `cf service <instance-name>` you will notice that it also displays a *dashboard* url. This will take you back to the admin dashboard of the service provider itself where you can inspect and also manage these database instances directly, in case of ElephantSQL for example it would allow you to manage backups, look at metrics, setup alarms, etc. Just be careful to not rename (or accidentally delete) them, as their GUID name is the reference for Cloud Foundry and the service broker to be able to identify them.
 
