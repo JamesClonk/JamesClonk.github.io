@@ -38,51 +38,50 @@ Service brokers implementing the OSBAPI specification usually provide some of th
  
 ## What is Kubernetes Service Catalog?
 
-As the OSBAPI specification is a platform agnostic way of delivering services it has also been adopted by the Kubernetes ecosystem via the Service Catalog project. Service Catalog is a Kubernetes component that lets you provision services provided by OSBAPI compliant service brokers directly from the comfort of native Kubernetes tooling, just as you would in Cloud Foundry over the service marketplace. Service Catalog integrates the OSBAPI, letting you connect service brokers for any service providers to your Kubernetes cluster. Using Service Catalog, a Kubernetes cluster operator can browse the list of managed services offered by the service broker, provision instances of managed services, and bind them to make them available to applications running inside the cluster.
+As the OSBAPI specification is a platform agnostic way of delivering services it has also been adopted by the Kubernetes ecosystem via the Service Catalog project. [Service Catalog](https://svc-cat.io/) is a Kubernetes component that lets you provision services provided by OSBAPI compliant service brokers directly from the comfort of native Kubernetes tooling, just as you would in Cloud Foundry over the service marketplace. Service Catalog integrates the OSBAPI, letting you connect service brokers for any service providers to your Kubernetes cluster. Using Service Catalog, a Kubernetes cluster operator can browse the list of managed services offered by the service broker, provision instances of managed services, and bind them to make them available to applications running inside the cluster.
 
-Review the Kubernetes documentation on Service Catalog for further information on getting it up and running on your cluster, and how the overall architecture and interactions with a service broker are implemented.
+Review the Kubernetes [documentation on Service Catalog](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/) for further information on getting it up and running on your cluster, and how the overall architecture and interactions with a service broker are implemented.
 
-https://ict.swisscom.ch/wp-content/uploads/2019/12/svc.png
-
+![SVC](https://ict.swisscom.ch/wp-content/uploads/2019/12/svc.png)
  
 ## Brokers a-plenty
 
 There is a multitude of service brokers already out there for a wide array of different types of services, all implementing the OSBAPI specification to make these services consumable by Cloud Foundry or Kubernetes. Through the OSBAPI specification it is possible to extend your service marketplace inside the Swisscom Application Cloud to any number of additional third-party service offerings.
 
 Have a look at some of these examples:
-
-    Open Service Broker for Azure
-    OSBA lets you provision Azure Cloud Services directly from Kubernetes or Cloud Foundry
-    https://osba.sh/
-    AWS Service Broker
-    Allows native AWS services to be exposed directly through Cloud Foundry and Kubernetes
-    https://aws.amazon.com/partners/servicebroker/
-    ElephantSQL Broker ?
-    A service broker for provisioning PostgreSQL databases on AWS, Azure or GCP via ElephantSQL managed PostgreSQL-as-a-Service
-    https://github.com/JamesClonk/elephantsql-broker
-    GCP Service Broker
-    A service broker for Google Cloud Platform, to be used with Cloud Foundry and Kubernetes
-    https://github.com/GoogleCloudPlatform/gcp-service-broker
-    Compose.io Broker
-    A service broker for Cloud Foundry and Kubernetes, provisioning managed services such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, etc.
-    https://github.com/JamesClonk/compose-broker
-    Kubernetes Minibroker
-    A service broker that provisions services via Helm Charts on your Minikube Kubernetes cluster, supporting PostgreSQL, MySQL and MongoDB
-    https://github.com/kubernetes-sigs/minibroker
+- **Open Service Broker for Azure** 
+  OSBA lets you provision Azure Cloud Services directly from Kubernetes or Cloud Foundry
+  https://osba.sh/
+- **AWS Service Broker**    
+  Allows native AWS services to be exposed directly through Cloud Foundry and Kubernetes
+  https://aws.amazon.com/partners/servicebroker/
+- **ElephantSQL Broker** 🐘 
+  A service broker for provisioning PostgreSQL databases on AWS, Azure or GCP via ElephantSQL managed PostgreSQL-as-a-Service
+  https://github.com/JamesClonk/elephantsql-broker
+- **GCP Service Broker**    
+  A service broker for Google Cloud Platform, to be used with Cloud Foundry and Kubernetes
+  https://github.com/GoogleCloudPlatform/gcp-service-broker
+- **Compose.io Broker** 
+  A service broker for Cloud Foundry and Kubernetes, provisioning managed services such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, etc.
+  https://github.com/JamesClonk/compose-broker
+- **Kubernetes Minibroker** 
+  A service broker that provisions services via Helm Charts on your Minikube Kubernetes cluster, supporting PostgreSQL, MySQL and MongoDB
+  https://github.com/kubernetes-sigs/minibroker
 
 In particular the AWS, Azure and GCP service brokers immediately open up a huge array of databases and services to your platform, giving your developers a big toolbox to work with when developing new applications. ?️
 
  
 ## Using a custom service broker in Cloud Foundry
 
-Lets take a closer look at the above mentioned compose-broker and elephantsql-broker, two very similar community written third-party service brokers for managing these public Database-as-a-Service offerings in your platform:
-
-    Compose.io offers developers hosting for managed databases, such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, RabbitMQ, etc.
-    ElephantSQL offers fully managed and highly available PostgreSQL databases as a service on any AWS, Azure or GCP datacenter of your choice.
+Lets take a closer look at the above mentioned *compose-broker* and *elephantsql-broker*, two very similar community written third-party service brokers for managing these public Database-as-a-Service offerings in your platform:
+- **[Compose.io](https://compose.io/)**  
+  offers developers hosting for managed databases, such as Redis, PostgreSQL, MySQL, Etcd, Elasticsearch, RethinkDB, ScyllaDB, RabbitMQ, etc.
+- **[ElephantSQL](https://www.elephantsql.com/)**   
+  offers fully managed and highly available PostgreSQL databases as a service on any AWS, Azure or GCP datacenter of your choice.
 
 ### The service catalog
 
-Both of these service brokers come with a catalog.yml configuration file included, that specifies all their whole service catalog and lists all their service offerings and plans that they can integrate into the cf marketplace. You can freely modify these to adjust what service offerings you plan on using. Lets have a quick look at the elephantsql-broker’s catalog:
+Both of these service brokers come with a `catalog.yml` configuration file included, that specifies all their whole service catalog and lists all their service offerings and plans that they can integrate into the cf marketplace. You can freely modify these to adjust what service offerings you plan on using. Lets have a quick look at the elephantsql-broker's catalog:
 https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/catalog.yml
 ```yaml
 services:
@@ -92,8 +91,8 @@ services:
   bindable: true
 ```
 
-The main catalog element is an array of service offerings, with each element having an ID, name and various other properties as described in the OSBAPI spec.
-A service offering also contains one or more service plans. In our case there is only one service offering which contains a list of all plans, with each of them representing and corresponding directly to a database instance plan from ElephantSQL.com/plans, for example:
+The main catalog element is an array of [service offerings](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-offering-object), with each element having an ID, name and various other properties as described in the OSBAPI spec.
+A service offering also contains one or more [service plans](https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-plan-object). In our case there is only one service offering which contains a list of all plans, with each of them representing and corresponding directly to a database instance plan from [ElephantSQL.com/plans](https://www.elephantsql.com/plans.html), for example:
 ```yaml
 plans:
 - id: 6203b8e7-9ef4-44ef-bb0b-48b50409794d
@@ -159,6 +158,6 @@ Here are a few example libraries:
 - **.NET**  
   https://github.com/AXOOM/OpenServiceBroker
 
-But even if you don’t like to use one of these libraries, writing your own service broker should be a piece of cake given how simple the API specification actually is.
+But even if you don't like to use one of these libraries, writing your own service broker should be a piece of cake given how simple the API specification actually is.
 
 Happy brokering! 🥳
