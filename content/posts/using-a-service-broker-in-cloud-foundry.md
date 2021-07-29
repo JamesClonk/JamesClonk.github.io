@@ -118,22 +118,26 @@ plans:
  
 ### Deploying the service broker to Cloud Foundry
 
-First you are going to need an account on one of these service providers you intend to use. For example for ElephantSQL you can just hop over to their login page and sign-in with your GitHub account. Next you will need to create an API key that service broker can use for direct API access to provision and manage database instances. Create a new API key now and keep it for later.
+First you are going to need an account on one of these service providers you intend to use. For example for ElephantSQL you can just hop over to their [login page](https://customer.elephantsql.com/login) and sign-in with your GitHub account. Next you will need to create an API key that service broker can use for direct API access to provision and manage database instances. Create a new [API key](https://customer.elephantsql.com/apikeys) now and keep it for later.
 
-In order to deploy the service broker onto the Swisscom Application Cloud then open and modify the included manifest.yml to your liking and run cf push. You can either add the previously mentioned API key directly to your manifest.yml, or provide it via the cf-cli during pushing.
+In order to deploy the service broker onto the Swisscom Application Cloud then open and modify the included [manifest.yml](https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/manifest.yml) to your liking and run `cf push`. You can either add the previously mentioned API key directly to your `manifest.yml`, or provide it via the cf-cli during pushing.
 
 Deployment of these service brokers works just like any other app on Cloud Foundry:
 
-Once the service broker application has been deployed you have to register it with Cloud Foundry. You do this by running the cf create-service-broker command, by giving it the --space-scoped flag. This will register the service broker for your current space and its services will be available from the marketplace when in that space. If you are not an administrator of your Cloud Foundry platform then all you can do is register space-scoped service brokers, but if by chance you are in fact an admin or know the admins then you could also enable-service-access or register the service broker globally to make its services available to specific orgs or even platform-wide to anyone.
+![Deployment](https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/setup-min.gif)
 
-Have a look at the documentation on managing service brokers on Cloud Foundry for further information on this topic.
+Once the service broker application has been deployed you have to register it with Cloud Foundry. You do this by running the `cf create-service-broker` command, by giving it the `--space-scoped` flag. This will register the service broker for your current space and its services will be available from the marketplace when in that space. If you are not an administrator of your Cloud Foundry platform then all you can do is register space-scoped service brokers, but if by chance you are in fact an admin or know the admins then you could also [enable-service-access](https://docs.cloudfoundry.org/services/access-control.html#enable-access) or register the service broker globally to make its services available to specific orgs or even platform-wide to anyone.
+
+Have a look at the documentation on [managing service brokers](https://docs.cloudfoundry.org/services/managing-service-brokers.html) on Cloud Foundry for further information on this topic.
 
  
 ### Provisioning new database services
 
-Once the service broker has been registered on the Swisscom Application Cloud and its services are available to you in the marketplace, you can then proceed as if it were any other platform provided service and start to create, bind and consume service instances via cf create-service and cf bind-service:
+Once the service broker has been registered on the Swisscom Application Cloud and its services are available to you in the marketplace, you can then proceed as if it were any other platform provided service and start to create, bind and consume service instances via `cf create-service` and `cf bind-service`:
 
-While looking at such a newly created service instance via cf service <instance-name> you will notice that it also displays a dashboard url. This will take you back to the admin dashboard of the service provider itself where you can inspect and also manage these database instances directly, in case of ElephantSQL for example it would allow you to manage backups, look at metrics, setup alarms, etc. Just be careful to not rename (or accidentally delete) them, as their GUID name is the reference for Cloud Foundry and the service broker to be able to identify them.
+![Provisioning](https://raw.githubusercontent.com/JamesClonk/compose-broker/recordings/provisioning-min.gif)
+
+While looking at such a newly created service instance via `cf service <instance-name>` you will notice that it also displays a *dashboard* url. This will take you back to the admin dashboard of the service provider itself where you can inspect and also manage these database instances directly, in case of ElephantSQL for example it would allow you to manage backups, look at metrics, setup alarms, etc. Just be careful to not rename (or accidentally delete) them, as their GUID name is the reference for Cloud Foundry and the service broker to be able to identify them.
 
  
 ## Building your own
@@ -142,10 +146,10 @@ If you are interested in developing and providing your own service broker then y
 
 Here are a few example libraries:
 - **Java**  
-  The Spring Cloud Open Service Broker framework for building Spring Boot applications that implement the Open Service Broker API  
+  The **Spring Cloud Open Service Broker** framework for building Spring Boot applications that implement the Open Service Broker API  
   https://spring.io/projects/spring-cloud-open-service-broker
 - **Java / Groovy** 
-  The Swisscom Open Service Broker enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services 
+  The **Swisscom Open Service Broker** enables platforms to provision and manage services, is built in a modular way, can be easily extended and host multiple services 
   https://github.com/swisscom/open-service-broker
 - **Golang**  
   https://github.com/pmorie/osb-starter-pack  
