@@ -1,8 +1,10 @@
 baseURL = "https://blog.jamesclonk.io/"
-languageCode = "en-us"
 title = "Ramblings about all things technical"
+languageCode = "en-us"
+defaultContentLanguage = "en"
 theme = "m10c"
 paginate = 5
+enableEmoji= true
 
 [menu]
   [[menu.main]]
