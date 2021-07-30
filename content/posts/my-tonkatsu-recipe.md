@@ -9,6 +9,11 @@ draft: false
 
 This is neither a technical blog post, nor is it written in English, I know. But please bear with me. (It's just 10x easier to write a recipe in German than English 🙈)
 
+So I just came back recently from a 3 week trip to Japan, and while being there I ate the most amazing Tonkatsu I've ever had!
+If you are ever in Tokyo, you have to go and visit the [Tonkatsu - Masamune](http://www.tonkatsu-masamune.com/) restaurant ([Google Maps](https://goo.gl/maps/nmqzvcFGHPfA5EZF9)).
+The food there is absolutely delicious!
+
+Naturally this means after coming back to Switzerland I'm now trying to replicate it as closely as possible. Thus this Tonkatsu guide came to be.
 
 ## The definitive guide to Tonkatsu
 
