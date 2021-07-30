@@ -5,7 +5,7 @@ tags: [cloud foundry,containers,networking,app cloud]
 authors: []
 author: Fabio Berchtold
 date: 2018-05-19T16:06:35+02:00
-draft: true
+draft: false
 ---
 
 > *Container-to-Container Networking on the Swisscom Application Cloud allows for secure and fast direct TCP and UDP communication between your applications. And thanks to its built in Application Service Discovery your app containers will easily be able to locate each other.*
@@ -38,22 +38,22 @@ In this example, the app developer created policies to regulate the flow of traf
 
 If traffic and its direction is not explicitly allowed, it is denied by default. For example, App B cannot send traffic to App C.
 
-![Cloud Foundry](/images/c2c-apps.png)
+![Container Networking](/images/c2c-apps.png)
 
 Using the CF CLI the commands to setup these networking policies:
-![Cloud Foundry](/images/c2c-setup.png)
+![Container Networking](/images/c2c-setup.png)
 
 Of these three apps only App A is exposed to the outside world with a mapped route:
-![Cloud Foundry](/images/c2c-apps-running.png)
+![Container Networking](/images/c2c-apps-running.png)
 
 We can display the configured policies with the network-policies command:
-![Cloud Foundry](/images/c2c-display-networking.png)
+![Container Networking](/images/c2c-display-networking.png)
 
 Let's create an additional policy with add-network-policy to also enable direct TCP communication on port 4567 from App C to App B (but not vice-versa!):
-![Cloud Foundry](/images/c2c-add-networking.png)
+![Container Networking](/images/c2c-add-networking.png)
 
 If we later decide that granting App C to App B access was a mistake, we can simply remove the network policy again by using remove-network-policy:
-![Cloud Foundry](/images/c2c-remove-networking.png)
+![Container Networking](/images/c2c-remove-networking.png)
 
 Now App C will no longer have direct communication access to App B as before.
 
@@ -84,7 +84,7 @@ The frontend app now will be able to discover the backend app by DNS resolving b
 
 Think of it like this:
 
-![Cloud Foundry](/images/c2c-app-sd.png)
+![Container Networking](/images/c2c-app-sd.png)
 
 You can find an example that's making use of app service discovery here, with [Cats and Dogs with Service Discovery](https://github.com/cloudfoundry/cf-networking-examples/blob/master/docs/c2c-with-service-discovery.md) on GitHub, that demonstrates communication between frontend and backend apps on Cloud Foundry.
 
@@ -92,7 +92,7 @@ If you follow along the example you'll end up with a situation similar to this:
 ![Cloud Foundry](/images/c2c-cats-and-dogs.png)
 
 The apps are both deployed, have a networking policy that allows the frontend access to the backend of which there are 4 instances running, and the key element here being the special route dogs-backend.apps.internal that has been mapped to the backend app:
-![Cloud Foundry](/images/c2c-dogs-backend-route.png)
+![Container Networking](/images/c2c-dogs-backend-route.png)
 
 Through this route the frontend can now DNS query all container IPs of the backend app:
 ![Cloud Foundry](/images/c2c-dig.png)
