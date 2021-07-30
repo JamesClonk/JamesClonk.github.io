@@ -8,7 +8,7 @@
           <span class="posts-list-item-description">
             {{ partial "icon.html" (dict "ctx" $ "name" "calendar") }}
             {{ .PublishDate.Format "Jan 2, 2006" }}
-            {{ $.Site.Params.menu_item_separator | default " - " | safeHTML }}
+            &nbsp;{{ $.Site.Params.menu_item_separator | default " - " | safeHTML }}&nbsp;
             {{ partial "icon.html" (dict "ctx" $ "name" "clock") }}
             {{ .ReadingTime }} min read
           </span>
