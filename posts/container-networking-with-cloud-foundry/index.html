@@ -1,0 +1,130 @@
+<!doctype html><html lang=en-us>
+<head>
+<title>Container Networking with Cloud Foundry // Ramblings about all things technical</title>
+<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
+<meta charset=utf-8>
+<meta name=generator content="Hugo 0.86.1">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=author content="Fabio Berchtold">
+<meta name=description content="Container-to-Container Networking on Cloud Foundry allows for secure and fast direct TCP and UDP communication between your applications">
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Container Networking with Cloud Foundry">
+<meta name=twitter:description content="Container-to-Container Networking on Cloud Foundry allows for secure and fast direct TCP and UDP communication between your applications">
+<meta property="og:title" content="Container Networking with Cloud Foundry">
+<meta property="og:description" content="Container-to-Container Networking on Cloud Foundry allows for secure and fast direct TCP and UDP communication between your applications">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.jamesclonk.io/posts/container-networking-with-cloud-foundry/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2018-05-19T16:06:35+02:00">
+<meta property="article:modified_time" content="2018-05-19T16:06:35+02:00">
+</head>
+<body>
+<header class=app-header>
+<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
+<h1>Ramblings about all things technical</h1>
+<nav class=app-header-menu>
+<a class=app-header-menu-item href=/>Home</a>
+-
+<a class=app-header-menu-item href=/tags/>Tags</a>
+-
+<a class=app-header-menu-item href=/about/>About</a>
+</nav>
+<p>Working with tech is fun!</p>
+<div class=app-header-social>
+<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
+</a>
+</div>
+</header>
+<main class=app-container>
+<article class=post>
+<header class=post-header>
+<h1 class=post-title>Container Networking with Cloud Foundry</h1>
+<div class=post-meta>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+Fabio Berchtold
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+May 19, 2018
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+5 min read
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+<a class=tag href=/tags/cloud-foundry/>cloud foundry</a>
+<a class=tag href=/tags/containers/>containers</a>
+<a class=tag href=/tags/networking/>networking</a>
+<a class=tag href=/tags/app-cloud/>app cloud</a>
+</div>
+</div>
+</header>
+<div class=post-content>
+<blockquote>
+<p><em>Container-to-Container Networking on the Swisscom Application Cloud allows for secure and fast direct TCP and UDP communication between your applications. And thanks to its built in Application Service Discovery your app containers will easily be able to locate each other.</em></p>
+</blockquote>
+<p><img src=/images/cf-logo.png alt="Cloud Foundry"></p>
+<p>The Swisscom Application Cloud uses the open-source distribution of <a href=https://www.cloudfoundry.org/>Cloud Foundry</a> to provide you with a managed platform-as-a-service.
+Ever since the platforms official release we&rsquo;ve continually been adding and implementing new features, and one of these is the Container-to-Container Networking.</p>
+<p>Container networking enables a policy-driven, direct communication between your application instances on Cloud Foundry.</p>
+<p>Based on policies you can set through the CF CLI, your applications now have direct connectivity with each other, either through TCP or UDP. Your choice!
+This of course provides many benefits like reduced latency and increased throughput thanks to direct communication instead of going through the GoRouter or an external load-balancer. It also enables you as a developer to set fine grained access controls through these app to app policies. Your apps become more secure with private communication between each other directly, using the container IPs instead of having to use a public route. This also gives you the option to hide applications from the outside and access them without adding a route to them.</p>
+<p>Container-to-Container Networking internally uses an overlay network to manage and allow communication between your app instances. All app containers are assigned a unique private container IP address, which they then can use to talk to each other.
+The overlay network is not externally routable, and traffic sent between your containers does not exit the overlay network.</p>
+<p>You can get an in-depth look at the architecture behind the scenes here on GitHub:
+<a href=https://github.com/cloudfoundry/cf-networking-release/blob/develop/docs/arch.md>https://github.com/cloudfoundry/cf-networking-release/blob/develop/docs/arch.md</a></p>
+<h2 id=great-how-do-i-use-this>Great, how do I use this?</h2>
+<p>To use the Container-to-Container Networking feature you will have to create networking policies for your apps. These policies specify a source app, destination app, protocol, and port so that app instances can communicate directly without going through the GoRouter, a load-balancer, or a firewall. Container-to-Container Networking supports both TCP and UDP, and you can configure policies for multiple ports or port ranges. Networking policies apply immediately without having to restart or restage your app.</p>
+<p>The diagram below illustrates how app instances communicate in a deployment with Container-to-Container Networking enabled and networking policies in place.
+In this example, the app developer created policies to regulate the flow of traffic between <strong>App A</strong>, <strong>B</strong>, and <strong>C</strong>.</p>
+<pre><code>- Allow traffic from App A to App B on TCP port range 7000-8000
+- Allow traffic from App A to App C  on UDP port 5053
+</code></pre>
+<p>If traffic and its direction is not explicitly allowed, it is denied by default. For example, App B cannot send traffic to App C.</p>
+<p><img src=/images/c2c-apps.png alt="Container Networking"></p>
+<p>Using the CF CLI the commands to setup these networking policies:
+<img src=/images/c2c-setup.png alt="Container Networking"></p>
+<p>Of these three apps only App A is exposed to the outside world with a mapped route:
+<img src=/images/c2c-apps-running.png alt="Container Networking"></p>
+<p>We can display the configured policies with the network-policies command:
+<img src=/images/c2c-display-networking.png alt="Container Networking"></p>
+<p>Let&rsquo;s create an additional policy with add-network-policy to also enable direct TCP communication on port 4567 from App C to App B (but not vice-versa!):
+<img src=/images/c2c-add-networking.png alt="Container Networking"></p>
+<p>If we later decide that granting App C to App B access was a mistake, we can simply remove the network policy again by using remove-network-policy:
+<img src=/images/c2c-remove-networking.png alt="Container Networking"></p>
+<p>Now App C will no longer have direct communication access to App B as before.</p>
+<p>That takes care of how to setup your private container network, but how do your apps figure out each others internal IP addresses?</p>
+<p>In the past you would have to deploy your own service discovery, like Eureka, or write your own by for example using a Redis service instance where each app then posts its container IP to it. One such example of this technique between a frontend and a backend app can be seen here on GitHub: <a href=https://github.com/JamesClonk/c2cn_demo/tree/master/redis_discovery>c2cn_demo/redis_discovery</a></p>
+<p>But recently we&rsquo;ve added a better and much more simple way for service discovery, integrated into the platform itself and available to all apps by default.</p>
+<h2 id=app-service-discovery>App Service Discovery</h2>
+<p>The Swisscom Application Cloud supports DNS-based service discovery that lets your apps find each others internal IP addresses. For example, a frontend app instance can use the service discovery mechanism to establish communications with a backend app instance.</p>
+<p>Container-to-Container app service discovery does not provide client-side load-balancing or circuit-breaking. It just lets your apps publish service endpoints to each other, unbrokered and unmediated, ready for you to use.</p>
+<p>With app service discovery your apps pushed to the Swisscom Application Cloud can establish direct container-to-container communications through a known route served by the internal DNS. The special domain <code>apps.internal</code> has been made available to you for this purpose:
+<img src=/images/c2c-apps-internal-domain.png alt="Cloud Foundry"></p>
+<p>Using this domain allows your frontend apps to easily discover and connect with any backend apps it needs.
+To establish container-to-container communications between a frontend and a backend app, all you have to do is:</p>
+<ul>
+<li>Push your backend app</li>
+<li>Map a route with the special <code>apps.internal</code> domain to it, for example <code>backend-app.apps.internal</code></li>
+<li>Push the frontend app</li>
+<li>Create the relevant networking policies that allow direct traffic from the frontend to the backend app</li>
+</ul>
+<p>The frontend app now will be able to discover the backend app by DNS resolving backend-app.apps.internal. The resulting IPs are the internal overlay IPs of all your backend app containers and can be used for direct communication.</p>
+<p>Think of it like this:</p>
+<p><img src=/images/c2c-app-sd.png alt="Container Networking"></p>
+<p>You can find an example that&rsquo;s making use of app service discovery here, with <a href=https://github.com/cloudfoundry/cf-networking-examples/blob/master/docs/c2c-with-service-discovery.md>Cats and Dogs with Service Discovery</a> on GitHub, that demonstrates communication between frontend and backend apps on Cloud Foundry.</p>
+<p>If you follow along the example you&rsquo;ll end up with a situation similar to this:
+<img src=/images/c2c-cats-and-dogs.png alt="Cloud Foundry"></p>
+<p>The apps are both deployed, have a networking policy that allows the frontend access to the backend of which there are 4 instances running, and the key element here being the special route dogs-backend.apps.internal that has been mapped to the backend app:
+<img src=/images/c2c-dogs-backend-route.png alt="Container Networking"></p>
+<p>Through this route the frontend can now DNS query all container IPs of the backend app:
+<img src=/images/c2c-dig.png alt="Cloud Foundry"></p>
+<p>Success! 😀</p>
+<p>Here you can find some more information about the app service discovery:
+<a href=https://www.cloudfoundry.org/blog/polyglot-service-discovery-container-networking-cloud-foundry/>https://www.cloudfoundry.org/blog/polyglot-service-discovery-container-networking-cloud-foundry/</a></p>
+<p><img src=/images/parrot.gif alt="Party Parrot"> Try it out now! <a href=https://developer.swisscom.com/>https://developer.swisscom.com/</a> <img src=/images/parrot.gif alt="Party Parrot"></p>
+</div>
+<div class=post-footer>
+</div>
+</article>
+</main>
+</body>
+</html>
