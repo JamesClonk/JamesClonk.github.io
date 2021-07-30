@@ -143,37 +143,37 @@ My requirements for this have been the following:</p>
 <h3 id=build-hugo-with-a-github-actions>Build Hugo with a GitHub Actions</h3>
 <p>GitHub Actions allows you to define workflows that can build your software or otherwise execute various steps as part of a CI/CD pipeline. With this setup I have a workflow which will build and publish this blog automatically everytime I push / create a new commit on the <code>master</code> branch of my Hugo Github repository.</p>
 <p>All I needed for this was to create <code>.github/workflows/gh-pages.yml</code> containing the following content (based on <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a>):</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=color:#f92672>name</span>: <span style=color:#ae81ff>github pages</span>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=color:#e06c75>name</span>: <span style=color:#98c379>github pages</span>
 
-<span style=color:#f92672>on</span>:
-  <span style=color:#f92672>push</span>:
-    <span style=color:#f92672>branches</span>: [ <span style=color:#ae81ff>master ]</span>
+<span style=color:#e06c75>on</span>:
+  <span style=color:#e06c75>push</span>:
+    <span style=color:#e06c75>branches</span>: [ <span style=color:#98c379>master ]</span>
 
-<span style=color:#f92672>jobs</span>:
-  <span style=color:#f92672>deploy</span>:
-    <span style=color:#f92672>name</span>: <span style=color:#ae81ff>deploy Hugo to gh-pages</span>
-    <span style=color:#f92672>runs-on</span>: <span style=color:#ae81ff>ubuntu-latest</span>
-    <span style=color:#f92672>steps</span>:
-    - <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>actions/checkout@v2</span>
-      <span style=color:#f92672>with</span>:
-        <span style=color:#f92672>submodules</span>: <span style=color:#66d9ef>true</span>
-        <span style=color:#f92672>fetch-depth</span>: <span style=color:#ae81ff>0</span>
+<span style=color:#e06c75>jobs</span>:
+  <span style=color:#e06c75>deploy</span>:
+    <span style=color:#e06c75>name</span>: <span style=color:#98c379>deploy Hugo to gh-pages</span>
+    <span style=color:#e06c75>runs-on</span>: <span style=color:#98c379>ubuntu-latest</span>
+    <span style=color:#e06c75>steps</span>:
+    - <span style=color:#e06c75>uses</span>: <span style=color:#98c379>actions/checkout@v2</span>
+      <span style=color:#e06c75>with</span>:
+        <span style=color:#e06c75>submodules</span>: <span style=color:#b756ff;font-weight:700>true</span>
+        <span style=color:#e06c75>fetch-depth</span>: <span style=color:#d19a66>0</span>
 
-    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Setup Hugo</span>
-      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>peaceiris/actions-hugo@v2</span>
-      <span style=color:#f92672>with</span>:
-        <span style=color:#f92672>hugo-version</span>: <span style=color:#e6db74>&#39;latest&#39;</span>
-        <span style=color:#f92672>extended</span>: <span style=color:#66d9ef>true</span>
+    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Setup Hugo</span>
+      <span style=color:#e06c75>uses</span>: <span style=color:#98c379>peaceiris/actions-hugo@v2</span>
+      <span style=color:#e06c75>with</span>:
+        <span style=color:#e06c75>hugo-version</span>: <span style=color:#98c379>&#39;latest&#39;</span>
+        <span style=color:#e06c75>extended</span>: <span style=color:#b756ff;font-weight:700>true</span>
 
-    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Build</span>
-      <span style=color:#f92672>run</span>: <span style=color:#ae81ff>hugo --minify</span>
+    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Build</span>
+      <span style=color:#e06c75>run</span>: <span style=color:#98c379>hugo --minify</span>
 
-    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>Deploy</span>
-      <span style=color:#f92672>uses</span>: <span style=color:#ae81ff>peaceiris/actions-gh-pages@v3</span>
-      <span style=color:#f92672>if</span>: <span style=color:#ae81ff>github.ref == &#39;refs/heads/master&#39;</span>
-      <span style=color:#f92672>with</span>:
-        <span style=color:#f92672>github_token</span>: <span style=color:#ae81ff>${{ secrets.GITHUB_TOKEN }}</span>
-        <span style=color:#f92672>publish_dir</span>: <span style=color:#ae81ff>./public</span>
+    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Deploy</span>
+      <span style=color:#e06c75>uses</span>: <span style=color:#98c379>peaceiris/actions-gh-pages@v3</span>
+      <span style=color:#e06c75>if</span>: <span style=color:#98c379>github.ref == &#39;refs/heads/master&#39;</span>
+      <span style=color:#e06c75>with</span>:
+        <span style=color:#e06c75>github_token</span>: <span style=color:#98c379>${{ secrets.GITHUB_TOKEN }}</span>
+        <span style=color:#e06c75>publish_dir</span>: <span style=color:#98c379>./public</span>
 </code></pre></div><p>The steps being executed by this workflow are as follows:</p>
 <ol>
 <li>If we get a push on branch <code>master</code></li>

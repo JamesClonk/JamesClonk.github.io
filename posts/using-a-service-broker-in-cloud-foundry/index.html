@@ -117,32 +117,32 @@ offers fully managed and highly available PostgreSQL databases as a service on a
 <h3 id=the-service-catalog>The service catalog</h3>
 <p>Both of these service brokers come with a <code>catalog.yml</code> configuration file included, that specifies all their whole service catalog and lists all their service offerings and plans that they can integrate into the cf marketplace. You can freely modify these to adjust what service offerings you plan on using. Lets have a quick look at the elephantsql-broker&rsquo;s catalog:
 <a href=https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/catalog.yml>https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/catalog.yml</a></p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>services</span>:
-- <span style=color:#f92672>id</span>: <span style=color:#ae81ff>8ff5d1c8-c6eb-4f04-928c-6a422e0ea330</span>
-  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>elephantsql</span>
-  <span style=color:#f92672>description</span>: <span style=color:#ae81ff>PostgreSQL as a Service</span>
-  <span style=color:#f92672>bindable</span>: <span style=color:#66d9ef>true</span>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>services</span>:
+- <span style=color:#e06c75>id</span>: <span style=color:#98c379>8ff5d1c8-c6eb-4f04-928c-6a422e0ea330</span>
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>elephantsql</span>
+  <span style=color:#e06c75>description</span>: <span style=color:#98c379>PostgreSQL as a Service</span>
+  <span style=color:#e06c75>bindable</span>: <span style=color:#b756ff;font-weight:700>true</span>
 </code></pre></div><p>The main catalog element is an array of <a href=https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-offering-object>service offerings</a>, with each element having an ID, name and various other properties as described in the OSBAPI spec.
 A service offering also contains one or more <a href=https://github.com/openservicebrokerapi/servicebroker/blob/v2.15/spec.md#service-plan-object>service plans</a>. In our case there is only one service offering which contains a list of all plans, with each of them representing and corresponding directly to a database instance plan from <a href=https://www.elephantsql.com/plans.html>ElephantSQL.com/plans</a>, for example:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#f92672>plans</span>:
-- <span style=color:#f92672>id</span>: <span style=color:#ae81ff>6203b8e7-9ef4-44ef-bb0b-48b50409794d</span>
-  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>spider</span>
-  <span style=color:#f92672>description</span>: <span style=color:#ae81ff>Simple Spider - shared instance</span>
-  <span style=color:#f92672>free</span>: <span style=color:#66d9ef>false</span>
-  <span style=color:#f92672>bindable</span>: <span style=color:#66d9ef>true</span>
-  <span style=color:#f92672>metadata</span>:
-    <span style=color:#f92672>displayName</span>: <span style=color:#ae81ff>Simple Spider</span>
-    <span style=color:#f92672>imageUrl</span>: <span style=color:#ae81ff>https://www.elephantsql.com/images/spider_256.png</span>
-    <span style=color:#f92672>costs</span>:
-    - <span style=color:#f92672>amount</span>:
-        <span style=color:#f92672>usd</span>: <span style=color:#ae81ff>5.0</span>
-      <span style=color:#f92672>unit</span>: <span style=color:#ae81ff>Monthly</span>
-    <span style=color:#f92672>bullets</span>:
-    - <span style=color:#ae81ff>Shared high performance server</span>
-    - <span style=color:#ae81ff>500</span> <span style=color:#ae81ff>MB data</span>
-    - <span style=color:#ae81ff>10</span> <span style=color:#ae81ff>concurrent connections</span>
-    <span style=color:#f92672>dedicatedService</span>: <span style=color:#66d9ef>false</span>
-    <span style=color:#f92672>highAvailability</span>: <span style=color:#66d9ef>false</span>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>plans</span>:
+- <span style=color:#e06c75>id</span>: <span style=color:#98c379>6203b8e7-9ef4-44ef-bb0b-48b50409794d</span>
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>spider</span>
+  <span style=color:#e06c75>description</span>: <span style=color:#98c379>Simple Spider - shared instance</span>
+  <span style=color:#e06c75>free</span>: <span style=color:#b756ff;font-weight:700>false</span>
+  <span style=color:#e06c75>bindable</span>: <span style=color:#b756ff;font-weight:700>true</span>
+  <span style=color:#e06c75>metadata</span>:
+    <span style=color:#e06c75>displayName</span>: <span style=color:#98c379>Simple Spider</span>
+    <span style=color:#e06c75>imageUrl</span>: <span style=color:#98c379>https://www.elephantsql.com/images/spider_256.png</span>
+    <span style=color:#e06c75>costs</span>:
+    - <span style=color:#e06c75>amount</span>:
+        <span style=color:#e06c75>usd</span>: <span style=color:#d19a66>5.0</span>
+      <span style=color:#e06c75>unit</span>: <span style=color:#98c379>Monthly</span>
+    <span style=color:#e06c75>bullets</span>:
+    - <span style=color:#98c379>Shared high performance server</span>
+    - <span style=color:#d19a66>500</span> <span style=color:#98c379>MB data</span>
+    - <span style=color:#d19a66>10</span> <span style=color:#98c379>concurrent connections</span>
+    <span style=color:#e06c75>dedicatedService</span>: <span style=color:#b756ff;font-weight:700>false</span>
+    <span style=color:#e06c75>highAvailability</span>: <span style=color:#b756ff;font-weight:700>false</span>
 </code></pre></div><h3 id=deploying-the-service-broker-to-cloud-foundry>Deploying the service broker to Cloud Foundry</h3>
 <p>First you are going to need an account on one of these service providers you intend to use. For example for ElephantSQL you can just hop over to their <a href=https://customer.elephantsql.com/login>login page</a> and sign-in with your GitHub account. Next you will need to create an API key that service broker can use for direct API access to provision and manage database instances. Create a new <a href=https://customer.elephantsql.com/apikeys>API key</a> now and keep it for later.</p>
 <p>In order to deploy the service broker onto the Swisscom Application Cloud then open and modify the included <a href=https://github.com/JamesClonk/elephantsql-broker/blob/v1.0.1/manifest.yml>manifest.yml</a> to your liking and run <code>cf push</code>. You can either add the previously mentioned API key directly to your <code>manifest.yml</code>, or provide it via the cf-cli during pushing.</p>

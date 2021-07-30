@@ -143,48 +143,48 @@ You can then configure your Prometheus to scrape metrics from there. An example 
 </table>
 <p>Let&rsquo;s deploy a test setup with Prometheus and Grafana now on the appCloud to see how this can be used.</p>
 <p>First we&rsquo;ll prepare a configuration file for Prometheus:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ cat &gt; /tmp/prometheus.yml <span style=color:#e6db74>&lt;&lt; EOF
-</span><span style=color:#e6db74>global:
-</span><span style=color:#e6db74>  scrape_interval: 15s
-</span><span style=color:#e6db74>  scrape_timeout: 10s
-</span><span style=color:#e6db74>  evaluation_interval: 15s
-</span><span style=color:#e6db74>alerting:
-</span><span style=color:#e6db74>  alertmanagers:
-</span><span style=color:#e6db74>  - static_configs:
-</span><span style=color:#e6db74>    - targets: []
-</span><span style=color:#e6db74>    scheme: http
-</span><span style=color:#e6db74>    timeout: 10s
-</span><span style=color:#e6db74>    api_version: v1
-</span><span style=color:#e6db74>scrape_configs:
-</span><span style=color:#e6db74># prometheus itself
-</span><span style=color:#e6db74>- job_name: prometheus
-</span><span style=color:#e6db74>  honor_timestamps: true
-</span><span style=color:#e6db74>  scrape_interval: 15s
-</span><span style=color:#e6db74>  scrape_timeout: 10s
-</span><span style=color:#e6db74>  metrics_path: /metrics
-</span><span style=color:#e6db74>  scheme: http
-</span><span style=color:#e6db74>  static_configs:
-</span><span style=color:#e6db74>  - targets:
-</span><span style=color:#e6db74>    - localhost:9090
-</span><span style=color:#e6db74># my new exporter app
-</span><span style=color:#e6db74>- job_name: exporter-app
-</span><span style=color:#e6db74>  honor_timestamps: true
-</span><span style=color:#e6db74>  scrape_interval: 15s
-</span><span style=color:#e6db74>  scrape_timeout: 10s
-</span><span style=color:#e6db74>  metrics_path: /metrics
-</span><span style=color:#e6db74>  scheme: https
-</span><span style=color:#e6db74>  basic_auth:
-</span><span style=color:#e6db74>    username: metrics-auth-username # change to your exporter basic-auth username
-</span><span style=color:#e6db74>    password: metrics-auth-password # change to your exporter basic-auth password
-</span><span style=color:#e6db74>  static_configs:
-</span><span style=color:#e6db74>  - targets:
-</span><span style=color:#e6db74>    - my-metrics-exporter-app.applicationcloud.io
-</span><span style=color:#e6db74>EOF</span>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ cat &gt; /tmp/prometheus.yml <span style=color:#98c379>&lt;&lt; EOF
+</span><span style=color:#98c379>global:
+</span><span style=color:#98c379>  scrape_interval: 15s
+</span><span style=color:#98c379>  scrape_timeout: 10s
+</span><span style=color:#98c379>  evaluation_interval: 15s
+</span><span style=color:#98c379>alerting:
+</span><span style=color:#98c379>  alertmanagers:
+</span><span style=color:#98c379>  - static_configs:
+</span><span style=color:#98c379>    - targets: []
+</span><span style=color:#98c379>    scheme: http
+</span><span style=color:#98c379>    timeout: 10s
+</span><span style=color:#98c379>    api_version: v1
+</span><span style=color:#98c379>scrape_configs:
+</span><span style=color:#98c379># prometheus itself
+</span><span style=color:#98c379>- job_name: prometheus
+</span><span style=color:#98c379>  honor_timestamps: true
+</span><span style=color:#98c379>  scrape_interval: 15s
+</span><span style=color:#98c379>  scrape_timeout: 10s
+</span><span style=color:#98c379>  metrics_path: /metrics
+</span><span style=color:#98c379>  scheme: http
+</span><span style=color:#98c379>  static_configs:
+</span><span style=color:#98c379>  - targets:
+</span><span style=color:#98c379>    - localhost:9090
+</span><span style=color:#98c379># my new exporter app
+</span><span style=color:#98c379>- job_name: exporter-app
+</span><span style=color:#98c379>  honor_timestamps: true
+</span><span style=color:#98c379>  scrape_interval: 15s
+</span><span style=color:#98c379>  scrape_timeout: 10s
+</span><span style=color:#98c379>  metrics_path: /metrics
+</span><span style=color:#98c379>  scheme: https
+</span><span style=color:#98c379>  basic_auth:
+</span><span style=color:#98c379>    username: metrics-auth-username # change to your exporter basic-auth username
+</span><span style=color:#98c379>    password: metrics-auth-password # change to your exporter basic-auth password
+</span><span style=color:#98c379>  static_configs:
+</span><span style=color:#98c379>  - targets:
+</span><span style=color:#98c379>    - my-metrics-exporter-app.applicationcloud.io
+</span><span style=color:#98c379>EOF</span>
 </code></pre></div><p>And then run it locally inside a Docker container:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>docker rm -f prometheus; docker run <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    -p 9090:9090 <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml <span style=color:#ae81ff>\
-</span><span style=color:#ae81ff></span>    --name prometheus prom/prometheus:latest
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>docker rm -f prometheus; docker run <span style=color:#d26464;font-weight:700>\
+</span><span style=color:#d26464;font-weight:700></span>    -p 9090:9090 <span style=color:#d26464;font-weight:700>\
+</span><span style=color:#d26464;font-weight:700></span>    -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml <span style=color:#d26464;font-weight:700>\
+</span><span style=color:#d26464;font-weight:700></span>    --name prometheus prom/prometheus:latest
 </code></pre></div><p>We can now access the Prometheus UI and check that our scrape target is working correctly:</p>
 <p><img src=/images/prometheus-targets.png alt=Loggregator></p>
 <p>To verify if we are now really scraping metrics from our apps and get live data from Cloud Foundry we can query the CPU metrics in Prometheus:</p>
