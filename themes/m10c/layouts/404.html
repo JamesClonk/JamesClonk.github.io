@@ -1,0 +1,7 @@
+{{ define "main" }}
+  <div class="error-404">
+    <h1 class="error-404-title">O{{ partial "icon.html" (dict "ctx" $ "name" "frown") }}ps... </h1>
+    <p>This is not the page you are looking for...</p>
+    <a href="{{ "/" | relURL }}">Go home {{ partial "icon.html" (dict "ctx" $ "name" "arrow-right") }}</a>
+  </div>
+{{ end }}
