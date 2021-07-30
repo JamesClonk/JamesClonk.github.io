@@ -2,7 +2,8 @@
 title: "{{ replace .Name "-" " " | title }}"
 description: ""
 tags: []
-authors: [Fabio Berchtold]
+authors: []
+author: [Fabio Berchtold]
 date: {{ .Date }}
 draft: true
 ---
