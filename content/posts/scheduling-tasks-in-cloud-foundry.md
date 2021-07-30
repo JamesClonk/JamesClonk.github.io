@@ -1,7 +1,7 @@
 ---
 title: "Scheduling Tasks in Cloud Foundry"
 description: "The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc."
-tags: [cloud foundry, scheduling]
+tags: [cloud foundry,scheduling,app cloud]
 authors: []
 author: Fabio Berchtold
 date: 2019-09-03T14:23:30+02:00
@@ -84,7 +84,7 @@ id  name                                   state       start time               
 1   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Tue, 27 Aug 2019 02:00:03 UTC   rake cleanup-db
 ```
 
-And that's all there is to it..  We wish you a happy scheduling! ⏲️
+And that's all there is to it..  I wish you a happy scheduling! ⏲️
 
 
 ### See also:
