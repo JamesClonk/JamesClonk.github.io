@@ -6,6 +6,13 @@ theme = "m10c"
 paginate = 5
 enableEmoji= true
 
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = "doom-one"
+
 [menu]
   [[menu.main]]
     identifier = "home"
