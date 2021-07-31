@@ -58,7 +58,7 @@ Jun 28, 2020
 </header>
 <div class=post-content>
 <p>As an app developer using the <a href=developer.swisscom.com>Swisscom Application Cloud</a> (which is based on the open source platform-as-a-service &ldquo;<a href=https://www.cloudfoundry.org/>Cloud Foundry</a>") you might have run into the situation already where you&rsquo;d want to stop your applications from being accessible to everybody. More specifically you want to restrict access to them only for certain IPs.</p>
-<p>Luckily for you Cloud Foundry has a feature that can do exactly that for (and much more!): <strong>Route-Services</strong></p>
+<p>Luckily for you Cloud Foundry has a feature that can do exactly that (and much more!): <strong>Route-Services</strong></p>
 <h2 id=route-services>Route-Services?</h2>
 <p>Route-services allow you to apply transformation or preprocessing of HTTP requests before they reach a target application. Common use cases include rate limiting, authentication and authorization, and caching services. A route service may reject requests or, after some transformation, pass requests to your application. Route-services are a special kind of service that you can use to apply various transformations to requests by binding an applications route to a route-service instance. You can bind this service instance to your applications route, and then automatically all requests for that route are being preprocessed by the route-service instance.</p>
 <h2 id=deploy-a-route-service>Deploy a Route-Service</h2>
