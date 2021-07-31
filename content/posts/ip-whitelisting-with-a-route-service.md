@@ -11,7 +11,7 @@ draft: false
 
 As an app developer using the [Swisscom Application Cloud](developer.swisscom.com) (which is based on the open source platform-as-a-service "[Cloud Foundry](https://www.cloudfoundry.org/)") you might have run into the situation already where you'd want to stop your applications from being accessible to everybody. More specifically you want to restrict access to them only for certain IPs.
 
-Luckily for you Cloud Foundry has a feature that can do exactly that for (and much more!): **Route-Services**
+Luckily for you Cloud Foundry has a feature that can do exactly that (and much more!): **Route-Services**
 
 ## Route-Services?
 
