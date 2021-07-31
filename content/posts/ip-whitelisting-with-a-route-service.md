@@ -78,7 +78,7 @@ When forwarding a request to the originally requested URL, the route-service app
 You can see an implementation of this in our example IP-whitelisting route-service from above: https://github.com/swisscom/ip-whitelisting-route-service-demo-app/blob/924b507e1d451a14638b44451bd72d3568e7d1d1/main.go#L75-L90
 ```go
 	// X-CF-Forwarded-Url is required to determine the target of the request after it has been passed the route service
-	// https://docs.developer.swisscom.com/services/route-services.html#headers
+	// https://docs.cloudfoundry.org/services/route-services.html#headers
 	targetURL := req.Header.Get("X-CF-Forwarded-Url")
 	if len(targetURL) == 0 {
 		rw.WriteHeader(http.StatusBadRequest)
