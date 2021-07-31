@@ -98,8 +98,8 @@ In this example, the app developer created policies to regulate the flow of traf
 <h2 id=app-service-discovery>App Service Discovery</h2>
 <p>The Swisscom Application Cloud supports DNS-based service discovery that lets your apps find each others internal IP addresses. For example, a frontend app instance can use the service discovery mechanism to establish communications with a backend app instance.</p>
 <p>Container-to-Container app service discovery does not provide client-side load-balancing or circuit-breaking. It just lets your apps publish service endpoints to each other, unbrokered and unmediated, ready for you to use.</p>
-<p>With app service discovery your apps pushed to the Swisscom Application Cloud can establish direct container-to-container communications through a known route served by the internal DNS. The special domain <code>apps.internal</code> has been made available to you for this purpose:
-<img src=/images/c2c-apps-internal-domain.png alt="Cloud Foundry"></p>
+<p>With app service discovery your apps pushed to the Swisscom Application Cloud can establish direct container-to-container communications through a known route served by the internal DNS. The special domain <code>apps.internal</code> has been made available to you for this purpose:</p>
+<p><img src=/images/c2c-apps-internal-domain.png alt="Cloud Foundry"></p>
 <p>Using this domain allows your frontend apps to easily discover and connect with any backend apps it needs.
 To establish container-to-container communications between a frontend and a backend app, all you have to do is:</p>
 <ul>
