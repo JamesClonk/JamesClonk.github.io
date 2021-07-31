@@ -17,7 +17,7 @@ Service discovery is the means to provide a way for automatic detection of appli
 
 ## What is Consul?
 
-[Consul](https://www.consul.io/docs/intro) is a fully integrated service discovery solution with a service registry, providing a web UI dashboard and API access for service discovery, configuration, leader election and a key value store. It allows you to discover, register and lookup services or applications for all kinds of workloads across VMs and networks. Entries in the service catalog can be added or removed automatically based on health checks.
+[Consul](https://www.consul.io/docs/intro) is a fully integrated service discovery solution with a service registry, providing a web UI dashboard and API access for service discovery, configuration, leader election and a key/value store. It allows you to discover, register and lookup services or applications for all kinds of workloads across VMs and networks. Entries in the service catalog can be added or removed automatically based on health checks.
 
 It enables services to discover each other by storing location information such as IP addresses in a single centralized service registry.
 
