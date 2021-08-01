@@ -1,3 +1,4 @@
+
 ---
 title: "Service Discovery with Consul"
 description: "Consul provides automatic service discovery in a cloud-native world of microservices"
@@ -47,3 +48,20 @@ my-mongodb.service.consul. 0   IN  A   192.168.1.77
 ;; Query time: 1 msec
 ;; SERVER: 127.0.0.1#8600(127.0.0.1)
 ```
+
+### Integrate it into your DNS
+
+Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
+If your are using for example *dnsmasq* or *[unbound](https://www.nlnetlabs.nl/projects/unbound/about/)* in your infrastructure you can easily configure a forward zone for `*.service.consul` to delegate any such request to your normal DNS server to be forwared along to the Consul DNS.
+Let's say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:
+```conf
+stub-zone:
+ name: "service.consul"
+ stub-addr: 127.0.0.1@8600  # forward ".service.consul" queries to local Consul agent
+ 
+stub-zone:
+ name: "node.consul"
+ stub-addr: 127.0.0.1@8600  # forward ".node.consul" queries to local Consul agent
+```
+
+This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀
