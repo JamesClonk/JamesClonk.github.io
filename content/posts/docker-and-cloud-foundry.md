@@ -108,4 +108,4 @@ $ cf env guestbook-backend
 
 Now we have our app running on the Cloud Foundry platform, where we can can easily scale it out if we ever need to, it's highly available and we don't need to take care of monitoring or operations. It just runs by itself.
 
-Go to https://developer.swisscom.com and try it out right now for yourself! ?
+Go to https://developer.swisscom.com and try it out right now for yourself! 
