@@ -47,7 +47,7 @@ Fabio Berchtold
 Nov 27, 2018
 </div>
 <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-2 min read
+3 min read
 </div>
 <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
 <a class=tag href=/tags/simracing/>simracing</a>
@@ -57,13 +57,27 @@ Nov 27, 2018
 </div>
 </header>
 <div class=post-content>
-<h2 id=what-is-sim-racing--iracing>What is Sim-racing / iRacing?</h2>
+<h2 id=what-is-sim-racing>What is Sim-racing?</h2>
+<p>Sim-racing is short for <em>&ldquo;simulated racing&rdquo;</em>. Basically it means you are using racing simulator software to try and simulate real world racing as accurately as possible. This includes all the real-world variables such as fuel usage, damage to the car, tire wear, grip, suspension settings, etc., which is unlike the more well-known arcade racing games like Forza Motorsport or Gran Turismo. The goal is to provide the most realistic depiction of real world racing as much as possible. Sim-racing software on PC is often times accompanied by special purpose hardware, like steering wheels, pedals, <em>&ldquo;rigs&rdquo;</em> with bucket seats, triple-screen monitor setups or Virtual Reality headsets, bass-shakers, etc.</p>
+<p>The most common sim-racing titles are:</p>
+<ul>
+<li><a href=https://en.wikipedia.org/wiki/IRacing>iRacing</a></li>
+<li><a href=https://en.wikipedia.org/wiki/Assetto_Corsa>Assetto Corsa</a></li>
+<li><a href=https://en.wikipedia.org/wiki/RFactor_2>rFactor 2</a></li>
+<li><a href=https://en.wikipedia.org/wiki/RaceRoom>RaceRoom</a></li>
+</ul>
+<h3 id=iracing>iRacing</h3>
+<p><a href=https://www.iracing.com/>iRacing</a></p>
+<p>To quote from iRacings website:</p>
+<blockquote>
+<p><em>iRacing is the leading sim-racing game for your PC. Developed as a centralized racing and competition service, iRacing organizes, hosts and officiates online racing on virtual tracks all around the world. In the fast-paced world of eSports, iRacing is a one-stop-shop for online racing. We utilize the latest technologies to recreate our ever-expanding lineup of famed race cars and tracks from the comfort of your home. Simulate what a professional NASCAR driver experiences inside the seat of a stock car, or a Grand Prix driver sees over the dash. All of the details add up to a lineup of cars and tracks that are virtually indistinguishable from the real thing. This creates unmatched immersion when sim racers take the green flag in our online racing simulator. Although iRacing is an online racing simulator at heart, the value as a training tool is just as real. The best sim racers in the world compete on iRacing and you can watch the race broadcasts live on the iRacing eSports Network.</em></p>
+</blockquote>
 <h2 id=and-a-motion-rig>And a motion rig?</h2>
 <p><a href=https://opensfx.com/>https://opensfx.com/</a></p>
 <p><a href=https://github.com/SimFeedback/SimFeedback-AC-Servo>https://github.com/SimFeedback/SimFeedback-AC-Servo</a></p>
 <p><a href=https://github.com/JamesClonk/simracing-rig>https://github.com/JamesClonk/simracing-rig</a></p>
 <h3 id=simfeedback>SimFeedback</h3>
-<p>The software used to control the OpenSFX100 servos is called <a href=https://github.com/SimFeedback/SimFeedback-AC-Servo>SimFeedback</a>, written by the same person who open-sourced the OpenSFX100 plans in the first place.</p>
+<p>The software used to control the servos and motors is called <a href=https://github.com/SimFeedback/SimFeedback-AC-Servo>SimFeedback</a>, written by the same person who open-sourced the OpenSFX100 plans in the first place.</p>
 <p><img src=/images/simfeedback.png alt=SimFeedback></p>
 <h3 id=telemetry-data-is-not-working>Telemetry data is not working?</h3>
 <p>But oh no, it&rsquo;s not working?!</p>
@@ -71,8 +85,9 @@ Nov 27, 2018
 <p>Good thing I know my way around software a bit, more or less anyway.
 It was time to dig into the source code of SimFeedback or rather its plugin interface. Having never before worked with C# this turned out to be quite the adventure, having to learn my way around an entirely new language just for the sake of writing a 60hz telemetry plugin for myself might sound a bit like overkill. 😂</p>
 <p>In the end though I figured out what was needed and managed to create the <a href=https://github.com/JamesClonk/iR60TelemetryProvider>iR60 Telemetry Provider</a> plugin and put it on GitHub to let everybody else profit from my work too. (As it turns out a lot of people use 60hz mode given that it&rsquo;s iRacings default)</p>
-<p>Now I could finally hook up all my gadgets and get back to actual racing on track.
-Here you can see the final thing in action:
+<p>Now I could finally hook up all my gadgets and get back to actual racing on track.</p>
+<h2 id=the-result>The result</h2>
+<p>Here you can see the final thing in action:
 <div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden>
 <iframe src=https://www.youtube.com/embed/M1Aam-OnV7w style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 allowfullscreen title="YouTube Video"></iframe>
 </div>
