@@ -30,7 +30,15 @@ To quote from iRacings website:
 
 ## And a motion rig?
 
-https://opensfx.com/
+In order to properly enjoy sim-racing you should have a *"rig"*, that is to say some kind of [sim-racing cockpit](https://sim-lab.eu/) with a frame made out of wood, steel or aluminum. To this rig you then attach a [bucket seat](https://www.sparco-official.com/en/rev-rev-ii.html) to sit in, a [direct drive servo motor](https://simracingcockpit.com/direct-drive-wheels/) powered [steering wheel](https://www.ascher-racing.com/shop/f64-usb-v2/), high quality [throttle and brake pedals](https://heusinkveld.com/shop/sim-pedals/sim-pedals-sprint/), bass-shakers, screens, etc.
+
+But what if you want to take it to the next level? A motion rig!
+
+I wanted my rig to actually move and simulate the road texture, bumps, curbs and G-forces (as best it could anyway). To do that you need to somehow equip your rig / platform with motion capability. The only problem with this is that pre-made, ready-to-use commercial products of motions rigs cost ***a lot*** of money, usually in the tens of thousands of dollars. I was absolutely not prepared to pay such an outrageous amount to get what I wanted.
+
+#### Enter the OpenSFX100
+
+Luckily for me I wasn't the only one dissatisfied with this lack of cheaper options on the market when it comes to motion rigs. Just as I was about to give up on my dream I discovered that somebody had designed and released plans for a complete Do-It-Yourself motion rig built out of as much off-the-shelf parts as possible and some additional ones that require 3D-printing: https://opensfx.com/
 
 https://github.com/SimFeedback/SimFeedback-AC-Servo
 
