@@ -117,9 +117,9 @@ There you go, Minecraft running on the Application Cloud:
 
 Running a Minecraft server on the Application Cloud would previously not have been possible due to its TCP only nature.
 
-Now of course we would still be missing a persistent filesystem here, so your world will be lost once your app gets restarted. But that is a problem we soon hope to fix too by giving you Volume Services. (A small teaser for the future!)
+Now of course we would still be missing a persistent filesystem here, so your world will be lost once your app gets restarted. But that is a problem hopefully soon being fixed too by adding [Volume Services](https://docs.cloudfoundry.org/running/deploy-vol-services.html) to Cloud Foundry.
 
-To use the TCP routing feature on our public Application Cloud offering, simply send us a support request detailing your intended use for it. We'll be happy to enable the appropriate quota settings your organization, so you can start pushing TCP-based apps onto the Cloud.
+To use the TCP routing feature on the Swisscom Public Application Cloud offering, simply send a support request detailing your intended use for it to get an appropriate quota setting for your organization enabled so you can start pushing TCP-based apps onto the Cloud. 👍 
 
-For more details on how to use the TCP routing from an end-user perspective please consult our documentation:
+For more details on how to use the TCP routing from an end-user perspective you can consult the documentation for further information:
 https://docs.developer.swisscom.com/devguide/deploy-apps/routes-domains.html#create-route-with-port
