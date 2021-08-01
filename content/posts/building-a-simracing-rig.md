@@ -52,12 +52,18 @@ It also requires various parts being 3D-printed, something I've never done befor
 
 After assembling all 4 actuators I needed build the controller unit for all 4 servos. The instructions on how to piece together the electronics for the Arduino can be found here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Electronics
 
-I built myself a rather ugly box to house all those units, but hey, it works! 🤷‍♂️
+I built myself a rather ugly box to house all the electronics, but hey, it works! 🤷‍♂️
 
 ![Controller](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/66_TxrYSBe.jpeg)
 
-I also needed a new rig / base platform to mount everything.
-https://github.com/JamesClonk/simracing-rig
+I also needed a new rig / base platform to mount everything, my old rig wasn't going to cut it anymore. It needed to be rock-solid and super stable to be able to handle the load and strain put on it by having it moving around. In the end instead of buying a pre-made rig from Sim-Lab like my old one, I decide I could probably also design one myself entirely from scratch. After a bit of learning-by-doing I ended up with this here by using SketchUp: https://github.com/JamesClonk/simracing-rig
+
+![Controller](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/SimRig_Edition_2018_03.jpg)
+
+Looks pretty good, at last in theory so far. Next step was ordering all the necessary aluminum profiles from [Motedis](https://www.motedis.com) and building the rig.
+After that it was time to attach the wheel, actuators, bucket seat, pedals, bass-shakers, etc.. Resulting in this: 
+![Controller](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/80_OonHZ2H.jpeg)
+🤩
 
 Check out this picture album of my whole journey in building this rig: https://github.com/JamesClonk/simracing-rig/blob/master/images/building/motion_rig.md 😂
 
