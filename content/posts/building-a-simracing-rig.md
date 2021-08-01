@@ -36,6 +36,8 @@ https://github.com/SimFeedback/SimFeedback-AC-Servo
 
 https://github.com/JamesClonk/simracing-rig
 
+https://imgur.com/a/8NfyycK
+
 ### SimFeedback
 
 The software used to control the servos and motors is called [SimFeedback](https://github.com/SimFeedback/SimFeedback-AC-Servo), written by the same person who open-sourced the OpenSFX100 plans in the first place.
