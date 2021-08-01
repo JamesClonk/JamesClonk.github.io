@@ -40,11 +40,26 @@ I wanted my rig to actually move and simulate the road texture, bumps, curbs and
 
 Luckily for me I wasn't the only one dissatisfied with this lack of cheaper options on the market when it comes to motion rigs. Just as I was about to give up on my dream I discovered that somebody had designed and released plans for a complete Do-It-Yourself motion rig built out of as much off-the-shelf parts as possible and some additional ones that require 3D-printing: https://opensfx.com/
 
-https://github.com/SimFeedback/SimFeedback-AC-Servo
+Originally that website didn't exist back then, the project was only released so far on GitHub here: https://github.com/SimFeedback/SimFeedback-AC-Servo
+The GitHub project includes everything necessary to build your own DIY motion platform, consisting of 4 actuators, 4 servos/controller boxes, and Arduino controlling those and software to feed instructions to the Arduino based on iRacing telemetry data while you're driving.
 
+A complete shopping list of all the parts needed to build your own SFX-100 actuators can be found here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Shopping-List
+And the assembly instructions are here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Actuator 😀 
+
+![Actuator](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/59_FoVcSXn.jpeg)
+
+It also requires various parts being 3D-printed, something I've never done before. After a bit of research it seemed that getting a [Prusa MK3](https://www.prusa3d.com/) was a good choice for a high quality hobby printer that a newbie like could handle but also is capabable of more advanced stuff should it be necessary. It only took a few weeks of pretty much running the printer 24x7 to print all the parts needed. 
+
+After assembling all 4 actuators I needed build the controller unit for all 4 servos. The instructions on how to piece together the electronics for the Arduino can be found here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Electronics
+
+I built myself a rather ugly box to house all those units, but hey, it works! 🤷‍♂️
+
+![Controller](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/66_TxrYSBe.jpeg)
+
+I also needed a new rig / base platform to mount everything.
 https://github.com/JamesClonk/simracing-rig
 
-https://imgur.com/a/8NfyycK
+Check out this picture album of my whole journey in building this rig: https://github.com/JamesClonk/simracing-rig/blob/master/images/building/motion_rig.md 😂
 
 ### SimFeedback
 
