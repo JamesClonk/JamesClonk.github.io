@@ -5,7 +5,7 @@ description: "How to build a DIY motion rig for sim-racing"
 tags: [simracing,iracing,diy,simulator]
 authors: []
 author: Fabio Berchtold
-date: 2018-11-23T15:56:39+02:00
+date: 2018-12-23T15:56:39+02:00
 draft: false
 ---
 
