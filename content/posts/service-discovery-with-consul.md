@@ -54,7 +54,7 @@ my-mongodb.service.consul. 0   IN  A   192.168.1.77
 Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
 If your are using for example *dnsmasq* or *[unbound](https://www.nlnetlabs.nl/projects/unbound/about/)* in your infrastructure you can easily configure a forward zone for `*.service.consul` to delegate any such request to your normal DNS server to be forwared along to the Consul DNS.
 Let's say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:
-```conf
+```yaml
 stub-zone:
  name: "service.consul"
  stub-addr: 127.0.0.1@8600  # forward ".service.consul" queries to local Consul agent
