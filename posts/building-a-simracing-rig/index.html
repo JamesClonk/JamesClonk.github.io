@@ -47,7 +47,7 @@ Fabio Berchtold
 Nov 27, 2018
 </div>
 <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-6 min read
+7 min read
 </div>
 <div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
 <a class=tag href=/tags/simracing/>simracing</a>
@@ -89,10 +89,14 @@ And the assembly instructions are here: <a href=https://github.com/SimFeedback/S
 <p><img src=https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/59_FoVcSXn.jpeg alt=Actuator></p>
 <p>It also requires various parts being 3D-printed, something I&rsquo;ve never done before. After a bit of research it seemed that getting a <a href=https://www.prusa3d.com/>Prusa MK3</a> was a good choice for a high quality hobby printer that a newbie like could handle but also is capabable of more advanced stuff should it be necessary. It only took a few weeks of pretty much running the printer 24x7 to print all the parts needed.</p>
 <p>After assembling all 4 actuators I needed build the controller unit for all 4 servos. The instructions on how to piece together the electronics for the Arduino can be found here: <a href=https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Electronics>https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Electronics</a></p>
-<p>I built myself a rather ugly box to house all those units, but hey, it works! 🤷‍♂️</p>
+<p>I built myself a rather ugly box to house all the electronics, but hey, it works! 🤷‍♂️</p>
 <p><img src=https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/66_TxrYSBe.jpeg alt=Controller></p>
-<p>I also needed a new rig / base platform to mount everything.
-<a href=https://github.com/JamesClonk/simracing-rig>https://github.com/JamesClonk/simracing-rig</a></p>
+<p>I also needed a new rig / base platform to mount everything, my old rig wasn&rsquo;t going to cut it anymore. It needed to be rock-solid and super stable to be able to handle the load and strain put on it by having it moving around. In the end instead of buying a pre-made rig from Sim-Lab like my old one, I decide I could probably also design one myself entirely from scratch. After a bit of learning-by-doing I ended up with this here by using SketchUp: <a href=https://github.com/JamesClonk/simracing-rig>https://github.com/JamesClonk/simracing-rig</a></p>
+<p><img src=https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/SimRig_Edition_2018_03.jpg alt=Controller></p>
+<p>Looks pretty good, at last in theory so far. Next step was ordering all the necessary aluminum profiles from <a href=https://www.motedis.com>Motedis</a> and building the rig.
+After that it was time to attach the wheel, actuators, bucket seat, pedals, bass-shakers, etc.. Resulting in this:
+<img src=https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/80_OonHZ2H.jpeg alt=Controller>
+🤩</p>
 <p>Check out this picture album of my whole journey in building this rig: <a href=https://github.com/JamesClonk/simracing-rig/blob/master/images/building/motion_rig.md>https://github.com/JamesClonk/simracing-rig/blob/master/images/building/motion_rig.md</a> 😂</p>
 <h3 id=simfeedback>SimFeedback</h3>
 <p>The software used to control the servos and motors is called <a href=https://github.com/SimFeedback/SimFeedback-AC-Servo>SimFeedback</a>, written by the same person who open-sourced the OpenSFX100 plans in the first place.</p>
