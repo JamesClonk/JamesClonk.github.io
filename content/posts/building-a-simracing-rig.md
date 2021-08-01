@@ -21,9 +21,17 @@ https://github.com/SimFeedback/SimFeedback-AC-Servo
 
 https://github.com/JamesClonk/simracing-rig
 
+### SimFeedback
+
+The software used to control the OpenSFX100 servos is called [SimFeedback](https://github.com/SimFeedback/SimFeedback-AC-Servo), written by the same person who open-sourced the OpenSFX100 plans in the first place.
+
+![SimFeedback](/images/simfeedback.png)
+
 ### Telemetry data is not working?
 
-Oh no, after I finally got everything up and running I discovered a major problem. You see, iRacing has 2 different output modes for telemetry data. It can be in either 60hz mode (the default) or in an increased 360hz mode (providing more accurate, albeit somewhat interpolated data). The problem I discovered though was that the majority of my software that I already was using to read telemetry data and do useful things with it, like simulating wind / air flow via Arduino-controlled fans or control bass-shakers to simulate vibrations and road texture, was operating in 60hz mode only. The iRacing plugin provided by SimFeedback on the other hand was expecting 360hz telemetry input and you can only use either one of these modes in iRacing, not both at the same time! 😱
+But oh no, it's not working?!
+
+After I finally got everything up and running I discovered a major problem. You see, iRacing has 2 different output modes for telemetry data. It is a memory-mapped file that refreshes provides data in either 60hz mode (the default) or in an increased 360hz mode (providing more accurate, albeit somewhat interpolated data). The problem I discovered though was that the majority of my software that I already was using to read telemetry data and do useful things with it, like [simulating wind / air flow via Arduino-controlled fans](https://www.youtube.com/watch?v=7fEaeoBWdHo) or control [bass-shakers](https://thebuttkicker.com/buttkicker-lfe/) to simulate vibrations and road texture, was operating in 60hz mode only. The iRacing plugin provided by SimFeedback on the other hand was expecting 360hz telemetry input and you can only use either one of these modes in iRacing, not both at the same time! 😱
 
 Good thing I know my way around software a bit, more or less anyway. 
 It was time to dig into the source code of SimFeedback or rather its plugin interface. Having never before worked with C# this turned out to be quite the adventure, having to learn my way around an entirely new language just for the sake of writing a 60hz telemetry plugin for myself might sound a bit like overkill. 😂
