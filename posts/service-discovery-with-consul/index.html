@@ -86,14 +86,14 @@ my-mongodb.service.consul. <span style=color:#d19a66>0</span>   IN  A   192.168.
 <p>Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
 If your are using for example <em>dnsmasq</em> or <em><a href=https://www.nlnetlabs.nl/projects/unbound/about/>unbound</a></em> in your infrastructure you can easily configure a forward zone for <code>*.service.consul</code> to delegate any such request to your normal DNS server to be forwared along to the Consul DNS.
 Let&rsquo;s say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:</p>
-<pre><code class=language-conf data-lang=conf>stub-zone:
- name: &quot;service.consul&quot;
- stub-addr: 127.0.0.1@8600  # forward &quot;.service.consul&quot; queries to local Consul agent
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>stub-zone</span>:
+ <span style=color:#e06c75>name</span>: <span style=color:#63c381>&#34;service.consul&#34;</span>
+ <span style=color:#e06c75>stub-addr</span>: <span style=color:#d19a66>127.0.0.1</span>@<span style=color:#d19a66>8600</span>  <span style=color:#8a93a5;font-style:italic># forward &#34;.service.consul&#34; queries to local Consul agent</span>
  
-stub-zone:
- name: &quot;node.consul&quot;
- stub-addr: 127.0.0.1@8600  # forward &quot;.node.consul&quot; queries to local Consul agent
-</code></pre><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p>
+<span style=color:#e06c75>stub-zone</span>:
+ <span style=color:#e06c75>name</span>: <span style=color:#63c381>&#34;node.consul&#34;</span>
+ <span style=color:#e06c75>stub-addr</span>: <span style=color:#d19a66>127.0.0.1</span>@<span style=color:#d19a66>8600</span>  <span style=color:#8a93a5;font-style:italic># forward &#34;.node.consul&#34; queries to local Consul agent</span>
+</code></pre></div><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p>
 </div>
 <div class=post-footer>
 </div>
