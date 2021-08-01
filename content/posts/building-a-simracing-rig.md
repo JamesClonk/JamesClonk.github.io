@@ -38,7 +38,7 @@ It was time to dig into the source code of SimFeedback or rather its plugin inte
 
 In the end though I figured out what was needed and managed to create the [iR60 Telemetry Provider](https://github.com/JamesClonk/iR60TelemetryProvider) plugin and put it on GitHub to let everybody else profit from my work too. (As it turns out a lot of people use 60hz mode given that it's iRacings default)
 
-Now I could finally hook up all my gadgets at the same time and get back to actual racing on track.
+Now I could finally hook up all my gadgets and get back to actual racing on track.
 Here you can see the final thing in action:
 {{< youtube M1Aam-OnV7w >}}
 
