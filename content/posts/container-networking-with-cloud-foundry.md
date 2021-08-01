@@ -1,7 +1,7 @@
 ---
 title: "Container Networking with Cloud Foundry"
 description: "Container-to-Container Networking on Cloud Foundry allows for secure and fast direct TCP and UDP communication between your applications"
-tags: [cloud foundry,containers,networking,app cloud,service discovery]
+tags: [cloud foundry,containers,networking,app cloud,service discovery,dns]
 authors: []
 author: Fabio Berchtold
 date: 2018-05-19T16:06:35+02:00
