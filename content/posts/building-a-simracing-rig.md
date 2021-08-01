@@ -44,7 +44,7 @@ The software used to control the servos and motors is called [SimFeedback](https
 
 ### Telemetry data is not working?
 
-But oh no, it's not working?!
+Oh no, what's wrong?!
 
 After I finally got everything up and running I discovered a major problem. You see, iRacing has 2 different output modes for telemetry data. It is a memory-mapped file that refreshes provides data in either 60hz mode (the default) or in an increased 360hz mode (providing more accurate, albeit somewhat interpolated data). The problem I discovered though was that the majority of my software that I already was using to read telemetry data and do useful things with it, like [simulating wind / air flow via Arduino-controlled fans](https://www.youtube.com/watch?v=7fEaeoBWdHo) or control [bass-shakers](https://thebuttkicker.com/buttkicker-lfe/) to simulate vibrations and road texture, was operating in 60hz mode only. The iRacing plugin provided by SimFeedback on the other hand was expecting 360hz telemetry input and you can only use either one of these modes in iRacing, not both at the same time! 😱
 
