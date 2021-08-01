@@ -1,15 +1,15 @@
 
 ---
-title: "Building a Simracing rig"
-description: ""
+title: "Building a Sim-racing motion rig"
+description: "How to build a DIY motion rig for sim-racing"
 tags: [simracing,iracing,diy]
 authors: []
 author: Fabio Berchtold
 date: 2018-11-27T15:56:39+02:00
-draft: true
+draft: false
 ---
 
-## What is Sim-Racing / iRacing?
+## What is Sim-racing / iRacing?
 
 
 
