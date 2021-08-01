@@ -21,10 +21,10 @@ The most common sim-racing titles are:
 
 ### iRacing
 
-[iRacing](https://www.iracing.com/)
-
 To quote from iRacings website:
 > *iRacing is the leading sim-racing game for your PC. Developed as a centralized racing and competition service, iRacing organizes, hosts and officiates online racing on virtual tracks all around the world. In the fast-paced world of eSports, iRacing is a one-stop-shop for online racing. We utilize the latest technologies to recreate our ever-expanding lineup of famed race cars and tracks from the comfort of your home. Simulate what a professional NASCAR driver experiences inside the seat of a stock car, or a Grand Prix driver sees over the dash. All of the details add up to a lineup of cars and tracks that are virtually indistinguishable from the real thing. This creates unmatched immersion when sim racers take the green flag in our online racing simulator. Although iRacing is an online racing simulator at heart, the value as a training tool is just as real. The best sim racers in the world compete on iRacing and you can watch the race broadcasts live on the iRacing eSports Network.*
+
+[iRacing](https://www.iracing.com/) is probably my favourite out of all the sim-racing software out there, thanks to its fantastic online component. It is entirely focused on competitive online racing in various championship series and leagues. One of the many great things about it is that due to its simulation accuracy it very popular especially among racing enthusiasts and also attracts a lot of actual real world drivers to the service. It is not uncommon to see the likes of Max Verstappen or Lando Norris appearing in these races, both of them being fans of iRacing.
 
 {{< youtube aK2-nlfnPys >}}
 
