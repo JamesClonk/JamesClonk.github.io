@@ -38,13 +38,12 @@ I wanted my rig to actually move and simulate the road texture, bumps, curbs and
 
 #### Enter the OpenSFX100
 
-Luckily for me I wasn't the only one dissatisfied with this lack of cheaper options on the market when it comes to motion rigs. Just as I was about to give up on my dream I discovered that somebody had designed and released plans for a complete Do-It-Yourself motion rig built out of as much off-the-shelf parts as possible and some additional ones that require 3D-printing: https://opensfx.com/
-
+Luckily for me I wasn't the only one dissatisfied with this lack of cheaper options on the market when it comes to motion rigs. Just as I was about to give up on my dream I discovered that somebody had designed and released plans for a complete Do-It-Yourself motion rig built out of as much off-the-shelf parts as possible and some additional ones that require 3D-printing: https://opensfx.com/          
 Originally that website didn't exist back then, the project was only released so far on GitHub back then: https://github.com/SimFeedback/SimFeedback-AC-Servo
 
 The GitHub project includes everything necessary to build your own DIY motion platform, consisting of 4 actuators, 4 servos/controller boxes, and Arduino controlling those and software to feed instructions to the Arduino based on iRacing telemetry data while you're driving.
 
-A complete shopping list of all the parts needed to build your own SFX-100 actuators can be found here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Shopping-List
+A complete shopping list of all the parts needed to build your own SFX-100 actuators can be found here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Shopping-List          
 And the assembly instructions are here: https://github.com/SimFeedback/SimFeedback-AC-Servo/wiki/Actuator 😀 
 
 ![Actuator](https://raw.githubusercontent.com/JamesClonk/simracing-rig/master/images/building/59_FoVcSXn.jpeg)
