@@ -1,6 +1,6 @@
 ---
 title: "Using Mozilla/SOPS for secret management"
-description: ""
+description: "Learn how to encrypt your secrets with Mozilla/SOPS"
 tags: [continuous deployment,github actions,secrets,github]
 authors: []
 author: Fabio Berchtold
