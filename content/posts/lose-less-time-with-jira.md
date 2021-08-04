@@ -13,7 +13,7 @@ draft: false
 Probably everybody knows or has heard of [Jira](https://www.atlassian.com/software/jira) before.
 
 Jira is commonly used as a tool for issue, epics, stories and bug tracking and agile project management in general, developed by Atlassian, and can be installed and run on-premises or consumed as a Cloud Software-as-a-Service product.
-At the company I work at ([Swisscom](https://www.swisscom.ch/de/business/enterprise/angebot/cloud/cloudservices/application-cloud.html)) we also use Jira internally for all those use cases.
+At the company I work at ([Swisscom](https://www.swisscom.ch/en/business/enterprise/angebot/cloud/cloudservices/application-cloud.html)) we also use Jira internally for all those use cases.
 
 But dealing with the web UI can be very cumbersome and slow, everytime I have to update my tasks or stories and modify their current state I keep rolling my eyes at the general slowness of the whole procedure. 🙄
 
