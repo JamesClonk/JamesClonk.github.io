@@ -21,7 +21,7 @@ That's where [TurboJira](https://github.com/JamesClonk/turbojira) comes into the
 
 ## TurboJira
 
-TurboJira is a very simple Android app that I write for myself to very specifically serve my exact uses cases of being able to:
+TurboJira is a very simple Android app that I wrote for myself to very specifically serve my exact uses cases of being able to:
 - quickly list my own tasks / stories
 - update / change their current state
 - edit their description / summary
