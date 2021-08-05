@@ -3,7 +3,7 @@ title = "Ramblings about all things technical"
 languageCode = "en-us"
 defaultContentLanguage = "en"
 theme = "m10c"
-paginate = 7
+paginate = 9
 enableEmoji= true
 
 [markup]
