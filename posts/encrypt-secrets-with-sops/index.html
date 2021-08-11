@@ -1,0 +1,193 @@
+<!doctype html><html lang=en-us>
+<head>
+<title>Using Mozilla/SOPS for secret management // Ramblings about all things technical</title>
+<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
+<meta charset=utf-8>
+<meta name=generator content="Hugo 0.87.0">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=author content="Fabio Berchtold">
+<meta name=description content="Learn how to encrypt your secrets with Mozilla/SOPS">
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Using Mozilla/SOPS for secret management">
+<meta name=twitter:description content="Learn how to encrypt your secrets with Mozilla/SOPS">
+<meta property="og:title" content="Using Mozilla/SOPS for secret management">
+<meta property="og:description" content="Learn how to encrypt your secrets with Mozilla/SOPS">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.jamesclonk.io/posts/encrypt-secrets-with-sops/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-07-25T19:51:09+02:00">
+<meta property="article:modified_time" content="2021-07-25T19:51:09+02:00">
+</head>
+<body>
+<header class=app-header>
+<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
+<h1>Ramblings about all things technical</h1>
+<nav class=app-header-menu>
+<a class=app-header-menu-item href=/>Home</a>
+-
+<a class=app-header-menu-item href=/tags/>Tags</a>
+-
+<a class=app-header-menu-item href=/about/>About</a>
+</nav>
+<p>Working with tech is fun!</p>
+<div class=app-header-social>
+<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
+</a>
+</div>
+</header>
+<main class=app-container>
+<article class=post>
+<header class=post-header>
+<h1 class=post-title>Using Mozilla/SOPS for secret management</h1>
+<div class=post-meta>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+Fabio Berchtold
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+Jul 25, 2021
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+6 min read
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+<a class=tag href=/tags/continuous-deployment/>continuous deployment</a>
+<a class=tag href=/tags/github-actions/>github actions</a>
+<a class=tag href=/tags/secrets/>secrets</a>
+<a class=tag href=/tags/github/>github</a>
+</div>
+</div>
+</header>
+<div class=post-content>
+<h2 id=enviroment-variables>Enviroment variables</h2>
+<p>When I was originally contemplating on how to run all my personal projects and applications on <a href=/posts/my-own-kubernetes/>my own Kubernetes</a> cluster, one of the problems was how would I store secrets? Where would I store them?</p>
+<p>Since I intended to have all my <a href="https://www.youtube.com/watch?v=RO7VcUAsf-I">Infrastructure-as-Code</a>, deployment and application repositories publicly accessible on GitHub (to be able to benefit from all the nice free services it provides for public / open-source projects), I needed to figure out how I should do this.</p>
+<p>Initially I went for the simple and obvious way of having all my pipeline code relying on injected environment variables, a typical principle of the <a href=https://12factor.net/config>12-factor</a> approach on how to store configuration data.</p>
+<p>Since at that point I was also migrating from <a href=https://circleci.com/>CircleCI</a> to <a href=https://docs.github.com/en/actions>GitHub Actions</a>, all I had to do was store all needed environment variables as &ldquo;Secrets&rdquo; on the particular Github repository where the Github Actions workflows are running:</p>
+<p><img src=/images/sops-github-secrets.png alt="GitHub secrets"></p>
+<p>Now I could simply inject them as environment variables into a workflow and its job steps, by referring to these GitHub repository secrets via <em><code>${{ .secret.&lt;SECRET_NAME> }}</code></em>:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>name</span>: <span style=color:#98c379>minecraft server on k8s</span>
+
+<span style=color:#e06c75>jobs</span>:
+  <span style=color:#e06c75>minecraft</span>:
+    <span style=color:#e06c75>name</span>: <span style=color:#98c379>minecraft</span>
+    <span style=color:#e06c75>runs-on</span>: <span style=color:#98c379>ubuntu-latest</span>
+    <span style=color:#e06c75>steps</span>:
+    - <span style=color:#e06c75>uses</span>: <span style=color:#98c379>actions/checkout@v2</span>
+    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>deploy minecraft server to k8s</span>
+      <span style=color:#e06c75>working-directory</span>: <span style=color:#98c379>minecraft</span>
+      <span style=color:#e06c75>run</span>: <span style=color:#98c379>./deploy.sh</span>
+      <span style=color:#e06c75>env</span>:
+        <span style=color:#e06c75>KUBECONFIG</span>: <span style=color:#98c379>${{ secrets.KUBECONFIG }}</span>
+        <span style=color:#e06c75>MINECRAFT_SERVER_PASSWORD</span>: <span style=color:#98c379>${{ secrets.MINECRAFT_SERVER_PASSWORD }}</span>
+        <span style=color:#e06c75>MINECRAFT_RCON_PASSWORD</span>: <span style=color:#98c379>${{ secrets.MINECRAFT_RCON_PASSWORD }}</span>
+        <span style=color:#e06c75>S3_BACKUP_BUCKET</span>: <span style=color:#98c379>${{ secrets.S3_BACKUP_BUCKET }}</span>
+        <span style=color:#e06c75>S3_BACKUP_ACCESS_KEY</span>: <span style=color:#98c379>${{ secrets.S3_BACKUP_ACCESS_KEY }}</span>
+        <span style=color:#e06c75>S3_BACKUP_SECRET_KEY</span>: <span style=color:#98c379>${{ secrets.S3_BACKUP_SECRET_KEY }}</span>
+</code></pre></div><p>Great, this works reasonably well!</p>
+<h4 id=could-it-be-better-though>Could it be better though?</h4>
+<p>While I always felt a bit uneasy about storing these raw secrets on GitHub, I was never bothered enough by it to seek out better solutions. What was however starting to bother me was that after a while this collection of GitHub repo secrets started to grow more and more. As I added more applications to my infrastructure-as-code monorepo and its number of deployment workflows grew, so did the number of secrets I had to configure and store.</p>
+<p>How else could I store secrets and the configuration data necessary for my workflows? This is where I learned about <a href=https://github.com/mozilla/sops>Mozilla/SOPS</a></p>
+<h2 id=mozillasops>Mozilla/SOPS</h2>
+<p>SOPS, short for <strong>S</strong>ecrets <strong>OP</strong>eration<strong>S</strong>, is a tool to encrypt files so that they can safely be stored in public git repositories. It natively supports <em>YAML</em>, <em>JSON</em>, <em>ENV</em>, <em>INI</em> and <em>BINARY</em> file formats and encrypts these either via <a href=https://aws.amazon.com/kms/>AWS KMS</a>, GCP KMS, Azure Key Vault, age, and/or PGP.</p>
+<p>With SOPS you can encrypt certain values (or the whole file) and are then able to safely store it in this encrypted state into a git repository, without having to fear that someone would be able to read your secrets.</p>
+<p><img src=/images/sops-sops.gif alt=SOPS></p>
+<p>Initially I wanted to use PGP as backend for SOPS, since I already use it in combination with <a href=https://www.passwordstore.org/>pass</a> to store my private passwords in git. (Fantastic tool btw!)</p>
+<p>But after researching for a bit longer and learning more in detail as to what exactly a &ldquo;Cloud KMS&rdquo; was I decided to use AWS KMS instead PGP. Another reason was also that at the time I was anyway neck deep into learning and preparing for my AWS Solution Architect and Developer associate certifications, and already had a personal AWS account that I used for S3 storage. So why not also use AWS KMS then? After all it is extremely cheap too, just like S3.</p>
+<h3 id=using-sops-with-aws-key-management-service-kms>Using SOPS with AWS Key Management Service (KMS)</h3>
+<p>The great thing about using AWS KMS instead of PGP is that since the master key remains on AWS at all times and is never itself committed onto the git repository (only the generated encryption keys are), it is possible to retroactively revoke access to decrypt any secrets simply by disabling the master key on AWS. It is also easy to use multiple master keys combined and also rotate a key.</p>
+<p>First I had to set up a new IAM user with appropriate policies for AWS KMS usage added. Once you create a new master key for in the AWS KMS web console then it will ask you which IAM user to grant access as &ldquo;key administrator&rdquo; or &ldquo;key user&rdquo;. I then also added a new Access key to this user, to allow API access to AWS KMS by using an access key ID and secret key.</p>
+<p>For a more detailed guide on using AWS KMS in general you can check out the official documentation here: <a href=https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html>https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html</a></p>
+<p>Once I had my shiny new master key ready I could create a <em><code>.sops.yaml</code></em> file in the root of my repository, referring to the AWS ARN of the master key:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>creation_rules</span>:
+- <span style=color:#e06c75>kms</span>: <span style=color:#98c379>arn:aws:kms:eu-central-1:1234567890:key/beefdead-beef-dead-dead-deadbeef</span>
+</code></pre></div><p>This is the main configuration file for SOPS. With this configuration setting any new secret or file you encrypt with SOPS will be encrypted via the referred master key on AWS KMS.</p>
+<p>Since SOPS uses the AWS SDK internally this means it will automatically infer the necessary credentials to access your master key via either <a href=https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html><em><code>AWS_*</code></em> environment variables</a> or from <code>~/.aws/credentials</code> (if you are using the AWS CLI)</p>
+<p>For this I&rsquo;ve set the necessary <em><code>AWS_*</code></em> environment variables directly as GitHub secrets:</p>
+<p><img src=/images/sops-github-aws-secrets.png alt="GitHub AWS secrets"></p>
+<h3 id=secrets-file-instead-of-variables>Secrets file instead of variables</h3>
+<p>Since as you can see in the screenshot above I&rsquo;ve removed all other environment variable secrets from the GitHub repository. So where are they now?</p>
+<p>I have added a new file to my git repo, <em><code>secrets.yaml</code></em>, which is a <em>YAML</em> file that contains all my secrets now that are needed by my applications and deployments:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>secrets</span>:
+  <span style=color:#e06c75>hetzner</span>:
+    <span style=color:#e06c75>token</span>: <span style=color:#98c379>deadbeef-beefdead</span>
+    <span style=color:#e06c75>ssh</span>:
+      <span style=color:#e06c75>public_key</span>: <span style=color:#98c379>&#39;ssh-rsa ... kubernetes&#39;</span>
+      <span style=color:#e06c75>private_key</span>: |<span style=color:#7e97c3>
+</span><span style=color:#7e97c3>        -----BEGIN RSA PRIVATE KEY-----
+</span><span style=color:#7e97c3>        ...
+</span><span style=color:#7e97c3>        -----END RSA PRIVATE KEY-----</span>        
+
+  <span style=color:#e06c75>ingress</span>:
+    <span style=color:#e06c75>basic_auth</span>:
+      <span style=color:#e06c75>username</span>: <span style=color:#98c379>my-user-name</span>
+      <span style=color:#e06c75>password</span>: <span style=color:#98c379>super-secret-password</span>
+
+  <span style=color:#e06c75>lets_encrypt</span>:
+    <span style=color:#e06c75>email</span>: <span style=color:#98c379>&#39;user@domain&#39;</span>
+    <span style=color:#e06c75>prod_key</span>: <span style=color:#98c379>&#39;... =&#39;</span>
+    <span style=color:#e06c75>staging_key</span>: <span style=color:#98c379>&#39;... =&#39;</span>
+
+  <span style=color:#e06c75>postgres</span>:
+    <span style=color:#e06c75>password</span>: <span style=color:#98c379>super-secret-superuser-password</span>
+    <span style=color:#e06c75>backup</span>:
+      <span style=color:#e06c75>s3</span>:
+        <span style=color:#e06c75>access_key_id</span>: <span style=color:#98c379>my-access-key</span>
+        <span style=color:#e06c75>secret_access_key</span>: <span style=color:#98c379>my-secret-key</span>
+        <span style=color:#e06c75>endpoint</span>: <span style=color:#98c379>https://s3.eu-west-1.amazonaws.com</span>
+        <span style=color:#e06c75>bucket</span>: <span style=color:#98c379>my-bucket</span>
+
+  <span style=color:#e06c75>grafana</span>:
+    <span style=color:#e06c75>password</span>: <span style=color:#98c379>super-secret-grafana-password</span>
+</code></pre></div><p>This file I then encrypted via simply running <code>sops -e -i secrets.yaml</code>. Afterwards the content of the file looks like this:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>secrets</span>:
+    <span style=color:#e06c75>hetzner</span>:
+        <span style=color:#e06c75>token</span>: <span style=color:#98c379>ENC[AES256_GCM,data:J3WHN2aAvIedB2Ogga6qhGA=,iv:CRqk4amBxFffdomf015JAyzn9gTDYS4BowB1j65Wdkl=,tag:MLI3OadfYkqaLygKhryf5w==,type:str]</span>
+        <span style=color:#e06c75>ssh</span>:
+            <span style=color:#e06c75>public_key</span>: <span style=color:#98c379>ENC[AES256_GCM,data:x074coIv5IegZm/sRuOkW6i6RX2ILQ==,iv:xJcYGh2SL3FU4FX2Ul71HVgDxDtCJZeH3ls26Qxe4Tx=,tag:yl7B3WPhdJ3sZ3R1ZsQJ53K==,type:str]</span>
+            <span style=color:#e06c75>private_key</span>: <span style=color:#98c379>ENC[AES256_GCM,data:GrugSAh4v5deSWlKNP/idFlTC8P6CQv7HUmYgd3Y6B8ao9FGB0TPwhg41l7BRgt67y5CdDpSOzxFLBSh,iv:kHhGXK+pACGtVQ7hFdihIZ2TJqH1j8q7K58FKbKFo6l=,tag:0ZIqoHCahXwVlvYvh0ea68==,type:str]</span>
+    <span style=color:#e06c75>ingress</span>:
+        <span style=color:#e06c75>basic_auth</span>:
+            <span style=color:#e06c75>username</span>: <span style=color:#98c379>ENC[AES256_GCM,data:RcTHE4Ad5SfAzsKl,iv:fPJOktbGrudSAh4v5ddSWlKNPUdVRPBpn+v0dqS3A=,tag:5tvr0ffkMR/AE3k3ks4zkQ==,type:str]</span>
+            <span style=color:#e06c75>password</span>: <span style=color:#98c379>ENC[AES256_GCM,data:Fl2G234vsdfzLVQlfGyBB8,iv:uYX2t291234dfddH0CRjaiJeJyT345fdgf46VCvlplKL0=,tag:eJxkE57656wpHZng8xBsdfgA==,type:str]</span>
+    <span style=color:#e06c75>lets_encrypt</span>:
+        <span style=color:#e06c75>email</span>: <span style=color:#98c379>ENC[AES256_GCM,data:I/J8XWsdfE23Xc=,iv:z2AkXK/jM234gSAh4v5deSWl54ssvFIA3OiWU=,tag:IoC6/X234fLLTF342Tza5mw==,type:str]</span>
+        <span style=color:#e06c75>prod_key</span>: <span style=color:#98c379>ENC[AES256_GCM,data:Q8NOjyc=,iv:R7xdfHpTSMSpG3isBL4qsdf+8S/8FGxsfUom4k=,tag:bR34spzBj/Q5Gsdf6Cpu+Q==,type:str]</span>
+        <span style=color:#e06c75>staging_key</span>: <span style=color:#98c379>ENC[AES256_GCM,data:63mgFw0=,iv:9Pe345GrugSARcTgEIsdffIzsJBNIRh7N45f8b5RA=,tag:odflzrcsdf6h6OWvU78f5g==,type:str]</span>
+    <span style=color:#e06c75>postgres</span>:
+        <span style=color:#e06c75>password</span>: <span style=color:#98c379>ENC[AES256_GCM,data:Jff24GBDKXpNVEKVdfcKwuTKEV62odfgzlQDg==,iv:hcdfgCFijtFU4e8bt12adfgk8HOA5huzKx30=,tag:L2hK26uMsdfy1gh8D+Eg==,type:str]</span>
+        <span style=color:#e06c75>backup</span>:
+            <span style=color:#e06c75>s3</span>:
+                <span style=color:#e06c75>access_key_id</span>: <span style=color:#98c379>ENC[AES256_GCM,data:9BE3545KsdfCOgig==,iv:+dAdfgskprCdfgv0yB5Vx45ZwjP+rfY456T0tU=,tag:/XT33OdgfP/H39+8odffCw==,type:str]</span>
+                <span style=color:#e06c75>secret_access_key</span>: <span style=color:#98c379>ENC[AES256_GCM,data:ZtsdfOU88567t7w==,iv:gc567P7G+f8f8OefghNnBZyo6Z5hjkcNwVXhjkWo=,tag:K/x234dNo9SfghOHAm2xcv==,type:str]</span>
+                <span style=color:#e06c75>endpoint</span>: <span style=color:#98c379>ENC[AES256_GCM,data:fg234ZSkpaXnyxc+8/hK3yxc2XsOOz2XX8v456YQXg==,iv:pyxcbDfe+m345z+6IyxcqMsxc/JNLT1234ltd=,tag:Dp+qsdfJUdjIJ345Ax567==,type:str]</span>
+                <span style=color:#e06c75>bucket</span>: <span style=color:#98c379>ENC[AES256_GCM,data:Fd345LdqG,iv:SssdfuP6fcvb/IsdfEo3455R1Zdfg=,tag:22UufFsdfMg==,type:str]</span>
+    <span style=color:#e06c75>grafana</span>:
+        <span style=color:#e06c75>password</span>: <span style=color:#98c379>ENC[AES256_GCM,data:6hasd6if9ON1aVL456k=,iv:ko4V/u3/nx2223t+5G234SWlKNPEdfg=,tag:3dnLtsdfySn51GsaSfxlw==,type:str]</span>
+<span style=color:#e06c75>sops</span>:
+    <span style=color:#e06c75>kms</span>:
+        - <span style=color:#e06c75>arn</span>: <span style=color:#98c379>arn:aws:kms:eu-central-1:1234567890:key/beefdead-beef-dead-dead-deadbeef</span>
+          <span style=color:#e06c75>created_at</span>: <span style=color:#63c381>&#34;2021-07-25T14:19:47Z&#34;</span>
+          <span style=color:#e06c75>enc</span>: <span style=color:#98c379>AKICFGHSHrR5cmJjgGFGHvKDmYZVSEGHJShczFxDgDStM7IbXaAA3AfWER9w0BBwagbzBtA34YXSIb3DQEHATAeBglghkDFHMEAS4wD778+ZjYAgast6Pf/6di0V234p6yqHJKWy345aBbYNsmemoTi345A2MBeY+OVP4D/4U3pHM4d+5dfqhA==</span>
+</code></pre></div><p>As you can see all the secrets have been encrypted by SOPS. This file can now be committed and pushed safely to a public GitHub repository.</p>
+<p>I now changed the deployments in my monorepo to always on-the-fly read and decrypt the <code>secrets.yaml</code> file at the start of each workflow step with a shellscript looking similar to this:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=color:#ef8383>export</span> <span style=color:#dcaeea>HETZNER_CLOUD_TOKEN</span><span style=color:#c7bf54>=</span><span style=color:#c678dd>$(</span>sops -d <span style=color:#63c381>&#34;secrets.yaml&#34;</span> | yq -e <span style=color:#ef8383>eval</span> <span style=color:#98c379>&#39;.secrets.hetzner.token&#39;</span> -<span style=color:#c678dd>)</span>
+<span style=color:#ef8383>export</span> <span style=color:#dcaeea>HETZNER_PUBLIC_SSH_KEY</span><span style=color:#c7bf54>=</span><span style=color:#c678dd>$(</span>sops -d <span style=color:#63c381>&#34;secrets.yaml&#34;</span> | yq -e <span style=color:#ef8383>eval</span> <span style=color:#98c379>&#39;.secrets.hetzner.ssh.public_key&#39;</span> -<span style=color:#c678dd>)</span>
+<span style=color:#ef8383>export</span> <span style=color:#dcaeea>HETZNER_PRIVATE_SSH_KEY</span><span style=color:#c7bf54>=</span><span style=color:#c678dd>$(</span>sops -d <span style=color:#63c381>&#34;secrets.yaml&#34;</span>| yq -e <span style=color:#ef8383>eval</span> <span style=color:#98c379>&#39;.secrets.hetzner.ssh.private_key&#39;</span> -<span style=color:#c678dd>)</span>
+<span style=color:#8a93a5;font-style:italic># etc ...</span>
+</code></pre></div><p>Reading and decrypting these secrets with SOPS and exporting them to environment variables for the running process means that I did not have to do any further changes to my already existing deployment procedures, all workflows were already based on environment variables. 😄</p>
+<h2 id=video-tutorials-for-sops>Video tutorials for SOPS</h2>
+<div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden>
+<iframe src=https://www.youtube.com/embed/V2PRhxphH2w style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 allowfullscreen title="YouTube Video"></iframe>
+</div>
+<div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden>
+<iframe src=https://www.youtube.com/embed/DWzJ87KbwxA style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 allowfullscreen title="YouTube Video"></iframe>
+</div>
+<h3 id=appendix>Appendix</h3>
+<p>For reference, the blogpost that led me to my decision to use SOPS instead of switching to use Vault: <a href=https://oteemo.com/hashicorp-vault-is-overhyped-and-mozilla-sops-with-kms-and-git-is-massively-underrated/>https://oteemo.com/hashicorp-vault-is-overhyped-and-mozilla-sops-with-kms-and-git-is-massively-underrated/</a></p>
+</div>
+<div class=post-footer>
+</div>
+</article>
+</main>
+</body>
+</html>
