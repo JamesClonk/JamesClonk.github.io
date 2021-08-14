@@ -66,6 +66,6 @@ In the end all I need to do is run *[./provision.sh](https://github.com/JamesClo
 
 Since I've recently started porting all my old blog posts onto my new blog (this very thing here you are reading 😂), I've stumbled upon this old beauty of a crazy self-made HA architecture. What a monstrosity!
 
-This thing was so bloody unnecessarily complicated, no wonder I abandoned it as soon as I could when I learned of [Cloud Foundry](https://www.cloudfoundry.org/). I more or less immediately just started deploying all my Golang web apps directly onto the [Swisscom Application Cloud](developer.swisscom.com) back, it greatly simplified everything.
+This thing was so bloody unnecessarily complicated, no wonder I abandoned it as soon as I could when I learned about [Cloud Foundry](https://www.cloudfoundry.org/). I more or less immediately just started deploying all my Golang web apps directly onto the [Swisscom Application Cloud](developer.swisscom.com) back then, it greatly simplified everything.
 
 And these days I have everything automated with [GitHub Actions](https://github.com/features/actions) and running on [my own Kubernetes](/posts/my-own-kubernetes/) cluster anyway..
