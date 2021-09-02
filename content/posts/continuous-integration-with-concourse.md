@@ -13,4 +13,4 @@ draft: true
 
 ## Concourse - the continuous thing-doer
 
-
+![Pipeline](/images/concourse-pipeline.png)
