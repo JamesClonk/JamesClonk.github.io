@@ -75,6 +75,18 @@ explain DNS of adguardhome.
 
 explain [Android WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android)
 
+#### What are the benefits of doing this?
+
+So at this point you might wonder why doing all of this in the first place, why would you run your own VPN server and DNS ad-blocker on the internet?
+
+There's various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the two most important one are these:
+- Secure network traffic in "foreign" networks, wifi, etc. for your phone
+  - All traffic will go through the VPN connection and exit on your "trusted" Kubernetes cluster, instead of being at the mercy of whatever hotel Wi-Fi you are currently using with your phone for example.
+- System-wide ad-blocking via DNS on Android!
+  - Having a DNS server that does ad-blocking being used as the sole DNS for the VPN connection means that you automatically get a system-wide ad-blocker for your Android phone. No more pesky ads in the browser or even within any apps themselves!
+
+Let's get started on a client configuration file for your phone:
+
 #### client.conf
 ```sh
 # Client configuration
@@ -106,7 +118,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
 ```
 
-As you can see from the above client config example we've defined with the *`DNS`* entry which DNS server should be used by the client once the VPN connection is established. In this case it is the IP under which our AdGuard Home DNS server is reachable, and thus we have now DNS-based ad-blocking automatically included for all our VPN traffic/connections.
+As you can see in the example above with the *`DNS`* entry we've defined which DNS server should be used by the client once the VPN connection is established. In this case it is the IP under which our AdGuard Home DNS server is reachable, and thus we have now DNS-based ad-blocking automatically included for all our VPN traffic/connections.
 
 ### qrencode
 
