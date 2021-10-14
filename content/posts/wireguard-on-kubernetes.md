@@ -72,8 +72,8 @@ https://hub.docker.com/r/adguard/adguardhome
 
 ...
 explain DNS of adguardhome.
-qrencode example.
-screenshot of wireguard app on phone.
+
+explain [Android WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android)
 
 #### client.conf
 ```sh
@@ -108,7 +108,49 @@ PersistentKeepalive = 25
 
 As you can see from the above client config example we've defined with the *`DNS`* entry which DNS server should be used by the client once the VPN connection is established. In this case it is the IP under which our AdGuard Home DNS server is reachable, and thus we have now DNS-based ad-blocking automatically included for all our VPN traffic/connections.
 
-After importing the client configuration via QR code you can then simply connect to the VPN and enjoy an ad-free internet experience on your whole Android phone, be it in the browser or inside apps! 😃
+### qrencode
+
+Once we have the client config file ready our next step is to import it into the [WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android) on your phone.
+
+The easiest way to do this is via QR-code. We'll install **`qrencode`** for this:
+
+```sh
+# pacman -S qrencode
+resolving dependencies...
+looking for conflicting packages...
+
+Packages (1) qrencode-4.1.1-1
+
+Total Installed Size:  0.10 MiB
+Net Upgrade Size:      0.00 MiB
+
+:: Proceed with installation? [Y/n] Y
+(1/1) checking keys in keyring                            [##############################] 100%
+(1/1) checking package integrity                          [##############################] 100%
+(1/1) loading package files                               [##############################] 100%
+(1/1) checking for file conflicts                         [##############################] 100%
+(1/1) checking available disk space                       [##############################] 100%
+:: Processing package changes...
+(1/1) installing qrencode                                 [##############################] 100%
+:: Running post-transaction hooks...
+(1/1) Arming ConditionNeedsUpdate...
+```
+
+Now let's use it to generate a QR-code picture of our config file, displaying it either directly in the terminal:
+```sh
+$ qrencode -t ANSIUTF8 -r client.conf
+[QR CODE in terminal]
+```
+
+Or by writing it to a PNG file to display:
+```sh
+$ qrencode -t PNG -r client.conf -o client_conf.png
+```
+![GitHub Pages](/images/wireguard-qrcode.png)
+
+Simply scan the resulting QR-code with the WireGuard app on your phone to import the client configuration.
+
+After importing you can then connect to the VPN and enjoy an ad-free internet experience on your whole Android phone, be it in the browser or inside apps! 😃
 
 ![GitHub Pages](/images/wireguard-android.png)
 
