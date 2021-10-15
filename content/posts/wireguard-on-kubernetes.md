@@ -9,11 +9,24 @@ draft: false
 
 # WireGuard
 
-...
-https://www.wireguard.com
-VPN
-what is it?
-how can it help me?
+So, after being back from a recent vacation trip and having to use the hotel Wi-Fi for my mobile phone, I once more started thinking about setting up a VPN endpoint for myself. I simply don't trust "foreign" Wi-Fi hotspots.
+
+A few years ago I kept a simple OpenVPN installation up and running on a DigitalOcean droplet, but let it deteriorate and stopped using it at some point. Also because of the Coronavirus pandemic that started last year there wasn't much travelling around anyway, thus I had no immediate need for a VPN.
+
+But thanks to the wonders of modern medicine (thank you very much [Katalin Karikó](https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3)! 👍️) this has changed this summer and I was again able to travel abroad. Which let to my decision to once more setup a VPN endpoint for myself. 😆
+
+The question was, what software to pick and how do I deploy and operate it this time?
+
+... enter WireGuard!
+
+*From https://www.wireguard.com*
+> *WireGuard® is an extremely simple yet fast and modern VPN that utilizes state-of-the-art cryptography. It aims to be faster, simpler, leaner, and more useful than IPsec, while avoiding the massive headache. It intends to be considerably more performant than OpenVPN. WireGuard is designed as a general purpose VPN for running on embedded interfaces and super computers alike, fit for many different circumstances. Initially released for the Linux kernel, it is now cross-platform (Windows, macOS, BSD, iOS, Android) and widely deployable. It is currently under heavy development, but already it might be regarded as the most secure, easiest to use, and simplest VPN solution in the industry.*
+
+> *WireGuard aims to be as easy to configure and deploy as SSH. A VPN connection is made simply by exchanging very simple public keys – exactly like exchanging SSH keys – and all the rest is transparently handled by WireGuard. It is even capable of roaming between IP addresses, just like Mosh. There is no need to manage connections, be concerned about state, manage daemons, or worry about what's under the hood. WireGuard presents an extremely basic yet powerful interface.*
+
+> *A combination of extremely high-speed cryptographic primitives and the fact that WireGuard lives inside the Linux kernel means that secure networking can be very high-speed. It is suitable for both small embedded devices like smartphones and fully loaded backbone routers.*
+
+It's the year 2021 after all, using anything other than WireGuard as your VPN these days is utterly silly.
 
 ## WireGuard on Kubernetes
 
@@ -54,6 +67,7 @@ As you can see from the server config example above we've chosen the network *`1
 
 To deploy WireGuard with this configuration onto Kubernetes we have to prepare a few resources defined in a yaml file:
 
+#### wireguard.yml
 ```yaml
 ---
 #! Deployment definition for WireGuard for a single instance container.
@@ -174,11 +188,12 @@ spec:
 ```
 
 I'm using [ytt](https://carvel.dev/ytt/) to do all my templating and then deploy and manage all my Kubernetes resources with [kapp](https://carvel.dev/kapp/). The templates I wrote for deploying WireGuard onto Kubernetes are available here on GitHub: [WireGuard ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/wireguard/templates)
+
+We are going to just directly deploy without doing any templating for this example to keep it brief:
 ```sh
-$ ytt ...
-$ kapp ...
+kubectl -n wireguard apply -f wireguard.yml
 ```
-Your own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.
+Your very own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.
 
 ```sh
 $ nc -vz 1.2.3.4 31820
@@ -190,14 +205,13 @@ Connection to 1.2.3.4 31820 port [udp/wireguard] succeeded!
 AdGuard Home is a network-wide software for blocking ads and tracking. When using it as your main DNS server it allows you to take advantage of system-wide ad-blocking on all your devices and you don't need any client-side software.
 It operates as a DNS server that blocks predefined ad and tracker domains using the "DNS sinkholing" method, thus preventing your devices from ever connecting to those servers.
 
-In terms of functionality it is very similar to the well-known [Pi-Hole](https://pi-hole.net/) but much easier to setup and operate, especially in regards to Kubernetes.
+In terms of functionality it is very similar to the more well-known [Pi-Hole](https://pi-hole.net/) but much easier to setup and operate, especially in regards to Kubernetes deployments.
 
 AdGuard Home is open source and can be found on GitHub: https://github.com/AdguardTeam/AdGuardHome
 
 ## AdGuard Home on Kubernetes
 
-...
-https://hub.docker.com/r/adguard/adguardhome
+Of course we also want to run AdGuard Home on Kubernetes, same as with WireGuard before. The main reason being that we want to be able to configure AdGuard Home as the sole DNS for established WireGuard VPN connections, forcing the clients to resolve all DNS queries via AdGuard Home and thus blocking ads.
 
 #### Kubernetes deployment
 
@@ -205,6 +219,7 @@ AdGuard Home is available as a ready-to-use image on Docker Hub: https://hub.doc
 
 In order to deploy it on Kubernetes we again have to prepare a yaml file with a few resources defined:
 
+#### adguard.yml
 ```yaml
 ---
 #! Deployment definition for AdGuard Home for a single instance container,
@@ -340,12 +355,13 @@ spec:
           serviceName: adguardhome
           servicePort: 3000
 ```
-Same as before with WireGuard I'm using a collection of ytt template files and do my deployment with kapp. The set of templates can be found here: [AdGuard Home ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/adguardhome/templates)
+Same as before with WireGuard I'm using a collection of ytt template files and do my deployment with kapp. The complete set of templates can be found here: [AdGuard Home ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/adguardhome/templates)
+
+Again though, for this example here we are just directly deploying the above yaml file without any templating:
 ```sh
-ytt ...
-kapp ...
+kubectl -n adguard apply -f adguard.yml
 ```
-And now we've got an DNS ad-blocker deployment up and running! 🥳
+And just like that we've now got an DNS ad-blocker deployment up and running! 🥳
 
 ## Use it with your Android phone
 
@@ -358,11 +374,13 @@ One of the more interesting use-cases would be to use it as a VPN for your mobil
 
 So at this point you might wonder why doing all of this in the first place, why would you run your own VPN server and DNS ad-blocker on the internet? Why connect to it with your phone?
 
-There are various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the two most important one are these:
+There are various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the most important ones are these:
 - Secure network traffic in "foreign" networks, wifi, etc. for your phone
   - All traffic will go through the VPN connection and exit on your "trusted" Kubernetes cluster, instead of being at the mercy of whatever hotel or office Wi-Fi you are currently using with your phone for example.
 - System-wide ad-blocking via DNS on Android!
   - Having a DNS server that does ad-blocking being used as the sole DNS for the VPN connection means that you automatically get a system-wide ad-blocker for your Android phone. No more pesky ads in the browser or even within any apps themselves!
+- The DNS server is cluster-internal
+  - Since the DNS server is only exposed via its clusterIP that means it is not accessible to the outside world. No one can reach and abuse our DNS server. We are able to connect to the DNS from our WireGuard endpoint as that is running in a container inside the cluster, but no one else can!
 
 Let's get started on preparing a client configuration file for your phone:
 
