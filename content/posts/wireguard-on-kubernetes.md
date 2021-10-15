@@ -1,6 +1,6 @@
 ---
-title: "Running WireGuard VPN (with adblocking) on Kubernetes"
-description: Deploying a WireGuard VPN server and DNS ad-blocker on Kubernetes
+title: "Running WireGuard VPN (with ad-blocking) on Kubernetes"
+description: How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes
 tags: [kubernetes,vpn,wireguard,adblock]
 author: Fabio Berchtold
 date: 2021-10-14T17:19:41+02:00
@@ -53,6 +53,20 @@ AllowedIPs = 10.10.0.5/32
 
 As you can see from the server config example above we've chosen the network *`10.10.0.0/24`* to be our Wireguard VPN network. The server itself and all clients should be configured to IPs within that subnet. The server itself is defined as the gateway with *`10.10.0.1/24`*, and then for each client (peer) you configure a specific /32-IP in that subnet to be assigned. This IP will need to be reflected also in the client config file.
 
+```yaml
+```
+
+I'm using [ytt](https://carvel.dev/ytt/) to do all my templating and then deploy and manage all my Kubernetes resources with [kapp](https://carvel.dev/kapp/). The templates I wrote for deploying WireGuard onto Kubernetes are available here on GitHub: [WireGuard ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/wireguard/templates)
+```sh
+$ ytt ...
+$ kapp ...
+```
+Your own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.
+
+```sh
+$ nc -vz 1.2.3.4 31820
+Connection to 1.2.3.4 31820 port [udp/wireguard] succeeded!
+```
 
 ## AdGuard Home
 
@@ -68,24 +82,166 @@ DNS ad-blocking
 ...
 https://hub.docker.com/r/adguard/adguardhome
 
+```yaml
+---
+#! Deployment definition for AdGuard Home for a single instance container,
+#! storing configuration data on a persistent volume claim.
+#! The management web interface on port 3000 and the DNS port 53
+#! are be made accessible via Kubernetes service definition, see further below.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguardhome
+  namespace: adguardhome
+  labels:
+    app: adguardhome
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  selector:
+    matchLabels:
+      app: adguardhome
+  template:
+    metadata:
+      labels:
+        app: adguardhome
+    spec:
+      containers:
+      - name: adguardhome
+        image: adguard/adguardhome:v0.106.3
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        - containerPort: 53
+          protocol: UDP
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        volumeMounts:
+        - name: adguardhome-config
+          mountPath: /opt/adguardhome/conf
+        - name: adguardhome-logs
+          mountPath: /opt/adguardhome/work
+      volumes:
+      - name: adguardhome-config
+        persistentVolumeClaim:
+          claimName: adguardhome
+      - name: adguardhome-logs
+        emptyDir: {}
+
+---
+#! Persistent volume claim to store all AdGuard Home configuration data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguardhome
+  namespace: adguardhome
+  labels:
+    app: adguardhome
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+#! Service definition for the AdGuard Home web interface and DNS port
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguardhome
+  namespace: adguardhome
+  labels:
+    app: adguardhome
+spec:
+  type: ClusterIP
+  selector:
+    app: adguardhome
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  - port: 53
+    targetPort: 53
+    protocol: UDP
+
+---
+#! Ingress resource, used for HTTP(S) access to the AdGuard Home web interface via Kubernetes ingress-controller
+#! https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: adguardhome
+  namespace: adguardhome
+  labels:
+    app: adguardhome
+  annotations:
+    #! Modify "cert-manager.io/cluster-issuer" to match your certificate ClusterIssuer if you are using cert-manager,
+    #! otherwise remove it entirely
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    #! Modify "kubernetes.io/ingress.class" to match your ingress-controller
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    #! Configure the hostname for the AdGuard Home web interface
+    - adguardhome.my-example-domain.com
+    secretName: adguardhome-tls
+  rules:
+  #! Configure the hostname for the AdGuard Home web interface
+  - host: adguardhome.my-example-domain.com
+    http:
+      paths:
+      - backend:
+          serviceName: adguardhome
+          servicePort: 3000
+```
+Same as before with WireGuard I'm using a collection of ytt template files and do my deployment with kapp. The set of templates can be found here: [AdGuard Home ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/adguardhome/templates)
+```sh
+ytt ...
+kapp ...
+```
+And now we've got an Ad-blocker deployment up and running! 🥳
+
 ## Use it with your Android phone
 
-...
-explain DNS of adguardhome.
+WireGuard clients exist for a large variety of operating systems and devices.
+It's easy to use it as your VPN on any Windows, Linux, OSX, iOS or Android device. Simply download and install a client for the platform of your choice: https://www.wireguard.com/install/
 
-explain [Android WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android)
+One of the more interesting use-cases would be to use it as a VPN for your mobile phone. For Android the best way is to use the official client, maintained by the WireGuard devs themselves: the [Android WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android)
 
 #### What are the benefits of doing this?
 
-So at this point you might wonder why doing all of this in the first place, why would you run your own VPN server and DNS ad-blocker on the internet?
+So at this point you might wonder why doing all of this in the first place, why would you run your own VPN server and DNS ad-blocker on the internet? Why connect to it with your phone?
 
-There's various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the two most important one are these:
+There are various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the two most important one are these:
 - Secure network traffic in "foreign" networks, wifi, etc. for your phone
-  - All traffic will go through the VPN connection and exit on your "trusted" Kubernetes cluster, instead of being at the mercy of whatever hotel Wi-Fi you are currently using with your phone for example.
+  - All traffic will go through the VPN connection and exit on your "trusted" Kubernetes cluster, instead of being at the mercy of whatever hotel or office Wi-Fi you are currently using with your phone for example.
 - System-wide ad-blocking via DNS on Android!
   - Having a DNS server that does ad-blocking being used as the sole DNS for the VPN connection means that you automatically get a system-wide ad-blocker for your Android phone. No more pesky ads in the browser or even within any apps themselves!
 
-Let's get started on a client configuration file for your phone:
+Let's get started on preparing a client configuration file for your phone:
 
 #### client.conf
 ```sh
@@ -124,7 +280,7 @@ As you can see in the example above with the *`DNS`* entry we've defined which D
 
 Once we have the client config file ready our next step is to import it into the [WireGuard app](https://play.google.com/store/apps/details?id=com.wireguard.android) on your phone.
 
-The easiest way to do this is via QR-code. We'll install **`qrencode`** for this:
+The easiest way to do this is with a QR-code. We'll install **`qrencode`** for this:
 
 ```sh
 # pacman -S qrencode
