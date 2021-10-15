@@ -8,6 +8,9 @@ date: 2016-01-11T19:22:35+02:00
 draft: false
 ---
 
+## Concourse - the continuous thing-doer
+
+=======
 ##### edit @ 2020.12.01
 These days there are many different platforms and systems out there that can be used to automate all your CI/CD needs.
 
@@ -66,5 +69,3 @@ With this chart you can install Concourse into any Kubernetes cluster. If you wa
 ### Video introduction
 
 {{< youtube 0bi_EWzhPvs >}}
-
-
