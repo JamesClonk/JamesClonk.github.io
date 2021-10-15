@@ -33,12 +33,9 @@ ListenPort = 51820
 # The private key of the server
 PrivateKey = 4N9FtwbtC9iY9P1C85l1QmM0OxlGRT0cHVjEuRbLuVA=
 
-# Configure server private key and (de)initialize iptables rules for routing the VPN traffic
-PostUp = wg set wg0 private-key /etc/wireguard/wg0.key && iptables -t nat -A POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+# (De)initialize iptables rules for routing the VPN traffic
+PostUp = iptables -t nat -A POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
 PostDown = iptables -t nat -D POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
-
-# Don't try to save WireGuard config file on shutdown (it gets overwritten by Kubernetes anyway)
-SaveConfig = false
 
 
 # Configure one or multiple VPN clients with a [Peer] entry for each.
@@ -53,7 +50,127 @@ AllowedIPs = 10.10.0.5/32
 
 As you can see from the server config example above we've chosen the network *`10.10.0.0/24`* to be our Wireguard VPN network. The server itself and all clients should be configured to IPs within that subnet. The server itself is defined as the gateway with *`10.10.0.1/24`*, and then for each client (peer) you configure a specific /32-IP in that subnet to be assigned. This IP will need to be reflected also in the client config file.
 
+#### Kubernetes deployment
+
+To deploy WireGuard with this configuration onto Kubernetes we have to prepare a few resources defined in a yaml file:
+
 ```yaml
+---
+#! Deployment definition for WireGuard for a single instance container.
+#! Configuration data from a secret gets mounted as files into the container.
+#! The init container ensures forwarding is enabled.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: wireguard
+  labels:
+    app: wireguard
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wireguard
+  template:
+    metadata:
+      labels:
+        app: wireguard
+    spec:
+      restartPolicy: Always
+      initContainers:
+      - name: init
+        image: busybox:1.32.0
+        command:
+        - sh
+        - -c
+        - sysctl -w net.ipv4.ip_forward=1 && sysctl -w net.ipv4.conf.all.forwarding=1
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+      containers:
+      - name: wireguard
+        image: masipcat/wireguard-go:latest
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+        command:
+        - sh
+        - -c
+        - /entrypoint.sh
+        env:
+        - name: LOG_LEVEL
+          value: info
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "128Mi"
+        volumeMounts:
+        - name: wireguard-config
+          mountPath: /etc/wireguard/wg0.key
+          subPath: wg0.key
+          readOnly: true
+        - name: wireguard-config
+          mountPath: /etc/wireguard/wg0.conf
+          subPath: wg0.conf
+          readOnly: true
+      volumes:
+      - name: wireguard-config
+        secret:
+          secretName: wireguard
+
+---
+#! Secret containing all configuration data for WireGuard, to be mapped as volume/files into container
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wireguard
+  namespace: wireguard
+  labels:
+    app: wireguard
+type: Opaque
+stringData:
+  wg0.key: 4N9FtwbtC9iY9P1C85l1QmM0OxlGRT0cHVjEuRbLuVA=
+  wg0.conf: |
+    [Interface]
+    Address = 10.10.0.1/24
+    ListenPort = 51820
+    PostUp = wg set wg0 private-key /etc/wireguard/wg0.key && iptables -t nat -A POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+    PostDown = iptables -t nat -D POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+    SaveConfig = false
+
+    [Peer]
+    PublicKey = 8EiAxqTGhKFJeLhDDaZcuEVqpGJK1qrq8Ht299J7Q2o=
+    AllowedIPs = 10.10.0.5/32
+
+---
+#! Service definition for WireGuard, exposes its UDP port as a NodePort service externally on <NodeIP:31820>
+apiVersion: v1
+kind: Service
+metadata:
+  name: wireguard
+  namespace: wireguard
+  labels:
+    app: wireguard
+spec:
+  type: NodePort
+  selector:
+    app: wireguard
+  ports:
+  - port: 51820
+    targetPort: 51820
+    nodePort: 31820
+    protocol: UDP
 ```
 
 I'm using [ytt](https://carvel.dev/ytt/) to do all my templating and then deploy and manage all my Kubernetes resources with [kapp](https://carvel.dev/kapp/). The templates I wrote for deploying WireGuard onto Kubernetes are available here on GitHub: [WireGuard ytt templates](https://github.com/JamesClonk/k8s-deployments/tree/master/wireguard/templates)
@@ -70,17 +187,23 @@ Connection to 1.2.3.4 31820 port [udp/wireguard] succeeded!
 
 ## AdGuard Home
 
-...
-https://github.com/AdguardTeam/AdGuardHome
-Ad-blocker
-What is it?
-How can it help me?
-DNS ad-blocking
+AdGuard Home is a network-wide software for blocking ads and tracking. When using it as your main DNS server it allows you to take advantage of system-wide ad-blocking on all your devices and you don't need any client-side software.
+It operates as a DNS server that blocks predefined ad and tracker domains using the "DNS sinkholing" method, thus preventing your devices from ever connecting to those servers.
+
+In terms of functionality it is very similar to the well-known [Pi-Hole](https://pi-hole.net/) but much easier to setup and operate, especially in regards to Kubernetes.
+
+AdGuard Home is open source and can be found on GitHub: https://github.com/AdguardTeam/AdGuardHome
 
 ## AdGuard Home on Kubernetes
 
 ...
 https://hub.docker.com/r/adguard/adguardhome
+
+#### Kubernetes deployment
+
+AdGuard Home is available as a ready-to-use image on Docker Hub: https://hub.docker.com/r/adguard/adguardhome
+
+In order to deploy it on Kubernetes we again have to prepare a yaml file with a few resources defined:
 
 ```yaml
 ---
@@ -222,7 +345,7 @@ Same as before with WireGuard I'm using a collection of ytt template files and d
 ytt ...
 kapp ...
 ```
-And now we've got an Ad-blocker deployment up and running! 🥳
+And now we've got an DNS ad-blocker deployment up and running! 🥳
 
 ## Use it with your Android phone
 
