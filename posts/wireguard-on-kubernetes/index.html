@@ -1,0 +1,510 @@
+<!doctype html><html lang=en-us>
+<head>
+<title>Running WireGuard VPN (with ad-blocking) on Kubernetes // Ramblings about all things technical</title>
+<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
+<meta charset=utf-8>
+<meta name=generator content="Hugo 0.88.1">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=author content="Fabio Berchtold">
+<meta name=description content="How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes">
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Running WireGuard VPN (with ad-blocking) on Kubernetes">
+<meta name=twitter:description content="How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes">
+<meta property="og:title" content="Running WireGuard VPN (with ad-blocking) on Kubernetes">
+<meta property="og:description" content="How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blog.jamesclonk.io/posts/wireguard-on-kubernetes/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-10-15T17:19:41+02:00">
+<meta property="article:modified_time" content="2021-10-15T17:19:41+02:00">
+</head>
+<body>
+<header class=app-header>
+<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
+<h1>Ramblings about all things technical</h1>
+<nav class=app-header-menu>
+<a class=app-header-menu-item href=/>Home</a>
+-
+<a class=app-header-menu-item href=/tags/>Tags</a>
+-
+<a class=app-header-menu-item href=/about/>About</a>
+</nav>
+<p>Working with tech is fun!</p>
+<div class=app-header-social>
+<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
+</a>
+</div>
+</header>
+<main class=app-container>
+<article class=post>
+<header class=post-header>
+<h1 class=post-title>Running WireGuard VPN (with ad-blocking) on Kubernetes</h1>
+<div class=post-meta>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+Fabio Berchtold
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+Oct 15, 2021
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+13 min read
+</div>
+<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+<a class=tag href=/tags/kubernetes/>kubernetes</a>
+<a class=tag href=/tags/vpn/>vpn</a>
+<a class=tag href=/tags/wireguard/>wireguard</a>
+<a class=tag href=/tags/adblock/>adblock</a>
+</div>
+</div>
+</header>
+<div class=post-content>
+<h1 id=wireguard>WireGuard</h1>
+<p>So, after being back from a recent vacation trip and having to use the hotel Wi-Fi for my mobile phone, I once more started thinking about setting up a VPN endpoint for myself. I simply don&rsquo;t trust &ldquo;foreign&rdquo; Wi-Fi hotspots.</p>
+<p>A few years ago I kept a simple OpenVPN installation up and running on a DigitalOcean droplet, but let it deteriorate and stopped using it at some point. Also because of the Coronavirus pandemic that started last year there wasn&rsquo;t much travelling around anyway, thus I had no immediate need for a VPN.</p>
+<p>But thanks to the wonders of modern medicine (thank you very much <a href=https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3>Katalin Karikó</a>! 👍️) the situation has changed this summer and I was once again able to travel abroad. Which let to my decision to once more setup a VPN endpoint for myself. 😆</p>
+<p>The question was, what software to pick and how do I deploy and operate it this time?</p>
+<p>&mldr; enter <a href=https://www.wireguard.com/>WireGuard</a>!</p>
+<p><em>From <a href=https://www.wireguard.com>https://www.wireguard.com</a></em></p>
+<blockquote>
+<p><em>WireGuard® is an extremely simple yet fast and modern VPN that utilizes state-of-the-art cryptography. It aims to be faster, simpler, leaner, and more useful than IPsec, while avoiding the massive headache. It intends to be considerably more performant than OpenVPN. WireGuard is designed as a general purpose VPN for running on embedded interfaces and super computers alike, fit for many different circumstances. Initially released for the Linux kernel, it is now cross-platform (Windows, macOS, BSD, iOS, Android) and widely deployable. It is currently under heavy development, but already it might be regarded as the most secure, easiest to use, and simplest VPN solution in the industry.</em></p>
+</blockquote>
+<blockquote>
+<p><em>WireGuard aims to be as easy to configure and deploy as SSH. A VPN connection is made simply by exchanging very simple public keys – exactly like exchanging SSH keys – and all the rest is transparently handled by WireGuard. It is even capable of roaming between IP addresses, just like Mosh. There is no need to manage connections, be concerned about state, manage daemons, or worry about what&rsquo;s under the hood. WireGuard presents an extremely basic yet powerful interface.</em></p>
+</blockquote>
+<blockquote>
+<p><em>A combination of extremely high-speed cryptographic primitives and the fact that WireGuard lives inside the Linux kernel means that secure networking can be very high-speed. It is suitable for both small embedded devices like smartphones and fully loaded backbone routers.</em></p>
+</blockquote>
+<p>It&rsquo;s the year 2021 after all, using anything other than WireGuard as your VPN is utterly silly.</p>
+<h2 id=wireguard-on-kubernetes>WireGuard on Kubernetes</h2>
+<p>Well, these days I&rsquo;ve more or less migrated almost all my projects onto <a href=/posts/my-own-kubernetes/>my own personal Kubernetes</a> cluster. Whether it&rsquo;s just to use it for config management purposes or more actual technical reasons is moot at this point.
+So Kubernetes it is!</p>
+<p>But then the question is, how do I run WireGuard on Kubernetes?</p>
+<p>I&rsquo;ve looked at various solutions on how to go about it, some of them included the following:</p>
+<ul>
+<li><a href=https://github.com/linuxserver/docker-wireguard>linuxserver/wireguard</a>
+<ul>
+<li>Docker image managed by the <a href=https://linuxserver.io/>LinuxServer.io</a> team, with regular updates, server and client mode, and configuration done mostly through ENV variables.</li>
+</ul>
+</li>
+<li><a href=https://github.com/EmbarkStudios/wg-ui>WG UI</a>
+<ul>
+<li>Complete WireGuard web UI for self-serve client configurations, with optional auth.</li>
+</ul>
+</li>
+<li><a href=https://github.com/ngoduykhanh/wireguard-ui>WireGuard-UI</a>
+<ul>
+<li>Another web user interface to manage your WireGuard setup.</li>
+</ul>
+</li>
+<li><a href=https://github.com/trailofbits/algo>Algo VPN</a>
+<ul>
+<li>A collection of scripts for easy setup of a personal WireGuard or IPSec VPN. Turned out to not really be useful for my intended purpose or running a minimal server on Kubernetes.</li>
+</ul>
+</li>
+<li><a href=https://github.com/masipcat/wireguard-go-docker>masipcat/wireguard-go</a>
+<ul>
+<li>Simple prebuilt image to run as a WireGuard server, provides a basic Kubernetes deployment example.</li>
+</ul>
+</li>
+<li><a href=https://github.com/cmulk/wireguard-docker>cmulk/wireguard-docker</a>
+<ul>
+<li>Another simple prebuilt image to use as a personal WireGuard server.</li>
+</ul>
+</li>
+</ul>
+<p>Ultimately I decided on <a href=https://github.com/masipcat/wireguard-go-docker>masipcat/wireguard-go</a>, because at its core it is a really simple and uncomplicated prebuilt Docker image, and also directly provides a Kubernetes deployment example that works out of the box.</p>
+<p>The first you need to do when setting up WireGuard is to prepare a configuration file for your server:</p>
+<h4 id=serverconf>server.conf</h4>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#8a93a5;font-style:italic># Server configuration</span>
+<span style=color:#c7bf54>[</span>Interface<span style=color:#c7bf54>]</span>
+<span style=color:#8a93a5;font-style:italic># The (internal) IP we want to give the VPN server itself</span>
+<span style=color:#dcaeea>Address</span> <span style=color:#c7bf54>=</span> 10.10.0.1/24
+
+<span style=color:#8a93a5;font-style:italic># The port the server should listen to, 51820 is the default for WireGuard</span>
+<span style=color:#dcaeea>ListenPort</span> <span style=color:#c7bf54>=</span> <span style=color:#d19a66>51820</span>
+
+<span style=color:#8a93a5;font-style:italic># The private key of the server</span>
+<span style=color:#dcaeea>PrivateKey</span> <span style=color:#c7bf54>=</span> <span style=color:#dcaeea>4N9FtwbtC9iY9P1C85l1QmM0OxlGRT0cHVjEuRbLuVA</span><span style=color:#c7bf54>=</span>
+
+<span style=color:#8a93a5;font-style:italic># (De)initialize iptables rules for routing the VPN traffic</span>
+<span style=color:#dcaeea>PostUp</span> <span style=color:#c7bf54>=</span> iptables -t nat -A POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+<span style=color:#dcaeea>PostDown</span> <span style=color:#c7bf54>=</span> iptables -t nat -D POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+
+
+<span style=color:#8a93a5;font-style:italic># Configure one or multiple VPN clients with a [Peer] entry for each.</span>
+<span style=color:#8a93a5;font-style:italic># For this example we only configure 1 client</span>
+<span style=color:#c7bf54>[</span>Peer<span style=color:#c7bf54>]</span>
+<span style=color:#8a93a5;font-style:italic># The public key of the client you want to let connect to the server</span>
+<span style=color:#dcaeea>PublicKey</span> <span style=color:#c7bf54>=</span> <span style=color:#dcaeea>8EiAxqTGhKFJeLhDDaZcuEVqpGJK1qrq8Ht299J7Q2o</span><span style=color:#c7bf54>=</span>
+
+<span style=color:#8a93a5;font-style:italic># The (internal) IP we want this client to have</span>
+<span style=color:#dcaeea>AllowedIPs</span> <span style=color:#c7bf54>=</span> 10.10.0.5/32
+</code></pre></div><p>As you can see from the server config example above we&rsquo;ve chosen the network <em><code>10.10.0.0/24</code></em> to be our Wireguard VPN network. The server itself and all clients should be configured to IPs within that subnet. The server itself is defined as the gateway with <em><code>10.10.0.1/24</code></em>, and then for each client (peer) you configure a specific /32-IP in that subnet to be assigned. This IP will need to be reflected also in the client config file.</p>
+<p>The public and private keys needed for the server and clients can be generated by using <code>wg</code>, which is usually part of the WireGuard tools package of your chosen Linux distribution.</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ wg genkey | tee private.key | wg pubkey &gt; public.key
+</code></pre></div><h4 id=kubernetes-deployment>Kubernetes deployment</h4>
+<p>To deploy WireGuard with this configuration onto Kubernetes we have to prepare a few resources defined in a yaml file:</p>
+<h4 id=wireguardyml>wireguard.yml</h4>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Deployment definition for WireGuard for a single instance container.</span>
+<span style=color:#8a93a5;font-style:italic>#! Configuration data from a secret gets mounted as files into the container.</span>
+<span style=color:#8a93a5;font-style:italic>#! The init container ensures forwarding is enabled.</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>apps/v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Deployment</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>replicas</span>: <span style=color:#d19a66>1</span>
+  <span style=color:#e06c75>strategy</span>:
+    <span style=color:#e06c75>type</span>: <span style=color:#98c379>Recreate</span>
+  <span style=color:#e06c75>selector</span>:
+    <span style=color:#e06c75>matchLabels</span>:
+      <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>template</span>:
+    <span style=color:#e06c75>metadata</span>:
+      <span style=color:#e06c75>labels</span>:
+        <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+    <span style=color:#e06c75>spec</span>:
+      <span style=color:#e06c75>restartPolicy</span>: <span style=color:#98c379>Always</span>
+      <span style=color:#e06c75>initContainers</span>:
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>init</span>
+        <span style=color:#e06c75>image</span>: <span style=color:#98c379>busybox:1.32.0</span>
+        <span style=color:#e06c75>command</span>:
+        - <span style=color:#98c379>sh</span>
+        - -<span style=color:#98c379>c</span>
+        - <span style=color:#98c379>sysctl -w net.ipv4.ip_forward=1 &amp;&amp; sysctl -w net.ipv4.conf.all.forwarding=1</span>
+        <span style=color:#e06c75>securityContext</span>:
+          <span style=color:#e06c75>privileged</span>: <span style=color:#b756ff;font-weight:700>true</span>
+          <span style=color:#e06c75>capabilities</span>:
+            <span style=color:#e06c75>add</span>:
+            - <span style=color:#98c379>NET_ADMIN</span>
+      <span style=color:#e06c75>containers</span>:
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard</span>
+        <span style=color:#e06c75>image</span>: <span style=color:#98c379>masipcat/wireguard-go:latest</span>
+        <span style=color:#e06c75>securityContext</span>:
+          <span style=color:#e06c75>privileged</span>: <span style=color:#b756ff;font-weight:700>true</span>
+          <span style=color:#e06c75>capabilities</span>:
+            <span style=color:#e06c75>add</span>:
+            - <span style=color:#98c379>NET_ADMIN</span>
+        <span style=color:#e06c75>ports</span>:
+        - <span style=color:#e06c75>containerPort</span>: <span style=color:#d19a66>51820</span>
+          <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>UDP</span>
+        <span style=color:#e06c75>command</span>:
+        - <span style=color:#98c379>sh</span>
+        - -<span style=color:#98c379>c</span>
+        - <span style=color:#98c379>/entrypoint.sh</span>
+        <span style=color:#e06c75>env</span>:
+        - <span style=color:#e06c75>name</span>: <span style=color:#98c379>LOG_LEVEL</span>
+          <span style=color:#e06c75>value</span>: <span style=color:#98c379>info</span>
+        <span style=color:#e06c75>resources</span>:
+          <span style=color:#e06c75>requests</span>:
+            <span style=color:#e06c75>memory</span>: <span style=color:#63c381>&#34;64Mi&#34;</span>
+            <span style=color:#e06c75>cpu</span>: <span style=color:#63c381>&#34;150m&#34;</span>
+          <span style=color:#e06c75>limits</span>:
+            <span style=color:#e06c75>memory</span>: <span style=color:#63c381>&#34;128Mi&#34;</span>
+        <span style=color:#e06c75>volumeMounts</span>:
+        - <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard-config</span>
+          <span style=color:#e06c75>mountPath</span>: <span style=color:#98c379>/etc/wireguard/wg0.key</span>
+          <span style=color:#e06c75>subPath</span>: <span style=color:#98c379>wg0.key</span>
+          <span style=color:#e06c75>readOnly</span>: <span style=color:#b756ff;font-weight:700>true</span>
+        - <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard-config</span>
+          <span style=color:#e06c75>mountPath</span>: <span style=color:#98c379>/etc/wireguard/wg0.conf</span>
+          <span style=color:#e06c75>subPath</span>: <span style=color:#98c379>wg0.conf</span>
+          <span style=color:#e06c75>readOnly</span>: <span style=color:#b756ff;font-weight:700>true</span>
+      <span style=color:#e06c75>volumes</span>:
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard-config</span>
+        <span style=color:#e06c75>secret</span>:
+          <span style=color:#e06c75>secretName</span>: <span style=color:#98c379>wireguard</span>
+
+<span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Secret containing all configuration data for WireGuard, to be mapped as volume/files into container</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Secret</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+<span style=color:#e06c75>type</span>: <span style=color:#98c379>Opaque</span>
+<span style=color:#e06c75>stringData</span>:
+  <span style=color:#e06c75>wg0.key</span>: <span style=color:#98c379>4N9FtwbtC9iY9P1C85l1QmM0OxlGRT0cHVjEuRbLuVA=</span>
+  <span style=color:#e06c75>wg0.conf</span>: |<span style=color:#7e97c3>
+</span><span style=color:#7e97c3>    [Interface]
+</span><span style=color:#7e97c3>    Address = 10.10.0.1/24
+</span><span style=color:#7e97c3>    ListenPort = 51820
+</span><span style=color:#7e97c3>    PostUp = wg set wg0 private-key /etc/wireguard/wg0.key &amp;&amp; iptables -t nat -A POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+</span><span style=color:#7e97c3>    PostDown = iptables -t nat -D POSTROUTING -s 10.10.0.0/24 -o eth0 -j MASQUERADE
+</span><span style=color:#7e97c3>    SaveConfig = false
+</span><span style=color:#7e97c3>
+</span><span style=color:#7e97c3>    [Peer]
+</span><span style=color:#7e97c3>    PublicKey = 8EiAxqTGhKFJeLhDDaZcuEVqpGJK1qrq8Ht299J7Q2o=
+</span><span style=color:#7e97c3>    AllowedIPs = 10.10.0.5/32</span>    
+
+<span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Service definition for WireGuard, exposes its UDP port as a NodePort service externally on &lt;NodeIP:31820&gt;</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Service</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>type</span>: <span style=color:#98c379>NodePort</span>
+  <span style=color:#e06c75>selector</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>wireguard</span>
+  <span style=color:#e06c75>ports</span>:
+  - <span style=color:#e06c75>port</span>: <span style=color:#d19a66>51820</span>
+    <span style=color:#e06c75>targetPort</span>: <span style=color:#d19a66>51820</span>
+    <span style=color:#e06c75>nodePort</span>: <span style=color:#d19a66>31820</span>
+    <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>UDP</span>
+</code></pre></div><p>I&rsquo;m using <a href=https://carvel.dev/ytt/>ytt</a> to do all my templating and then deploy and manage all my Kubernetes resources with <a href=https://carvel.dev/kapp/>kapp</a>. The templates I wrote for deploying WireGuard onto Kubernetes are available here on GitHub: <a href=https://github.com/JamesClonk/k8s-deployments/tree/master/wireguard/templates>WireGuard ytt templates</a></p>
+<p>We are going to just directly deploy without doing any templating for this example to keep it brief:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>kubectl -n wireguard apply -f wireguard.yml
+</code></pre></div><p>Your very own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ nc -vz 1.2.3.4 <span style=color:#d19a66>31820</span>
+Connection to 1.2.3.4 <span style=color:#d19a66>31820</span> port <span style=color:#c7bf54>[</span>udp/wireguard<span style=color:#c7bf54>]</span> succeeded!
+</code></pre></div><h2 id=adguard-home>AdGuard Home</h2>
+<p>AdGuard Home is a network-wide software for blocking ads and tracking. When using it as your main DNS server it allows you to take advantage of system-wide ad-blocking on all your devices and you don&rsquo;t need any client-side software.
+It operates as a DNS server that blocks predefined ad and tracker domains using the &ldquo;DNS sinkholing&rdquo; method, thus preventing your devices from ever connecting to those servers.</p>
+<p>In terms of functionality it is very similar to the more well-known <a href=https://pi-hole.net/>Pi-Hole</a> but much easier to setup and operate, especially in regards to Kubernetes deployments.</p>
+<p>AdGuard Home is open source and can be found on GitHub: <a href=https://github.com/AdguardTeam/AdGuardHome>https://github.com/AdguardTeam/AdGuardHome</a></p>
+<h2 id=adguard-home-on-kubernetes>AdGuard Home on Kubernetes</h2>
+<p>Of course we also want to run AdGuard Home on Kubernetes, same as with WireGuard before. The main reason being that we want to be able to configure AdGuard Home as the sole DNS for established WireGuard VPN connections, forcing the clients to resolve all DNS queries via AdGuard Home and thus blocking ads.</p>
+<h4 id=kubernetes-deployment-1>Kubernetes deployment</h4>
+<p>AdGuard Home is available as a ready-to-use image on Docker Hub: <a href=https://hub.docker.com/r/adguard/adguardhome>https://hub.docker.com/r/adguard/adguardhome</a></p>
+<p>In order to deploy it on Kubernetes we again have to prepare a yaml file with a few resources defined:</p>
+<h4 id=adguardyml>adguard.yml</h4>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Deployment definition for AdGuard Home for a single instance container,</span>
+<span style=color:#8a93a5;font-style:italic>#! storing configuration data on a persistent volume claim.</span>
+<span style=color:#8a93a5;font-style:italic>#! The management web interface on port 3000 and the DNS port 53</span>
+<span style=color:#8a93a5;font-style:italic>#! are be made accessible via Kubernetes service definition, see further below.</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>apps/v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Deployment</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>replicas</span>: <span style=color:#d19a66>1</span>
+  <span style=color:#e06c75>strategy</span>:
+    <span style=color:#e06c75>type</span>: <span style=color:#98c379>RollingUpdate</span>
+    <span style=color:#e06c75>rollingUpdate</span>:
+      <span style=color:#e06c75>maxUnavailable</span>: <span style=color:#d19a66>1</span>
+      <span style=color:#e06c75>maxSurge</span>: <span style=color:#d19a66>0</span>
+  <span style=color:#e06c75>selector</span>:
+    <span style=color:#e06c75>matchLabels</span>:
+      <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>template</span>:
+    <span style=color:#e06c75>metadata</span>:
+      <span style=color:#e06c75>labels</span>:
+        <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+    <span style=color:#e06c75>spec</span>:
+      <span style=color:#e06c75>containers</span>:
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome</span>
+        <span style=color:#e06c75>image</span>: <span style=color:#98c379>adguard/adguardhome:v0.106.3</span>
+        <span style=color:#e06c75>securityContext</span>:
+          <span style=color:#e06c75>privileged</span>: <span style=color:#b756ff;font-weight:700>false</span>
+          <span style=color:#e06c75>allowPrivilegeEscalation</span>: <span style=color:#b756ff;font-weight:700>false</span>
+        <span style=color:#e06c75>ports</span>:
+        - <span style=color:#e06c75>containerPort</span>: <span style=color:#d19a66>3000</span>
+          <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>TCP</span>
+        - <span style=color:#e06c75>containerPort</span>: <span style=color:#d19a66>53</span>
+          <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>UDP</span>
+        <span style=color:#e06c75>resources</span>:
+          <span style=color:#e06c75>requests</span>:
+            <span style=color:#e06c75>memory</span>: <span style=color:#63c381>&#34;128Mi&#34;</span>
+            <span style=color:#e06c75>cpu</span>: <span style=color:#63c381>&#34;200m&#34;</span>
+          <span style=color:#e06c75>limits</span>:
+            <span style=color:#e06c75>memory</span>: <span style=color:#63c381>&#34;256Mi&#34;</span>
+        <span style=color:#e06c75>readinessProbe</span>:
+          <span style=color:#e06c75>httpGet</span>:
+            <span style=color:#e06c75>path</span>: <span style=color:#98c379>/</span>
+            <span style=color:#e06c75>port</span>: <span style=color:#d19a66>3000</span>
+        <span style=color:#e06c75>livenessProbe</span>:
+          <span style=color:#e06c75>httpGet</span>:
+            <span style=color:#e06c75>path</span>: <span style=color:#98c379>/</span>
+            <span style=color:#e06c75>port</span>: <span style=color:#d19a66>3000</span>
+        <span style=color:#e06c75>volumeMounts</span>:
+        - <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome-config</span>
+          <span style=color:#e06c75>mountPath</span>: <span style=color:#98c379>/opt/adguardhome/conf</span>
+        - <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome-logs</span>
+          <span style=color:#e06c75>mountPath</span>: <span style=color:#98c379>/opt/adguardhome/work</span>
+      <span style=color:#e06c75>volumes</span>:
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome-config</span>
+        <span style=color:#e06c75>persistentVolumeClaim</span>:
+          <span style=color:#e06c75>claimName</span>: <span style=color:#98c379>adguardhome</span>
+      - <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome-logs</span>
+        <span style=color:#e06c75>emptyDir</span>: {}
+
+<span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Persistent volume claim to store all AdGuard Home configuration data</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>PersistentVolumeClaim</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>accessModes</span>:
+  - <span style=color:#98c379>ReadWriteOnce</span>
+  <span style=color:#e06c75>resources</span>:
+    <span style=color:#e06c75>requests</span>:
+      <span style=color:#e06c75>storage</span>: <span style=color:#98c379>2Gi</span>
+
+<span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Service definition for the AdGuard Home web interface and DNS port</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>v1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Service</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>type</span>: <span style=color:#98c379>ClusterIP</span>
+  <span style=color:#e06c75>selector</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>ports</span>:
+  - <span style=color:#e06c75>port</span>: <span style=color:#d19a66>3000</span>
+    <span style=color:#e06c75>targetPort</span>: <span style=color:#d19a66>3000</span>
+    <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>TCP</span>
+  - <span style=color:#e06c75>port</span>: <span style=color:#d19a66>53</span>
+    <span style=color:#e06c75>targetPort</span>: <span style=color:#d19a66>53</span>
+    <span style=color:#e06c75>protocol</span>: <span style=color:#98c379>UDP</span>
+
+<span style=color:#76a9f9>---</span>
+<span style=color:#8a93a5;font-style:italic>#! Ingress resource, used for HTTP(S) access to the AdGuard Home web interface via Kubernetes ingress-controller</span>
+<span style=color:#8a93a5;font-style:italic>#! https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/</span>
+<span style=color:#e06c75>apiVersion</span>: <span style=color:#98c379>networking.k8s.io/v1beta1</span>
+<span style=color:#e06c75>kind</span>: <span style=color:#98c379>Ingress</span>
+<span style=color:#e06c75>metadata</span>:
+  <span style=color:#e06c75>name</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>namespace</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>labels</span>:
+    <span style=color:#e06c75>app</span>: <span style=color:#98c379>adguardhome</span>
+  <span style=color:#e06c75>annotations</span>:
+    <span style=color:#8a93a5;font-style:italic>#! Modify &#34;cert-manager.io/cluster-issuer&#34; to match your certificate ClusterIssuer if you are using cert-manager,</span>
+    <span style=color:#8a93a5;font-style:italic>#! otherwise remove it entirely</span>
+    <span style=color:#e06c75>cert-manager.io/cluster-issuer</span>: <span style=color:#98c379>letsencrypt-prod</span>
+    <span style=color:#8a93a5;font-style:italic>#! Modify &#34;kubernetes.io/ingress.class&#34; to match your ingress-controller</span>
+    <span style=color:#e06c75>kubernetes.io/ingress.class</span>: <span style=color:#98c379>nginx</span>
+    <span style=color:#e06c75>nginx.ingress.kubernetes.io/force-ssl-redirect</span>: <span style=color:#63c381>&#34;true&#34;</span>
+    <span style=color:#e06c75>nginx.ingress.kubernetes.io/ssl-redirect</span>: <span style=color:#63c381>&#34;true&#34;</span>
+<span style=color:#e06c75>spec</span>:
+  <span style=color:#e06c75>tls</span>:
+  - <span style=color:#e06c75>hosts</span>:
+    <span style=color:#8a93a5;font-style:italic>#! Configure the hostname for the AdGuard Home web interface</span>
+    - <span style=color:#98c379>adguardhome.my-example-domain.com</span>
+    <span style=color:#e06c75>secretName</span>: <span style=color:#98c379>adguardhome-tls</span>
+  <span style=color:#e06c75>rules</span>:
+  <span style=color:#8a93a5;font-style:italic>#! Configure the hostname for the AdGuard Home web interface</span>
+  - <span style=color:#e06c75>host</span>: <span style=color:#98c379>adguardhome.my-example-domain.com</span>
+    <span style=color:#e06c75>http</span>:
+      <span style=color:#e06c75>paths</span>:
+      - <span style=color:#e06c75>backend</span>:
+          <span style=color:#e06c75>serviceName</span>: <span style=color:#98c379>adguardhome</span>
+          <span style=color:#e06c75>servicePort</span>: <span style=color:#d19a66>3000</span>
+</code></pre></div><p>Same as before with WireGuard I&rsquo;m using a collection of ytt template files and do my deployment with kapp. The complete set of templates can be found here: <a href=https://github.com/JamesClonk/k8s-deployments/tree/master/adguardhome/templates>AdGuard Home ytt templates</a></p>
+<p>Again though, for this example here we are just directly deploying the above yaml file without any templating:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>kubectl -n adguard apply -f adguard.yml
+</code></pre></div><p>And just like that we&rsquo;ve now got an DNS ad-blocker deployment up and running! 🥳</p>
+<h2 id=use-it-with-your-android-phone>Use it with your Android phone</h2>
+<p>WireGuard clients exist for a large variety of operating systems and devices.
+It&rsquo;s easy to use it as your VPN on any Windows, Linux, OSX, iOS or Android device. Simply download and install a client for the platform of your choice: <a href=https://www.wireguard.com/install/>https://www.wireguard.com/install/</a></p>
+<p>One of the more interesting use-cases would be to use it as a VPN for your mobile phone. For Android the best way is to use the official client, maintained by the WireGuard devs themselves: the <a href="https://play.google.com/store/apps/details?id=com.wireguard.android">Android WireGuard app</a></p>
+<h4 id=what-are-the-benefits-of-doing-this>What are the benefits of doing this?</h4>
+<p>So at this point you might wonder why doing all of this in the first place, why would you run your own VPN server and DNS ad-blocker on the internet? Why connect to it with your phone?</p>
+<p>There are various reasons for running this on my Kubernetes cluster (besides it being a fun project to thinker with), but the most important ones are these:</p>
+<ul>
+<li>Secure network traffic in &ldquo;foreign&rdquo; networks, wifi, etc. for your phone
+<ul>
+<li>All traffic will go through the VPN connection and exit on your &ldquo;trusted&rdquo; Kubernetes cluster, instead of being at the mercy of whatever hotel or office Wi-Fi you are currently using with your phone for example.</li>
+</ul>
+</li>
+<li>System-wide ad-blocking via DNS on Android!
+<ul>
+<li>Having a DNS server that does ad-blocking being used as the sole DNS for the VPN connection means that you automatically get a system-wide ad-blocker for your Android phone. No more pesky ads in the browser or even within any apps themselves!</li>
+</ul>
+</li>
+<li>The DNS server is cluster-internal
+<ul>
+<li>Since the DNS server is only exposed via its clusterIP that means it is not accessible to the outside world. No one can reach and abuse our DNS server. We are able to connect to the DNS from our WireGuard endpoint as that is running in a container inside the cluster, but no one else can!</li>
+</ul>
+</li>
+</ul>
+<p>Let&rsquo;s get started on preparing a client configuration file for your phone:</p>
+<h4 id=clientconf>client.conf</h4>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#8a93a5;font-style:italic># Client configuration</span>
+<span style=color:#c7bf54>[</span>Interface<span style=color:#c7bf54>]</span>
+<span style=color:#8a93a5;font-style:italic># Assign the IP as configured on the server config for this peer</span>
+<span style=color:#dcaeea>Address</span> <span style=color:#c7bf54>=</span> 10.10.0.5/32
+
+<span style=color:#8a93a5;font-style:italic># The private key of this client (its corresponding public key is in the server config for this peer)</span>
+<span style=color:#dcaeea>PrivateKey</span> <span style=color:#c7bf54>=</span> wMq8AvPsaJSTaFEnwv+J535BGZZ4eWybs5x31r7bhGA<span style=color:#c7bf54>=</span>
+
+<span style=color:#8a93a5;font-style:italic># DNS server the VPN client should use once connected.</span>
+<span style=color:#8a93a5;font-style:italic># In our case this is the ClusterIP of our AdGuard Home Kubernetes service</span>
+<span style=color:#dcaeea>DNS</span> <span style=color:#c7bf54>=</span> 10.0.15.31
+
+
+<span style=color:#8a93a5;font-style:italic># The VPN server we want to connect to</span>
+<span style=color:#c7bf54>[</span>Peer<span style=color:#c7bf54>]</span>
+<span style=color:#8a93a5;font-style:italic># The public key of the server you want to connect to</span>
+<span style=color:#dcaeea>PublicKey</span> <span style=color:#c7bf54>=</span> uJ0bUIe8Kc+vp27sJVDLH8lAmo4E3dfGtzRvOAGQZ0U<span style=color:#c7bf54>=</span>
+
+<span style=color:#8a93a5;font-style:italic># The IP that points to our WireGuard pod on Kubernetes, could be a K8s LoadBalancer IP, ClusterIP, etc..</span>
+<span style=color:#8a93a5;font-style:italic># In our case it is the node IP directly as we used a NodePort</span>
+<span style=color:#dcaeea>Endpoint</span> <span style=color:#c7bf54>=</span> 1.2.3.4:31820
+
+<span style=color:#8a93a5;font-style:italic># What IPs/subnet should be routed through the VPN? Use &#34;0.0.0.0/0, ::/0&#34; for all traffic</span>
+<span style=color:#dcaeea>AllowedIPs</span> <span style=color:#c7bf54>=</span> 0.0.0.0/0, ::/0
+
+<span style=color:#8a93a5;font-style:italic># Keep the connection alive through NAT and firewalls by sending a keepalive packet every 25 seconds</span>
+<span style=color:#dcaeea>PersistentKeepalive</span> <span style=color:#c7bf54>=</span> <span style=color:#d19a66>25</span>
+</code></pre></div><p>As you can see in the example above with the <em><code>DNS</code></em> entry we&rsquo;ve defined which DNS server should be used by the client once the VPN connection is established. In this case it is the IP under which our AdGuard Home DNS server is reachable, and thus we have now DNS-based ad-blocking automatically included for all our VPN traffic/connections.</p>
+<h3 id=qrencode>qrencode</h3>
+<p>Once we have the client config file ready our next step is to import it into the <a href="https://play.google.com/store/apps/details?id=com.wireguard.android">WireGuard app</a> on your phone.</p>
+<p>The easiest way to do this is with a QR-code. We&rsquo;ll install <strong><code>qrencode</code></strong> for this:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=color:#8a93a5;font-style:italic># pacman -S qrencode</span>
+resolving dependencies...
+looking <span style=color:#c678dd>for</span> conflicting packages...
+
+Packages <span style=color:#c7bf54>(</span>1<span style=color:#c7bf54>)</span> qrencode-4.1.1-1
+
+Total Installed Size:  0.10 MiB
+Net Upgrade Size:      0.00 MiB
+
+:: Proceed with installation? <span style=color:#c7bf54>[</span>Y/n<span style=color:#c7bf54>]</span> Y
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> checking keys in keyring                            <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> checking package integrity                          <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> loading package files                               <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> checking <span style=color:#c678dd>for</span> file conflicts                         <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> checking available disk space                       <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+:: Processing package changes...
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> installing qrencode                                 <span style=color:#c7bf54>[</span><span style=color:#8a93a5;font-style:italic>##############################] 100%</span>
+:: Running post-transaction hooks...
+<span style=color:#c7bf54>(</span>1/1<span style=color:#c7bf54>)</span> Arming ConditionNeedsUpdate...
+</code></pre></div><p>Now let&rsquo;s use it to generate a QR-code picture of our config file, displaying it either directly in the terminal:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ qrencode -t ANSIUTF8 -r client.conf
+<span style=color:#c7bf54>[</span>QR CODE in terminal<span style=color:#c7bf54>]</span>
+</code></pre></div><p>Or by writing it to a PNG file to display:</p>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ qrencode -t PNG -r client.conf -o client_conf.png
+</code></pre></div><p><img src=/images/wireguard-qrcode.png alt="GitHub Pages"></p>
+<p>Simply scan the resulting QR-code with the WireGuard app on your phone to import the client configuration.</p>
+<p>After importing you can then connect to the VPN and enjoy an ad-free internet experience on your whole Android phone, be it in the browser or inside apps! 😃</p>
+<p><img src=/images/wireguard-android.png alt="GitHub Pages"></p>
+<p>WireGuard is <em>very fast</em>, stable and also handles reconnects gracefully, allowing you to basically have the VPN connection open 24/7.</p>
+</div>
+<div class=post-footer>
+</div>
+</article>
+</main>
+</body>
+</html>

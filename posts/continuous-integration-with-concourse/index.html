@@ -3,7 +3,7 @@
 <title>Continuous Integration with Concourse // Ramblings about all things technical</title>
 <link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
 <meta charset=utf-8>
-<meta name=generator content="Hugo 0.88.0">
+<meta name=generator content="Hugo 0.88.1">
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="A brief introduction to Concourse, a software for building Continuous Integration / Continuous Delivery pipelines">
@@ -59,6 +59,8 @@ Jan 11, 2016
 </div>
 </header>
 <div class=post-content>
+<h2 id=concourse---the-continuous-thing-doer>Concourse - the continuous thing-doer</h2>
+<p>=======</p>
 <h5 id=edit--20201201>edit @ 2020.12.01</h5>
 <p>These days there are many different platforms and systems out there that can be used to automate all your CI/CD needs.</p>
 <p>Software-as-a-Service / hosted solutions:</p>
@@ -79,7 +81,7 @@ Jan 11, 2016
 <p>One the SaaS side after I was initially using TravisCI, then gradually transitioning to CircleCI. But eventually I ended up using GitHub Actions, they seem to provide a reasonable amount of flexibility and customization at a low price (free!).</p>
 <p>When it comes to self-hosted CI/CD software Jenkins is probably the most commonly used one. But I&rsquo;d strongly advise not use it, it is a very old and crufty project back from a time when the word &ldquo;pipeline&rdquo; or microservices architecture did not exist yet.</p>
 <p>Instead, lets have a look at the king of them all when it comes to the ability to tackle complex pipelines and dependency flows: <a href=https://concourse-ci.org>Concourse</a></p>
-<h2 id=concourse---the-continuous-thing-doer>Concourse - the continuous thing-doer</h2>
+<h2 id=concourse---the-continuous-thing-doer-1>Concourse - the continuous thing-doer</h2>
 <p>Concourse is an open source CI/CD platform, focused on allowing you to build and work with pipelines. It&rsquo;s freely available and can be installed in various ways, be it with Docker, on Kubernetes with Helm, via BOSH, or manually via its single binary.</p>
 <p><a href=https://concourse-ci.org/docs.html>https://concourse-ci.org/docs.html</a></p>
 <h3 id=pipelines>Pipelines</h3>
