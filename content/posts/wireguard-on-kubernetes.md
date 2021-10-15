@@ -3,7 +3,7 @@ title: "Running WireGuard VPN (with ad-blocking) on Kubernetes"
 description: How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes
 tags: [kubernetes,vpn,wireguard,adblock]
 author: Fabio Berchtold
-date: 2021-10-14T17:19:41+02:00
+date: 2021-10-15T17:19:41+02:00
 draft: false
 ---
 
@@ -13,11 +13,11 @@ So, after being back from a recent vacation trip and having to use the hotel Wi-
 
 A few years ago I kept a simple OpenVPN installation up and running on a DigitalOcean droplet, but let it deteriorate and stopped using it at some point. Also because of the Coronavirus pandemic that started last year there wasn't much travelling around anyway, thus I had no immediate need for a VPN.
 
-But thanks to the wonders of modern medicine (thank you very much [Katalin Karikó](https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3)! 👍️) this has changed this summer and I was again able to travel abroad. Which let to my decision to once more setup a VPN endpoint for myself. 😆
+But thanks to the wonders of modern medicine (thank you very much [Katalin Karikó](https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3)! 👍️) the situation has changed this summer and I was once again able to travel abroad. Which let to my decision to once more setup a VPN endpoint for myself. 😆
 
 The question was, what software to pick and how do I deploy and operate it this time?
 
-... enter WireGuard!
+... enter [WireGuard](https://www.wireguard.com/)!
 
 *From https://www.wireguard.com*
 > *WireGuard® is an extremely simple yet fast and modern VPN that utilizes state-of-the-art cryptography. It aims to be faster, simpler, leaner, and more useful than IPsec, while avoiding the massive headache. It intends to be considerably more performant than OpenVPN. WireGuard is designed as a general purpose VPN for running on embedded interfaces and super computers alike, fit for many different circumstances. Initially released for the Linux kernel, it is now cross-platform (Windows, macOS, BSD, iOS, Android) and widely deployable. It is currently under heavy development, but already it might be regarded as the most secure, easiest to use, and simplest VPN solution in the industry.*
@@ -26,12 +26,32 @@ The question was, what software to pick and how do I deploy and operate it this 
 
 > *A combination of extremely high-speed cryptographic primitives and the fact that WireGuard lives inside the Linux kernel means that secure networking can be very high-speed. It is suitable for both small embedded devices like smartphones and fully loaded backbone routers.*
 
-It's the year 2021 after all, using anything other than WireGuard as your VPN these days is utterly silly.
+It's the year 2021 after all, using anything other than WireGuard as your VPN is utterly silly.
 
 ## WireGuard on Kubernetes
 
-...
-how to run: looked at many different images, *list*, ultimately decided on [masipcat/wireguard-go](https://github.com/masipcat/wireguard-go-docker), because its very simple and uncomplicated image, also directly provides a K8s example out of the box.
+Well, these days I've more or less migrated almost all my projects onto [my own personal Kubernetes](/posts/my-own-kubernetes/) cluster. Whether it's just to use it for config management purposes or more actual technical reasons is moot at this point.
+So Kubernetes it is!
+
+But then the question is, how do I run WireGuard on Kubernetes?
+
+I've looked at various solutions on how to go about it, some of them included the following:
+- [linuxserver/wireguard](https://github.com/linuxserver/docker-wireguard)
+  - Docker image managed by the [LinuxServer.io](https://linuxserver.io/) team, with regular updates, server and client mode, and configuration done mostly through ENV variables.
+- [WG UI](https://github.com/EmbarkStudios/wg-ui)
+  - Complete WireGuard web UI for self-serve client configurations, with optional auth.
+- [WireGuard-UI](https://github.com/ngoduykhanh/wireguard-ui)
+  - Another web user interface to manage your WireGuard setup.
+- [Algo VPN](https://github.com/trailofbits/algo)
+  - A collection of scripts for easy setup of a personal WireGuard or IPSec VPN. Turned out to not really be useful for my intended purpose or running a minimal server on Kubernetes.
+- [masipcat/wireguard-go](https://github.com/masipcat/wireguard-go-docker)
+  - Simple prebuilt image to run as a WireGuard server, provides a basic Kubernetes deployment example.
+- [cmulk/wireguard-docker](https://github.com/cmulk/wireguard-docker)
+  - Another simple prebuilt image to use as a personal WireGuard server.
+
+Ultimately I decided on [masipcat/wireguard-go](https://github.com/masipcat/wireguard-go-docker), because at its core it is a really simple and uncomplicated prebuilt Docker image, and also directly provides a Kubernetes deployment example that works out of the box.
+
+The first you need to do when setting up WireGuard is to prepare a configuration file for your server:
 
 #### server.conf
 ```sh
@@ -62,6 +82,11 @@ AllowedIPs = 10.10.0.5/32
 ```
 
 As you can see from the server config example above we've chosen the network *`10.10.0.0/24`* to be our Wireguard VPN network. The server itself and all clients should be configured to IPs within that subnet. The server itself is defined as the gateway with *`10.10.0.1/24`*, and then for each client (peer) you configure a specific /32-IP in that subnet to be assigned. This IP will need to be reflected also in the client config file.
+
+The public and private keys needed for the server and clients can be generated by using `wg`, which is usually part of the WireGuard tools package of your chosen Linux distribution.
+```sh
+$ wg genkey | tee private.key | wg pubkey > public.key
+```
 
 #### Kubernetes deployment
 
