@@ -10,7 +10,6 @@ draft: false
 
 ## Concourse - the continuous thing-doer
 
-=======
 ##### edit @ 2020.12.01
 These days there are many different platforms and systems out there that can be used to automate all your CI/CD needs.
 
