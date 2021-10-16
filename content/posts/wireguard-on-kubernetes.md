@@ -221,7 +221,7 @@ kubectl -n wireguard apply -f wireguard.yml
 Your very own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.
 
 ```sh
-$ nc -vz 1.2.3.4 31820
+$ nc -uvz 1.2.3.4 31820
 Connection to 1.2.3.4 31820 port [udp/wireguard] succeeded!
 ```
 
