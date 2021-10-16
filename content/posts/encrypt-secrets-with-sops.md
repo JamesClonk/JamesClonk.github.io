@@ -8,7 +8,7 @@ date: 2021-07-25T19:51:09+02:00
 draft: false
 ---
 
-## Enviroment variables
+## Environment variables
 
 When I was originally contemplating on how to run all my personal projects and applications on [my own Kubernetes](/posts/my-own-kubernetes/) cluster, one of the problems was how would I store secrets? Where would I store them?
 
