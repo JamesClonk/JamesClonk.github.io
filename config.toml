@@ -11,7 +11,10 @@ enableEmoji= true
     [markup.goldmark.renderer]
       unsafe = true
   [markup.highlight]
-    style = "doom-one"
+    #style = "doom-one"
+    #style = "github"
+    #style = "lovelace"
+    style = "tango"
 
 [menu]
   [[menu.main]]
@@ -41,9 +44,19 @@ enableEmoji= true
     name = "GitHub"
     url = "https://github.com/JamesClonk"
 
+# dark theme, use together with "doom-one" highlight
+#  [params.style]
+#    darkestColor = "#242930"
+#    darkColor = "#353b43"
+#    lightColor = "#afbac4"
+#    lightestColor = "#ffffff"
+#    primaryColor = "#578acc"
+
+# light theme, use together with "tango" highlight
+# "215580", "#1e4d73", "#1b4466", "#1a4162", "#133048", "#122d45"
   [params.style]
-    darkestColor = "#242930"
-    darkColor = "#353b43"
-    lightColor = "#afbac4"
-    lightestColor = "#ffffff"
-    primaryColor = "#578acc"
+    darkestColor = "#f3f3f3"
+    darkColor = "#ffffff"
+    lightColor = "#333333"
+    lightestColor = "#133048"
+    primaryColor = "#215580"
