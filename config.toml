@@ -59,4 +59,5 @@ enableEmoji= true
     darkColor = "#ffffff"
     lightColor = "#333333"
     lightestColor = "#133048"
-    primaryColor = "#215580"
+    primaryColor = "#1e4d73"
+    highlightColor = "#f0c828"

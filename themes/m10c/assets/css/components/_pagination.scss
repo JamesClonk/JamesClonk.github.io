@@ -16,7 +16,8 @@
 
   &.active {
     .page-link {
-      color: $lightest-color;
+      color: $highlight-color;
+      font-weight: bold;
       border-radius: 2em;
       background: $primary-color;
     }
