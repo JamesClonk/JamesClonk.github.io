@@ -7,7 +7,7 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="Cloud Foundry is the leading open source industry standard for a Platform-as-a-Service. With the next version of the Cloud Foundry scheduler, the user is now able to run his Docker images with a full PaaS experience on the Swisscom Application Cloud.">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.0cd1e8c02130c0b61d70f667046a924a31bb965c4f2ece488c05513ad5e78880.css>
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Docker and Cloud Foundry">
 <meta name=twitter:description content="Cloud Foundry is the leading open source industry standard for a Platform-as-a-Service. With the next version of the Cloud Foundry scheduler, the user is now able to run his Docker images with a full PaaS experience on the Swisscom Application Cloud.">
@@ -87,28 +87,28 @@ May 4, 2016
 The source code for these is available in this <a href=https://github.com/JamesClonk/cloudfoundry-samples/tree/master/docker-guestbook>GitHub repository</a>.</p>
 <p>We are now going to deploy these two Docker images on the Swisscom Application Cloud, through using its CLI tool <code>cf</code>. If you have not yet installed or used it before, please consult the documentation available here: <a href=https://docs.developer.swisscom.com/cf-cli/index.html>https://docs.developer.swisscom.com/cf-cli/index.html</a></p>
 <p>First we push the frontend app:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push guestbook-frontend --docker-image jamesclonk/guestbook-frontend --hostname docker-guestbook
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push guestbook-frontend --docker-image jamesclonk/guestbook-frontend --hostname docker-guestbook
 </code></pre></div><p>We specify the name of our application guestbook-frontend, the Docker image to use jamesclonk/guestbook-frontend and the hostname guestbook. This means once the app is running it will be available under the subdomain docker-guestbook.scapp.io on the Swisscom Application Cloud. The docker image will be pulled from Docker Hub, assembled into a Cloud Foundry app droplet and deployed through the Cloud Foundry Diego runtime. This app droplet will not be running inside a Docker container though, as currently Diego uses Garden / Garden-Linux containers.</p>
 <p>We could also decide upfront how much instances, memory and diskpace should be allocated for our app when deploying.
 Let&rsquo;s do this for the second app:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push guestbook-backend --docker-image jamesclonk/guestbook-backend --hostname docker-guestbook-backend -i <span style=color:#d19a66>2</span> -m 256M -k 32M
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push guestbook-backend --docker-image jamesclonk/guestbook-backend --hostname docker-guestbook-backend -i <span style=color:#0000cf;font-weight:700>2</span> -m 256M -k 32M
 </code></pre></div><p>This will start our backend application with 2 instances, and a limit of 256MB RAM and 64MB diskspace. We don&rsquo;t need a lot of diskspace for the backend as it has no public assets to serve and basically only interacts with MongoDB as its datastore and our frontend-app. No need for a filesystem. 😉</p>
 <p>We can then check the status and number of instances of our app:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf app guestbook-backend
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf app guestbook-backend
 </code></pre></div><p>This shows us how many instances are currently running, and how their cpu usage, memory and disk space consumption is:
 <img src=/images/docker-app-backend.png alt=Scale></p>
 <p>It is also possible to change these settings even if the app is already running:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf scale guestbook-backend -m 128M -i <span style=color:#d19a66>4</span>
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf scale guestbook-backend -m 128M -i <span style=color:#0000cf;font-weight:700>4</span>
 </code></pre></div><p><img src=/images/docker-more-backend.png alt=Scale></p>
 <p>Now the backend-app of course also wants to have a database to store all its data. In our case this would be a MongoDB. Let&rsquo;s check the services marketplace to see what the Swisscom Application Cloud offers:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf marketplace
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf marketplace
 </code></pre></div><p><img src=/images/docker-marketplace.png alt=Marketplace></p>
 <p>We are going to create a MongoDB service instance now for our app to use and then bind to it:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf create-service mongodb small guestbook-db
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf create-service mongodb small guestbook-db
 $ cf bind-service guestbook-backend guestbook-db
 </code></pre></div><p>You can find more details on how to use these services and how to attach them to your app in our documentation: <a href=https://docs.developer.swisscom.com/service-offerings/index.html>https://docs.developer.swisscom.com/service-offerings/index.html</a></p>
 <p>The app will now be able to read the connection string and credentials it needs through ENV variables available to it. We can check these by running the following command:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf env guestbook-backend
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf env guestbook-backend
 </code></pre></div><p><img src=/images/docker-mongodb.png alt=MongoDB></p>
 <p>Now we have our app running on the Cloud Foundry platform, where we can can easily scale it out if we ever need to, it&rsquo;s highly available and we don&rsquo;t need to take care of monitoring or operations. It just runs by itself.</p>
 <p>Go to <a href=https://developer.swisscom.com>https://developer.swisscom.com</a> and try it out right now for yourself!</p>

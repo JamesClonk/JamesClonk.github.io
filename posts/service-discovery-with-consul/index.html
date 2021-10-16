@@ -7,7 +7,7 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="Consul provides automatic service discovery in a cloud-native world of microservices">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.0cd1e8c02130c0b61d70f667046a924a31bb965c4f2ece488c05513ad5e78880.css>
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Service Discovery with Consul">
 <meta name=twitter:description content="Consul provides automatic service discovery in a cloud-native world of microservices">
@@ -72,28 +72,28 @@ Modern microservices architecture requires the introduction of &ldquo;Service Di
 <p>The main interface for Consul service discovery is DNS. Via simple DNS requests applications can make use of service discovery without needing any libraries or other code integration tied directly to Consul.</p>
 <p>For example an application could lookup its database backend by making a DNS query for <code>postgres-instance-2.service.consul</code>. Consul translates this query automatically into a lookup of all nodes that are registered to provide the postgres service <code>postgres-instance-2</code> and have no failing health checks, with the returning result being their <em>current</em> IP addresses that the application then can use to connect to the database servers.</p>
 <p>Assuming a Consul agent is currently running on the local VM you could query the location of a particular service for example simply like this:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ dig @127.0.0.1 -p <span style=color:#d19a66>8600</span> my-mongodb.service.consul
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ dig @127.0.0.1 -p <span style=color:#0000cf;font-weight:700>8600</span> my-mongodb.service.consul
 ...
 
-;; ANSWER SECTION:
-my-mongodb.service.consul. <span style=color:#d19a66>0</span>   IN  A   192.168.1.77
+<span style=color:#000;font-weight:700>;;</span> ANSWER SECTION:
+my-mongodb.service.consul. <span style=color:#0000cf;font-weight:700>0</span>   IN  A   192.168.1.77
 
 ...
 
-;; Query time: <span style=color:#d19a66>1</span> msec
-;; SERVER: 127.0.0.1#8600<span style=color:#c7bf54>(</span>127.0.0.1<span style=color:#c7bf54>)</span>
+<span style=color:#000;font-weight:700>;;</span> Query time: <span style=color:#0000cf;font-weight:700>1</span> msec
+<span style=color:#000;font-weight:700>;;</span> SERVER: 127.0.0.1#8600<span style=color:#ce5c00;font-weight:700>(</span>127.0.0.1<span style=color:#ce5c00;font-weight:700>)</span>
 </code></pre></div><h3 id=integrate-it-into-your-dns>Integrate it into your DNS</h3>
 <p>Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
 If you are using for example <em>dnsmasq</em> or <em><a href=https://www.nlnetlabs.nl/projects/unbound/about/>unbound</a></em> in your infrastructure you can easily configure a forward zone for <code>*.service.consul</code> to delegate any such request that your normal DNS server receives to be forwared along to the Consul DNS.
 Let&rsquo;s say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#e06c75>stub-zone</span>:
- <span style=color:#e06c75>name</span>: <span style=color:#63c381>&#34;service.consul&#34;</span>
- <span style=color:#e06c75>stub-addr</span>: <span style=color:#d19a66>127.0.0.1</span>@<span style=color:#d19a66>8600</span>  <span style=color:#8a93a5;font-style:italic># forward &#34;.service.consul&#34; queries to local Consul agent</span>
- 
-<span style=color:#e06c75>stub-zone</span>:
- <span style=color:#e06c75>name</span>: <span style=color:#63c381>&#34;node.consul&#34;</span>
- <span style=color:#e06c75>stub-addr</span>: <span style=color:#d19a66>127.0.0.1</span>@<span style=color:#d19a66>8600</span>  <span style=color:#8a93a5;font-style:italic># forward &#34;.node.consul&#34; queries to local Consul agent</span>
-</code></pre></div><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;service.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.service.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline> 
+</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;node.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.node.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></code></pre></div><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p>
 </div>
 <div class=post-footer>
 </div>

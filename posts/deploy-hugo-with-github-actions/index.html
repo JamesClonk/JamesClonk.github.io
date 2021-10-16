@@ -7,7 +7,7 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.0cd1e8c02130c0b61d70f667046a924a31bb965c4f2ece488c05513ad5e78880.css>
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="A blog with Hugo on GitHub">
 <meta name=twitter:description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions">
@@ -143,38 +143,38 @@ My requirements for this have been the following:</p>
 <h3 id=build-hugo-with-a-github-actions>Build Hugo with a GitHub Actions</h3>
 <p>GitHub Actions allows you to define workflows that can build your software or otherwise execute various steps as part of a CI/CD pipeline. With this setup I have a workflow which will build and publish this blog automatically everytime I push / create a new commit on the <code>master</code> branch of my Hugo Github repository.</p>
 <p>All I needed for this was to create <code>.github/workflows/gh-pages.yml</code> containing the following content (based on <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a>):</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=color:#e06c75>name</span>: <span style=color:#98c379>github pages</span>
-
-<span style=color:#e06c75>on</span>:
-  <span style=color:#e06c75>push</span>:
-    <span style=color:#e06c75>branches</span>: [ <span style=color:#98c379>master ]</span>
-
-<span style=color:#e06c75>jobs</span>:
-  <span style=color:#e06c75>deploy</span>:
-    <span style=color:#e06c75>name</span>: <span style=color:#98c379>deploy Hugo to gh-pages</span>
-    <span style=color:#e06c75>runs-on</span>: <span style=color:#98c379>ubuntu-latest</span>
-    <span style=color:#e06c75>steps</span>:
-    - <span style=color:#e06c75>uses</span>: <span style=color:#98c379>actions/checkout@v2</span>
-      <span style=color:#e06c75>with</span>:
-        <span style=color:#e06c75>submodules</span>: <span style=color:#b756ff;font-weight:700>true</span>
-        <span style=color:#e06c75>fetch-depth</span>: <span style=color:#d19a66>0</span>
-
-    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Setup Hugo</span>
-      <span style=color:#e06c75>uses</span>: <span style=color:#98c379>peaceiris/actions-hugo@v2</span>
-      <span style=color:#e06c75>with</span>:
-        <span style=color:#e06c75>hugo-version</span>: <span style=color:#98c379>&#39;latest&#39;</span>
-        <span style=color:#e06c75>extended</span>: <span style=color:#b756ff;font-weight:700>true</span>
-
-    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Build</span>
-      <span style=color:#e06c75>run</span>: <span style=color:#98c379>hugo --minify</span>
-
-    - <span style=color:#e06c75>name</span>: <span style=color:#98c379>Deploy</span>
-      <span style=color:#e06c75>uses</span>: <span style=color:#98c379>peaceiris/actions-gh-pages@v3</span>
-      <span style=color:#e06c75>if</span>: <span style=color:#98c379>github.ref == &#39;refs/heads/master&#39;</span>
-      <span style=color:#e06c75>with</span>:
-        <span style=color:#e06c75>github_token</span>: <span style=color:#98c379>${{ secrets.GITHUB_TOKEN }}</span>
-        <span style=color:#e06c75>publish_dir</span>: <span style=color:#98c379>./public</span>
-</code></pre></div><p>The steps being executed by this workflow are as follows:</p>
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github pages</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>push</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>branches</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000;font-weight:700>[</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>master ]</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>jobs</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>deploy</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>deploy Hugo to gh-pages</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>runs-on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>ubuntu-latest</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>steps</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>actions/checkout@v2</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>submodules</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>fetch-depth</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>0</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Setup Hugo</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-hugo@v2</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>hugo-version</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#39;latest&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>extended</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Build</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>run</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>hugo --minify</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Deploy</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-gh-pages@v3</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>if</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github.ref == &#39;refs/heads/master&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>github_token</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>${{ secrets.GITHUB_TOKEN }}</span><span style=color:#f8f8f8;text-decoration:underline>
+</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>publish_dir</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>./public</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></code></pre></div><p>The steps being executed by this workflow are as follows:</p>
 <ol>
 <li>If we get a push on branch <code>master</code></li>
 <li>Then checkout the repository (with submodules, since we have a theme in here as a submodule)</li>

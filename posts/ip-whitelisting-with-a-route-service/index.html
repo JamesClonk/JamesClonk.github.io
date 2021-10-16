@@ -7,7 +7,7 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="Route-services allow you to apply transformation or preprocessing of HTTP requests before they reach a target application, with common examples of use cases being rate limiting, authentication and authorization, and caching services">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.0cd1e8c02130c0b61d70f667046a924a31bb965c4f2ece488c05513ad5e78880.css>
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="IP-whitelisting with a Cloud Foundry Route-Service">
 <meta name=twitter:description content="Route-services allow you to apply transformation or preprocessing of HTTP requests before they reach a target application, with common examples of use cases being rate limiting, authentication and authorization, and caching services">
@@ -64,15 +64,15 @@ Jun 28, 2020
 <h2 id=deploy-a-route-service>Deploy a Route-Service</h2>
 <p>Let&rsquo;s have a look and go through the example project here: <a href=https://github.com/swisscom/ip-whitelisting-route-service-demo-app>https://github.com/swisscom/ip-whitelisting-route-service-demo-app</a></p>
 <p>First clone the repository:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ git clone https://github.com/swisscom/ip-whitelisting-route-service-demo-app.git
-$ <span style=color:#ef8383>cd</span> ip-whitelisting-route-service-demo-app
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ git clone https://github.com/swisscom/ip-whitelisting-route-service-demo-app.git
+$ <span style=color:#204a87>cd</span> ip-whitelisting-route-service-demo-app
 </code></pre></div><p>Then edit the IP whitelist configuration file and the manifest:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ vim ip-whitelist.conf
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ vim ip-whitelist.conf
 $ vim manifest.yml
 </code></pre></div><p>In the <code>ip-whitelist.conf</code> file you will have to add all individual IPs or whole IP ranges that you want to be able to access your applications from.
 For the <code>manifest.yml</code> make sure to edit the preconfigured <code>route</code> to where you want your route-service app to be.</p>
 <p>Let&rsquo;s push the route-service app now and then create an actual route-service via the <a href=https://docs.cloudfoundry.org/cf-cli/getting-started.html>CF CLI</a>:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push my-route-service-app -f manifest.yml
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push my-route-service-app -f manifest.yml
 ...
 
 Instances starting...
@@ -86,22 +86,22 @@ type:            web
 instances:       1/1
 memory usage:    64M
 start command:   ./bin/ip-whitelisting-route-service-demo-app
-</code></pre></div><div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf create-user-provided-service my-route-service -r https://my-route-service-app.scapp.swisscom.com
-Creating user provided service my-route-service in org sandbox / space <span style=color:#ef8383>test</span> as admin...
+</code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf create-user-provided-service my-route-service -r https://my-route-service-app.scapp.swisscom.com
+Creating user provided service my-route-service in org sandbox / space <span style=color:#204a87>test</span> as admin...
 OK
 </code></pre></div><p>We are creating a <em>user-provided</em> route-service here and specifying the route you configured in your <code>manifest.yml</code> with the <code>-r</code> flag, this will tell Cloud Foundry the URL to the route-service. See the <a href=https://docs.cloudfoundry.org/services/route-services.html#user-provided>documention for route-services</a> for additional information.</p>
 <p>Check to make sure the route-service is there:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf service my-route-service
-Showing info of service my-route-service in org sandbox / space <span style=color:#ef8383>test</span> as admin...
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf service my-route-service
+Showing info of service my-route-service in org sandbox / space <span style=color:#204a87>test</span> as admin...
 
 name:                my-route-service
 service:             user-provided
 route service url:   https://my-route-service-app.scapp.swisscom.com
 
-There are no bound apps <span style=color:#c678dd>for</span> this service.
+There are no bound apps <span style=color:#204a87;font-weight:700>for</span> this service.
 </code></pre></div><p>Now this where the magic happens. Where are going to bind the new route-service to our other apps that we want to protect:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf bind-route-service scapp.swisscom.com my-route-service --hostname my-other-app
-Binding route my-other-app.scapp.swisscom.com to service instance my-route-service in org sandbox / space <span style=color:#ef8383>test</span> as admin...
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf bind-route-service scapp.swisscom.com my-route-service --hostname my-other-app
+Binding route my-other-app.scapp.swisscom.com to service instance my-route-service in org sandbox / space <span style=color:#204a87>test</span> as admin...
 OK
 </code></pre></div><p>This will cause all traffic going through the route of <code>my-other-app.scapp.swisscom.com</code> to be intercepted and routed to be first processed by our route-service app.
 See the <a href=https://docs.cloudfoundry.org/devguide/services/route-binding.html>documention for route-service-bindings</a> for additional information.</p>
@@ -117,20 +117,20 @@ See the <a href=https://docs.cloudfoundry.org/devguide/services/route-binding.ht
 </ul>
 <p>When forwarding a request to the originally requested URL, the route-service app must forward the <code>X-CF-Forwarded-Url</code>, <code>X-CF-Proxy-Signature</code> and <code>X-CF-Proxy-Metadata</code> headers along with the request or it will be rejected.</p>
 <p>You can see an implementation of this in our example IP-whitelisting route-service from above: <a href=https://github.com/swisscom/ip-whitelisting-route-service-demo-app/blob/14d5074f940f93e342e330acee08fffb9411d50c/main.go#L75-L90>https://github.com/swisscom/ip-whitelisting-route-service-demo-app/blob/14d5074f940f93e342e330acee08fffb9411d50c/main.go#L75-L90</a></p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>	<span style=color:#8a93a5;font-style:italic>// X-CF-Forwarded-Url is required to determine the target of the request after it has been passed the route service
-</span><span style=color:#8a93a5;font-style:italic></span>	<span style=color:#8a93a5;font-style:italic>// https://docs.cloudfoundry.org/services/route-services.html#headers
-</span><span style=color:#8a93a5;font-style:italic></span>	<span style=color:#c1abea>targetURL</span> <span style=color:#c7bf54>:=</span> <span style=color:#c1abea>req</span>.<span style=color:#c1abea>Header</span>.<span style=color:#00b1f7>Get</span>(<span style=color:#98c379>&#34;X-CF-Forwarded-Url&#34;</span>)
-	<span style=color:#c678dd>if</span> <span style=color:#ef8383>len</span>(<span style=color:#c1abea>targetURL</span>) <span style=color:#c7bf54>==</span> <span style=color:#d19a66>0</span> {
-		<span style=color:#c1abea>rw</span>.<span style=color:#00b1f7>WriteHeader</span>(<span style=color:#c1abea>http</span>.<span style=color:#c1abea>StatusBadRequest</span>)
-		<span style=color:#c1abea>_</span>,<span style=color:#c1abea>_</span> = <span style=color:#c1abea>rw</span>.<span style=color:#00b1f7>Write</span>([]<span style=color:#ef8383>byte</span>(<span style=color:#98c379>&#34;Bad Request&#34;</span>))
-		<span style=color:#c678dd>return</span>
-	}
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go>	<span style=color:#8f5902;font-style:italic>// X-CF-Forwarded-Url is required to determine the target of the request after it has been passed the route service
+</span><span style=color:#8f5902;font-style:italic></span>	<span style=color:#8f5902;font-style:italic>// https://docs.cloudfoundry.org/services/route-services.html#headers
+</span><span style=color:#8f5902;font-style:italic></span>	<span style=color:#000>targetURL</span> <span style=color:#ce5c00;font-weight:700>:=</span> <span style=color:#000>req</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>Header</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>Get</span><span style=color:#000;font-weight:700>(</span><span style=color:#4e9a06>&#34;X-CF-Forwarded-Url&#34;</span><span style=color:#000;font-weight:700>)</span>
+	<span style=color:#204a87;font-weight:700>if</span> <span style=color:#204a87>len</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>targetURL</span><span style=color:#000;font-weight:700>)</span> <span style=color:#ce5c00;font-weight:700>==</span> <span style=color:#0000cf;font-weight:700>0</span> <span style=color:#000;font-weight:700>{</span>
+		<span style=color:#000>rw</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>WriteHeader</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>http</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>StatusBadRequest</span><span style=color:#000;font-weight:700>)</span>
+		<span style=color:#000>_</span><span style=color:#000;font-weight:700>,</span><span style=color:#000>_</span> <span style=color:#000;font-weight:700>=</span> <span style=color:#000>rw</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>Write</span><span style=color:#000;font-weight:700>([]</span><span style=color:#204a87>byte</span><span style=color:#000;font-weight:700>(</span><span style=color:#4e9a06>&#34;Bad Request&#34;</span><span style=color:#000;font-weight:700>))</span>
+		<span style=color:#204a87;font-weight:700>return</span>
+	<span style=color:#000;font-weight:700>}</span>
 
-	<span style=color:#c1abea>target</span>, <span style=color:#c1abea>err</span> <span style=color:#c7bf54>:=</span> <span style=color:#c1abea>url</span>.<span style=color:#00b1f7>Parse</span>(<span style=color:#c1abea>targetURL</span>)
-	<span style=color:#c7bf54>...</span>
+	<span style=color:#000>target</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>err</span> <span style=color:#ce5c00;font-weight:700>:=</span> <span style=color:#000>url</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>Parse</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>targetURL</span><span style=color:#000;font-weight:700>)</span>
+	<span style=color:#ce5c00;font-weight:700>...</span>
 
-	<span style=color:#8a93a5;font-style:italic>// setup a reverse proxy and forward the original request to the target
-</span><span style=color:#8a93a5;font-style:italic></span>	<span style=color:#c1abea>proxy</span> <span style=color:#c7bf54>:=</span> <span style=color:#c1abea>httputil</span>.<span style=color:#00b1f7>NewSingleHostReverseProxy</span>(<span style=color:#c1abea>target</span>)
+	<span style=color:#8f5902;font-style:italic>// setup a reverse proxy and forward the original request to the target
+</span><span style=color:#8f5902;font-style:italic></span>	<span style=color:#000>proxy</span> <span style=color:#ce5c00;font-weight:700>:=</span> <span style=color:#000>httputil</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>NewSingleHostReverseProxy</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>target</span><span style=color:#000;font-weight:700>)</span>
 </code></pre></div><hr>
 <h3 id=video-demonstration>Video demonstration!</h3>
 <p>If you want to see another example of route-services in action then check out this video:

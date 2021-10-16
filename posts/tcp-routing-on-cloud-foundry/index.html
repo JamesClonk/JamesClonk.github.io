@@ -7,7 +7,7 @@
 <meta name=viewport content="width=device-width,initial-scale=1">
 <meta name=author content="Fabio Berchtold">
 <meta name=description content="The Swisscom Application Cloud, which is based on the open source industry standard Cloud Foundry, offers an exciting new feature for its users. TCP routing, the ability to support and expose any TCP-based, non-HTTP application to the world. Let's have a closer look and learn how to use TCP routing.">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.9bba7fde0750c7bda25f057fa3c3b60a9bc8a01eca8636633114e4a19d3d4b43.css>
+<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.0cd1e8c02130c0b61d70f667046a924a31bb965c4f2ece488c05513ad5e78880.css>
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="TCP-Routing on Cloud Foundry">
 <meta name=twitter:description content="The Swisscom Application Cloud, which is based on the open source industry standard Cloud Foundry, offers an exciting new feature for its users. TCP routing, the ability to support and expose any TCP-based, non-HTTP application to the world. Let's have a closer look and learn how to use TCP routing.">
@@ -69,49 +69,49 @@ TCP routing in Cloud Foundry is based on reserving ports on a TCP router group f
 <p><img src=/images/tcp-route-ports.png alt=Devportal></p>
 <p>TCP Routing allows you to push applications onto the Application Cloud you previously would not have thought of.</p>
 <p>For example you could push <a href=https://memcached.org/>Memcached</a> as an app, an in-memory cache that communicates via TCP:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push -o memcached memcached
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push -o memcached memcached
 Creating app memcached in org swisscom / space examples as user1...
 OK
 
 ...
 
-Showing health and status <span style=color:#c678dd>for</span> app memcached in org swisscom / space examples as user1...
+Showing health and status <span style=color:#204a87;font-weight:700>for</span> app memcached in org swisscom / space examples as user1...
 OK
 
 requested state: started
 instances: 1/1
-usage: 1G x <span style=color:#d19a66>1</span> instances
+usage: 1G x <span style=color:#0000cf;font-weight:700>1</span> instances
 urls: memcached.scapp.io
 state since cpu memory disk details
-<span style=color:#8a93a5;font-style:italic>#0 running 2018-03-05 12:31:31 PM 0.0% 0 of 1G 0 of 1G</span>
+<span style=color:#8f5902;font-style:italic>#0 running 2018-03-05 12:31:31 PM 0.0% 0 of 1G 0 of 1G</span>
 </code></pre></div><p>And all you need to do now to expose it over TCP would be to simply bind a TCP-route to it, specifying the port by which it is going to be exposed to the outside world:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf map-route memcached tcp.scapp.io --port <span style=color:#d19a66>35666</span>
-Creating route tcp.scapp.io:35666 <span style=color:#c678dd>for</span> org swisscom / space examples as user1...
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf map-route memcached tcp.scapp.io --port <span style=color:#0000cf;font-weight:700>35666</span>
+Creating route tcp.scapp.io:35666 <span style=color:#204a87;font-weight:700>for</span> org swisscom / space examples as user1...
 OK
 
 Adding route tcp.scapp.io:35666 to app memcached in org  swisscom / space examples as user1...
 OK
 </code></pre></div><p>Your application should now be exposed over TCP port <em>35666</em> on the domain <code>tcp.scapp.io</code>.
 Let&rsquo;s verify that this actually works, by using telnet to open up a TCP connection to our app on that domain and port:</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ telnet tcp.scapp.io <span style=color:#d19a66>35666</span>
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ telnet tcp.scapp.io <span style=color:#0000cf;font-weight:700>35666</span>
 Trying 211.222.233.100...
 Connected to tcp.scapp.io.
-Escape character is <span style=color:#98c379>&#39;^]&#39;</span>.
+Escape character is <span style=color:#4e9a06>&#39;^]&#39;</span>.
 
-<span style=color:#ef8383>set</span> greeting <span style=color:#d19a66>1</span> <span style=color:#d19a66>0</span> <span style=color:#d19a66>11</span>
+<span style=color:#204a87>set</span> greeting <span style=color:#0000cf;font-weight:700>1</span> <span style=color:#0000cf;font-weight:700>0</span> <span style=color:#0000cf;font-weight:700>11</span>
 Hello World
 STORED
 
 quit
 Connection closed by foreign host.
 
-$ telnet tcp.scapp.io <span style=color:#d19a66>35666</span>
+$ telnet tcp.scapp.io <span style=color:#0000cf;font-weight:700>35666</span>
 Trying 211.222.233.100...
 Connected to tcp.scapp.io.
-Escape character is <span style=color:#98c379>&#39;^]&#39;</span>.
+Escape character is <span style=color:#4e9a06>&#39;^]&#39;</span>.
 
 get greeting
-VALUE greeting <span style=color:#d19a66>1</span> <span style=color:#d19a66>11</span>
+VALUE greeting <span style=color:#0000cf;font-weight:700>1</span> <span style=color:#0000cf;font-weight:700>11</span>
 Hello World
 END
 
@@ -121,27 +121,27 @@ Connection closed by foreign host.
 <p>Another interesting type of application possible thanks to TCP routing would be to deploy a game server that communicates also over TCP only.
 Let&rsquo;s try that out with <a href=https://minecraft.net/>Minecraft</a>:</p>
 <p><img src=/images/tcp-routing.png alt=Devportal></p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push minecraft -o itzg/minecraft-server -i <span style=color:#d19a66>1</span> -m 1536M --no-start
-$ cf create-route examples tcp.scapp.io --port <span style=color:#d19a66>28888</span>
-$ cf map-route mcs tcp.scapp.io --port <span style=color:#d19a66>28888</span>
-$ cf set-env mcs EULA <span style=color:#ef8383>true</span>
-$ cf set-env mcs MOTD <span style=color:#98c379>&#39;Minecraft powered by Swisscom Application Cloud&#39;</span>
+<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf push minecraft -o itzg/minecraft-server -i <span style=color:#0000cf;font-weight:700>1</span> -m 1536M --no-start
+$ cf create-route examples tcp.scapp.io --port <span style=color:#0000cf;font-weight:700>28888</span>
+$ cf map-route mcs tcp.scapp.io --port <span style=color:#0000cf;font-weight:700>28888</span>
+$ cf set-env mcs EULA <span style=color:#204a87>true</span>
+$ cf set-env mcs MOTD <span style=color:#4e9a06>&#39;Minecraft powered by Swisscom Application Cloud&#39;</span>
 $ cf start minecraft
 
 $ cf app minecraft
-Showing health and status <span style=color:#c678dd>for</span> app minecraft in org  swisscom / space examples as user1...
+Showing health and status <span style=color:#204a87;font-weight:700>for</span> app minecraft in org  swisscom / space examples as user1...
 
 name:              minecraft
 requested state:   started
 instances:         1/1
-usage:             1.5G x <span style=color:#d19a66>1</span> instances
+usage:             1.5G x <span style=color:#0000cf;font-weight:700>1</span> instances
 routes:            tcp.scapp.io:28888
-last uploaded:     Mon <span style=color:#d19a66>12</span> Feb 15:26:23 UTC <span style=color:#d19a66>2018</span>
+last uploaded:     Mon <span style=color:#0000cf;font-weight:700>12</span> Feb 15:26:23 UTC <span style=color:#0000cf;font-weight:700>2018</span>
 stack:             cflinuxfs2
 docker image:      itzg/minecraft-server
 
      state     since                  cpu    memory           disk          details
-<span style=color:#8a93a5;font-style:italic>#0   running   2018-03-28T22:44:18Z   1.2%   959.5M of 1.5G   35.2M of 1G</span>
+<span style=color:#8f5902;font-style:italic>#0   running   2018-03-28T22:44:18Z   1.2%   959.5M of 1.5G   35.2M of 1G</span>
 </code></pre></div><p>There you go, Minecraft running on the Application Cloud:
 <img src=/images/tcp-minecraft.png alt=Devportal></p>
 <p>Running a Minecraft server on the Application Cloud would previously not have been possible due to its TCP only nature.</p>
