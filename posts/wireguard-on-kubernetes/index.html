@@ -265,7 +265,7 @@ So Kubernetes it is!</p>
 <p>We are going to just directly deploy without doing any templating for this example to keep it brief:</p>
 <div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>kubectl -n wireguard apply -f wireguard.yml
 </code></pre></div><p>Your very own personal WireGuard VPN server should now be up and running, reachable on the NodePort IP and port 31820 as per our Kubernetes service definition.</p>
-<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ nc -vz 1.2.3.4 <span style=color:#d19a66>31820</span>
+<div class=highlight><pre tabindex=0 style=color:#b0c4de;background-color:#282c34;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ nc -uvz 1.2.3.4 <span style=color:#d19a66>31820</span>
 Connection to 1.2.3.4 <span style=color:#d19a66>31820</span> port <span style=color:#c7bf54>[</span>udp/wireguard<span style=color:#c7bf54>]</span> succeeded!
 </code></pre></div><h2 id=adguard-home>AdGuard Home</h2>
 <p>AdGuard Home is a network-wide software for blocking ads and tracking. When using it as your main DNS server it allows you to take advantage of system-wide ad-blocking on all your devices and you don&rsquo;t need any client-side software.
