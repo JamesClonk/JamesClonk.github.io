@@ -55,7 +55,7 @@ enableEmoji= true
 # light theme, use together with "tango" highlight
 # "215580", "#1e4d73", "#1b4466", "#1a4162", "#133048", "#122d45"
   [params.style]
-    darkestColor = "#f3f3f3"
+    darkestColor = "#f4f6f6"
     darkColor = "#ffffff"
     lightColor = "#333333"
     lightestColor = "#133048"
