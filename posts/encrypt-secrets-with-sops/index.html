@@ -58,7 +58,7 @@ Jul 25, 2021
 </div>
 </header>
 <div class=post-content>
-<h2 id=enviroment-variables>Enviroment variables</h2>
+<h2 id=environment-variables>Environment variables</h2>
 <p>When I was originally contemplating on how to run all my personal projects and applications on <a href=/posts/my-own-kubernetes/>my own Kubernetes</a> cluster, one of the problems was how would I store secrets? Where would I store them?</p>
 <p>Since I intended to have all my <a href="https://www.youtube.com/watch?v=RO7VcUAsf-I">Infrastructure-as-Code</a>, deployment and application repositories publicly accessible on GitHub (to be able to benefit from all the nice free services it provides for public / open-source projects), I needed to figure out how I should do this.</p>
 <p>Initially I went for the simple and obvious way of having all my pipeline code relying on injected environment variables, a typical principle of the <a href=https://12factor.net/config>12-factor</a> approach on how to store configuration data.</p>
