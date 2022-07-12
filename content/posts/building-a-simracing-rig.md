@@ -1,4 +1,3 @@
-
 ---
 title: "Building a motion rig for Sim-racing"
 description: "How to build a DIY motion rig for sim-racing"

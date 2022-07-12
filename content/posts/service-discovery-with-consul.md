@@ -1,4 +1,3 @@
-
 ---
 title: "Service Discovery with Consul"
 description: "Consul provides automatic service discovery in a cloud-native world of microservices"
