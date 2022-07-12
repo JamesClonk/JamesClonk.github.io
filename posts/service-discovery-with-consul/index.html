@@ -1,103 +1,28 @@
-<!doctype html><html lang=en-us>
-<head>
-<title>Service Discovery with Consul // Ramblings about all things technical</title>
-<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
-<meta charset=utf-8>
-<meta name=generator content="Hugo 0.88.1">
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=author content="Fabio Berchtold">
-<meta name=description content="Consul provides automatic service discovery in a cloud-native world of microservices">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css>
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Service Discovery with Consul">
-<meta name=twitter:description content="Consul provides automatic service discovery in a cloud-native world of microservices">
-<meta property="og:title" content="Service Discovery with Consul">
-<meta property="og:description" content="Consul provides automatic service discovery in a cloud-native world of microservices">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.jamesclonk.io/posts/service-discovery-with-consul/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2015-06-11T14:40:58+02:00">
-<meta property="article:modified_time" content="2015-06-11T14:40:58+02:00">
-</head>
-<body>
-<header class=app-header>
-<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
-<h1>Ramblings about all things technical</h1>
-<nav class=app-header-menu>
-<a class=app-header-menu-item href=/>Home</a>
+<!doctype html><html lang=en-us><head><title>Service Discovery with Consul // Ramblings about all things technical</title><link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Fabio Berchtold"><meta name=description content="Consul provides automatic service discovery in a cloud-native world of microservices"><link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css><meta name=twitter:card content="summary"><meta name=twitter:title content="Service Discovery with Consul"><meta name=twitter:description content="Consul provides automatic service discovery in a cloud-native world of microservices"><meta property="og:title" content="Service Discovery with Consul"><meta property="og:description" content="Consul provides automatic service discovery in a cloud-native world of microservices"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.jamesclonk.io/posts/service-discovery-with-consul/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2015-06-11T14:40:58+02:00"><meta property="article:modified_time" content="2015-06-11T14:40:58+02:00"></head><body><header class=app-header><a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a><h1>Ramblings about all things technical</h1><nav class=app-header-menu><a class=app-header-menu-item href=/>Home</a>
 -
 <a class=app-header-menu-item href=/tags/>Tags</a>
 -
-<a class=app-header-menu-item href=/about/>About</a>
-</nav>
-<p>Working with tech is fun!</p>
-<div class=app-header-social>
-<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
-</a>
-</div>
-</header>
-<main class=app-container>
-<article class=post>
-<header class=post-header>
-<h1 class=post-title>Service Discovery with Consul</h1>
-<div class=post-meta>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-Fabio Berchtold
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-Jun 11, 2015
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-3 min read
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-<a class=tag href=/tags/service-discovery/>service discovery</a>
+<a class=app-header-menu-item href=/about/>About</a></nav><p>Working with tech is fun!</p><div class=app-header-social><a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>Service Discovery with Consul</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fabio Berchtold</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jun 11, 2015</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>3 min read</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class=tag href=/tags/service-discovery/>service discovery</a>
 <a class=tag href=/tags/consul/>consul</a>
 <a class=tag href=/tags/unbound/>unbound</a>
-<a class=tag href=/tags/dns/>dns</a>
-</div>
-</div>
-</header>
-<div class=post-content>
-<h2 id=what-is-service-discovery>What is Service Discovery?</h2>
-<p>In a cloud environment applications can change often, containers can move around, and VMs can be shutdown and recreated at any time. How do you keep track of where your databases or other services or applications are located and what their IP addresses are?
-Modern microservices architecture requires the introduction of &ldquo;Service Discovery&rdquo;.</p>
-<p>Service discovery is the means to provide a way for automatic detection of applications and services in the cloud, to keep track of the location of service instances with dynamically assigned IP address.</p>
-<h2 id=what-is-consul>What is Consul?</h2>
-<p><a href=https://www.consul.io/docs/intro>Consul</a> is a fully integrated service discovery solution with a service registry, providing a web UI dashboard and API access for service discovery, configuration, leader election and a key/value store. It allows you to discover, register and lookup services or applications for all kinds of workloads across VMs and networks. Entries in the service catalog can be added or removed automatically based on health checks.</p>
-<p>It enables services to discover each other by storing location information such as IP addresses in a single centralized service registry.</p>
-<p><img src=/images/consul-service-registry.png alt=Consul></p>
-<p>The goal of service discovery is to provide a catalog of available services or applications. Via a local Consul agent applications can provide a service definition to declare their availability to associate themselves with a health check. Such services can be defined in a configuration file or added at runtime over an HTTP API.</p>
-<p>Consul servers provide a strong consistency guarantee as they replicate their state using the <a href=https://www.consul.io/docs/architecture/consensus>Raft consensus protocol</a>. The Raft protocol allows the servers in a Consul cluster to coordinate with each through leader elections and a quorum. If for example the Consul server currently being the leader were to suddenly fail this would trigger a new leader election and the quorum would vote and decide on a new cluster leader.</p>
-<h3 id=how-can-i-use-it>How can I use it?</h3>
-<p>The main interface for Consul service discovery is DNS. Via simple DNS requests applications can make use of service discovery without needing any libraries or other code integration tied directly to Consul.</p>
-<p>For example an application could lookup its database backend by making a DNS query for <code>postgres-instance-2.service.consul</code>. Consul translates this query automatically into a lookup of all nodes that are registered to provide the postgres service <code>postgres-instance-2</code> and have no failing health checks, with the returning result being their <em>current</em> IP addresses that the application then can use to connect to the database servers.</p>
-<p>Assuming a Consul agent is currently running on the local VM you could query the location of a particular service for example simply like this:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ dig @127.0.0.1 -p <span style=color:#0000cf;font-weight:700>8600</span> my-mongodb.service.consul
-...
-
-<span style=color:#000;font-weight:700>;;</span> ANSWER SECTION:
-my-mongodb.service.consul. <span style=color:#0000cf;font-weight:700>0</span>   IN  A   192.168.1.77
-
-...
-
-<span style=color:#000;font-weight:700>;;</span> Query time: <span style=color:#0000cf;font-weight:700>1</span> msec
-<span style=color:#000;font-weight:700>;;</span> SERVER: 127.0.0.1#8600<span style=color:#ce5c00;font-weight:700>(</span>127.0.0.1<span style=color:#ce5c00;font-weight:700>)</span>
-</code></pre></div><h3 id=integrate-it-into-your-dns>Integrate it into your DNS</h3>
-<p>Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
+<a class=tag href=/tags/dns/>dns</a></div></div></header><div class=post-content><h2 id=what-is-service-discovery>What is Service Discovery?</h2><p>In a cloud environment applications can change often, containers can move around, and VMs can be shutdown and recreated at any time. How do you keep track of where your databases or other services or applications are located and what their IP addresses are?
+Modern microservices architecture requires the introduction of &ldquo;Service Discovery&rdquo;.</p><p>Service discovery is the means to provide a way for automatic detection of applications and services in the cloud, to keep track of the location of service instances with dynamically assigned IP address.</p><h2 id=what-is-consul>What is Consul?</h2><p><a href=https://www.consul.io/docs/intro>Consul</a> is a fully integrated service discovery solution with a service registry, providing a web UI dashboard and API access for service discovery, configuration, leader election and a key/value store. It allows you to discover, register and lookup services or applications for all kinds of workloads across VMs and networks. Entries in the service catalog can be added or removed automatically based on health checks.</p><p>It enables services to discover each other by storing location information such as IP addresses in a single centralized service registry.</p><p><img src=/images/consul-service-registry.png alt=Consul></p><p>The goal of service discovery is to provide a catalog of available services or applications. Via a local Consul agent applications can provide a service definition to declare their availability to associate themselves with a health check. Such services can be defined in a configuration file or added at runtime over an HTTP API.</p><p>Consul servers provide a strong consistency guarantee as they replicate their state using the <a href=https://www.consul.io/docs/architecture/consensus>Raft consensus protocol</a>. The Raft protocol allows the servers in a Consul cluster to coordinate with each through leader elections and a quorum. If for example the Consul server currently being the leader were to suddenly fail this would trigger a new leader election and the quorum would vote and decide on a new cluster leader.</p><h3 id=how-can-i-use-it>How can I use it?</h3><p>The main interface for Consul service discovery is DNS. Via simple DNS requests applications can make use of service discovery without needing any libraries or other code integration tied directly to Consul.</p><p>For example an application could lookup its database backend by making a DNS query for <code>postgres-instance-2.service.consul</code>. Consul translates this query automatically into a lookup of all nodes that are registered to provide the postgres service <code>postgres-instance-2</code> and have no failing health checks, with the returning result being their <em>current</em> IP addresses that the application then can use to connect to the database servers.</p><p>Assuming a Consul agent is currently running on the local VM you could query the location of a particular service for example simply like this:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ dig @127.0.0.1 -p <span style=color:#0000cf;font-weight:700>8600</span> my-mongodb.service.consul
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>;;</span> ANSWER SECTION:
+</span></span><span style=display:flex><span>my-mongodb.service.consul. <span style=color:#0000cf;font-weight:700>0</span>   IN  A   192.168.1.77
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>;;</span> Query time: <span style=color:#0000cf;font-weight:700>1</span> msec
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>;;</span> SERVER: 127.0.0.1#8600<span style=color:#ce5c00;font-weight:700>(</span>127.0.0.1<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span></code></pre></div><h3 id=integrate-it-into-your-dns>Integrate it into your DNS</h3><p>Now of course we could program our applications to go and query the Consul servers themselves directly whenever they need to resolve the location of a particular service, but an even better way than having to hard-code any such behaviour would be to integrate the Consul DNS resolution within your default DNS provider.
 If you are using for example <em>dnsmasq</em> or <em><a href=https://www.nlnetlabs.nl/projects/unbound/about/>unbound</a></em> in your infrastructure you can easily configure a forward zone for <code>*.service.consul</code> to delegate any such request that your normal DNS server receives to be forwared along to the Consul DNS.
-Let&rsquo;s say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;service.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.service.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline> 
-</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;node.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.node.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
-</span></code></pre></div><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p>
-</div>
-<div class=post-footer>
-</div>
-</article>
-</main>
-</body>
-</html>
+Let&rsquo;s say you also have a local Consul agent running on your unbound VMs and that agent is part of your Consul cluster, then you can simply define stub-zones like these in the unbound configuration files:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;service.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.service.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline> 
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>stub-zone</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#34;node.consul&#34;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>stub-addr</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>127.0.0.1</span>@<span style=color:#0000cf;font-weight:700>8600</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#8f5902;font-style:italic># forward &#34;.node.consul&#34; queries to local Consul agent</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span></code></pre></div><p>This way any DNS query your applications do within your network will be able to resolve and locate services from the Consul service catalog. 😀</p></div><div class=post-footer></div></article></main></body></html>

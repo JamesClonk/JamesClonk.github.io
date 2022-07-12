@@ -1,203 +1,59 @@
-<!doctype html><html lang=en-us>
-<head>
-<title>Cloud Foundry and Prometheus // Ramblings about all things technical</title>
-<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
-<meta charset=utf-8>
-<meta name=generator content="Hugo 0.88.1">
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=author content="Fabio Berchtold">
-<meta name=description content="Get your app metrics from Cloud Foundry / the Application Cloud">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css>
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Cloud Foundry and Prometheus">
-<meta name=twitter:description content="Get your app metrics from Cloud Foundry / the Application Cloud">
-<meta property="og:title" content="Cloud Foundry and Prometheus">
-<meta property="og:description" content="Get your app metrics from Cloud Foundry / the Application Cloud">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.jamesclonk.io/posts/cloud-foundry-and-prometheus/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2019-11-26T11:40:41+02:00">
-<meta property="article:modified_time" content="2019-11-26T11:40:41+02:00">
-</head>
-<body>
-<header class=app-header>
-<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
-<h1>Ramblings about all things technical</h1>
-<nav class=app-header-menu>
-<a class=app-header-menu-item href=/>Home</a>
+<!doctype html><html lang=en-us><head><title>Cloud Foundry and Prometheus // Ramblings about all things technical</title><link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Fabio Berchtold"><meta name=description content="Get your app metrics from Cloud Foundry / the Application Cloud"><link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css><meta name=twitter:card content="summary"><meta name=twitter:title content="Cloud Foundry and Prometheus"><meta name=twitter:description content="Get your app metrics from Cloud Foundry / the Application Cloud"><meta property="og:title" content="Cloud Foundry and Prometheus"><meta property="og:description" content="Get your app metrics from Cloud Foundry / the Application Cloud"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.jamesclonk.io/posts/cloud-foundry-and-prometheus/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-11-26T11:40:41+02:00"><meta property="article:modified_time" content="2019-11-26T11:40:41+02:00"></head><body><header class=app-header><a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a><h1>Ramblings about all things technical</h1><nav class=app-header-menu><a class=app-header-menu-item href=/>Home</a>
 -
 <a class=app-header-menu-item href=/tags/>Tags</a>
 -
-<a class=app-header-menu-item href=/about/>About</a>
-</nav>
-<p>Working with tech is fun!</p>
-<div class=app-header-social>
-<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
-</a>
-</div>
-</header>
-<main class=app-container>
-<article class=post>
-<header class=post-header>
-<h1 class=post-title>Cloud Foundry and Prometheus</h1>
-<div class=post-meta>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-Fabio Berchtold
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-Nov 26, 2019
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-5 min read
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-<a class=tag href=/tags/cloud-foundry/>cloud foundry</a>
+<a class=app-header-menu-item href=/about/>About</a></nav><p>Working with tech is fun!</p><div class=app-header-social><a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>Cloud Foundry and Prometheus</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fabio Berchtold</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Nov 26, 2019</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>5 min read</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class=tag href=/tags/cloud-foundry/>cloud foundry</a>
 <a class=tag href=/tags/prometheus/>prometheus</a>
 <a class=tag href=/tags/metrics/>metrics</a>
 <a class=tag href=/tags/containers/>containers</a>
-<a class=tag href=/tags/app-cloud/>app cloud</a>
-</div>
-</div>
-</header>
-<div class=post-content>
-<h3 id=where-are-my-metrics-a-cloud-foundry-story>Where are my metrics? A Cloud Foundry story</h3>
-<h2 id=loggregator>Loggregator</h2>
-<p>The Loggregator in Cloud Foundry is the system behind the scenes that&rsquo;s responsible for gathering and streaming logs and metrics about user apps. It also gathers and streams metrics from Cloud Foundry components itself and health metrics from other platform VMs. Loggregator allows you to view these logs and metrics either through the <a href=https://github.com/cloudfoundry/log-stream-cli>Loggregator CF-CLI plugins</a> or through various third-party services and consumers, like for example the Cloud-Controller (API), a Firehose Nozzle or a Log-Cache endpoint.</p>
-<p>The Loggregator uses a microservices design architecture architecture that includes components for collecting, storing, and forwarding logs and metrics:</p>
-<p><img src=/images/loggregator.png alt=Loggregator></p>
-<p>Further information about the Loggregator system overall:</p>
-<ul>
-<li><a href=https://docs.cloudfoundry.org/loggregator/architecture.html>https://docs.cloudfoundry.org/loggregator/architecture.html</a></li>
-<li><a href=https://docs.cloudfoundry.org/loggregator/container-metrics.html>https://docs.cloudfoundry.org/loggregator/container-metrics.html</a></li>
-</ul>
-<h2 id=log-cache>Log-Cache</h2>
-<p>Out of all the components the Loggregator system is made up from the most interesting for our use case is the Log-Cache.</p>
-<p>Log-Cache is an in-memory store that allows you to view logs and metrics from Loggregator over a specified period of time. Log-Cache includes API endpoints and also a <a href=https://github.com/cloudfoundry/log-cache-cli>CF-CLI plugin</a> to query and filter logs and metrics. The Log-Cache API endpoints are available by default. For more information about using the Log-Cache API directly you can check out <a href=https://github.com/cloudfoundry/log-cache>Log-Cache</a> on GitHub.</p>
-<h2 id=reverse-log-proxy>Reverse Log Proxy</h2>
-<p>The Reverse Log Proxy (RLP) in Cloud Foundry is there to collect logs and metrics from the Dopplers and forward them to Log-Cache. It also has a RLP Gateway which allows external clients (i.e. you or your app) to connect to it and stream ingest envelopes (logs and metrics) from the Loggregator API.
+<a class=tag href=/tags/app-cloud/>app cloud</a></div></div></header><div class=post-content><h3 id=where-are-my-metrics-a-cloud-foundry-story>Where are my metrics? A Cloud Foundry story</h3><h2 id=loggregator>Loggregator</h2><p>The Loggregator in Cloud Foundry is the system behind the scenes that&rsquo;s responsible for gathering and streaming logs and metrics about user apps. It also gathers and streams metrics from Cloud Foundry components itself and health metrics from other platform VMs. Loggregator allows you to view these logs and metrics either through the <a href=https://github.com/cloudfoundry/log-stream-cli>Loggregator CF-CLI plugins</a> or through various third-party services and consumers, like for example the Cloud-Controller (API), a Firehose Nozzle or a Log-Cache endpoint.</p><p>The Loggregator uses a microservices design architecture architecture that includes components for collecting, storing, and forwarding logs and metrics:</p><p><img src=/images/loggregator.png alt=Loggregator></p><p>Further information about the Loggregator system overall:</p><ul><li><a href=https://docs.cloudfoundry.org/loggregator/architecture.html>https://docs.cloudfoundry.org/loggregator/architecture.html</a></li><li><a href=https://docs.cloudfoundry.org/loggregator/container-metrics.html>https://docs.cloudfoundry.org/loggregator/container-metrics.html</a></li></ul><h2 id=log-cache>Log-Cache</h2><p>Out of all the components the Loggregator system is made up from the most interesting for our use case is the Log-Cache.</p><p>Log-Cache is an in-memory store that allows you to view logs and metrics from Loggregator over a specified period of time. Log-Cache includes API endpoints and also a <a href=https://github.com/cloudfoundry/log-cache-cli>CF-CLI plugin</a> to query and filter logs and metrics. The Log-Cache API endpoints are available by default. For more information about using the Log-Cache API directly you can check out <a href=https://github.com/cloudfoundry/log-cache>Log-Cache</a> on GitHub.</p><h2 id=reverse-log-proxy>Reverse Log Proxy</h2><p>The Reverse Log Proxy (RLP) in Cloud Foundry is there to collect logs and metrics from the Dopplers and forward them to Log-Cache. It also has a RLP Gateway which allows external clients (i.e. you or your app) to connect to it and stream ingest envelopes (logs and metrics) from the Loggregator API.
 This API endpoint is commonly available at <em><strong><code>log-stream.system-domain</code></strong></em>.
-For example for the Swisscom AppCloud this would be at <a href=https://log-stream.lyra-836.appcloud.swisscom.com>https://log-stream.lyra-836.appcloud.swisscom.com</a> (and <a href=https://log-stream.scapp-console.swisscom.com>https://log-stream.scapp-console.swisscom.com</a> for the internal AppCloud)</p>
-<h2 id=prometheus>Prometheus?</h2>
-<p><a href=https://prometheus.io/>Prometheus</a> is a system used for event monitoring and alerting. It records real-time metrics in its own time-series database with flexible queries and real-time alerting.
-It works based on a PULL model, scraping metrics from available remote <code>/metrics</code> endpoints. It is very commonly used as the main monitoring system for cloud native applications.</p>
-<p><img src=/images/prometheus.png alt=Loggregator></p>
-<h2 id=app-metrics>App metrics</h2>
-<p>Prometheus and Log-Cache are great, but how do I get these now to work together?</p>
-<h3 id=prometheus-exporter>Prometheus-Exporter</h3>
-<p>Since Prometheus is based on a PULL model you are going to need to somehow provide a <code>/metrics</code> endpoint for Prometheus that can be scraped. This is where the <a href=https://github.com/swisscom/paas-prometheus-exporter>paas-prometheus-exporter</a> comes into play.
+For example for the Swisscom AppCloud this would be at <a href=https://log-stream.lyra-836.appcloud.swisscom.com>https://log-stream.lyra-836.appcloud.swisscom.com</a> (and <a href=https://log-stream.scapp-console.swisscom.com>https://log-stream.scapp-console.swisscom.com</a> for the internal AppCloud)</p><h2 id=prometheus>Prometheus?</h2><p><a href=https://prometheus.io/>Prometheus</a> is a system used for event monitoring and alerting. It records real-time metrics in its own time-series database with flexible queries and real-time alerting.
+It works based on a PULL model, scraping metrics from available remote <code>/metrics</code> endpoints. It is very commonly used as the main monitoring system for cloud native applications.</p><p><img src=/images/prometheus.png alt=Loggregator></p><h2 id=app-metrics>App metrics</h2><p>Prometheus and Log-Cache are great, but how do I get these now to work together?</p><h3 id=prometheus-exporter>Prometheus-Exporter</h3><p>Since Prometheus is based on a PULL model you are going to need to somehow provide a <code>/metrics</code> endpoint for Prometheus that can be scraped. This is where the <a href=https://github.com/swisscom/paas-prometheus-exporter>paas-prometheus-exporter</a> comes into play.
 It&rsquo;s a simple app that you can push onto Cloud Foundry, then connects to the API to auto-detect all your apps, collects their metrics from Loggregator / Log-Cache for you and provides them at a Prometheus-compatible <code>/metrics</code> endpoint.
-If you&rsquo;re a Golang developer it is actually be very easy to write your own app to do this thanks to the provided <a href=https://github.com/cloudfoundry/go-loggregator>go-loggregator library</a>, which you can use to ingest the stream of logs and metrics from Cloud Foundry (see <a href=https://github.com/cloudfoundry/go-loggregator/tree/master/examples/rlp_gateway>examples</a>) via the Reverse Log Proxy.</p>
-<p>But for now let&rsquo;s use the paas-prometheus-exporter to get our metrics.
+If you&rsquo;re a Golang developer it is actually be very easy to write your own app to do this thanks to the provided <a href=https://github.com/cloudfoundry/go-loggregator>go-loggregator library</a>, which you can use to ingest the stream of logs and metrics from Cloud Foundry (see <a href=https://github.com/cloudfoundry/go-loggregator/tree/master/examples/rlp_gateway>examples</a>) via the Reverse Log Proxy.</p><p>But for now let&rsquo;s use the paas-prometheus-exporter to get our metrics.
 First you&rsquo;ll have to create a new technical user to be used via the AppCloud Portal UI.
-You can then assign the roles OrgAuditor and SpaceAuditor to this new user for any orgs and/or spaces you want it to collect app metrics from.</p>
-<p>Once pushed the exporter app will automatically detect any other apps from these orgs/spaces and collect their metrics information from Log-Cache in order to present it to you via its own <code>/metrics</code> endpoint.
-You can then configure your Prometheus to scrape metrics from there. An example <code>manifest.yml</code> and instructions on how to push/configure the app can be found in the <a href=https://github.com/swisscom/paas-prometheus-exporter#usage-on-swisscom-appcloud>Readme</a>.</p>
-<p>The following metrics will be exported for every application instance:</p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>cpu</strong></td>
-<td><em>gauge</em></td>
-<td>CPU</td>
-</tr>
-<tr>
-<td><strong>disk_bytes</strong></td>
-<td><em>gauge</em></td>
-<td>Disk usage in bytes</td>
-</tr>
-<tr>
-<td><strong>disk_utilization</strong></td>
-<td><em>gauge</em></td>
-<td>Disk utilisation in percent (0-100)</td>
-</tr>
-<tr>
-<td><strong>memory_bytes</strong></td>
-<td><em>gauge</em></td>
-<td>Memory usage in bytes</td>
-</tr>
-<tr>
-<td><strong>memory_utilization</strong></td>
-<td><em>gauge</em></td>
-<td>Memory utilisation in percent (0-100)</td>
-</tr>
-<tr>
-<td><strong>crash</strong></td>
-<td><em>counter</em></td>
-<td>Increased by one if the application crashed for any reason</td>
-</tr>
-<tr>
-<td><strong>requests</strong></td>
-<td><em>counter</em></td>
-<td>Number of requests processed broken down by status_range label</td>
-</tr>
-<tr>
-<td><strong>response_time</strong></td>
-<td><em>histogram</em></td>
-<td>Timing of processed requests broken down by status_range label</td>
-</tr>
-</tbody>
-</table>
-<p>Let&rsquo;s deploy a test setup with Prometheus and Grafana now on the appCloud to see how this can be used.</p>
-<p>First we&rsquo;ll prepare a configuration file for Prometheus:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>$ cat &gt; /tmp/prometheus.yml <span style=color:#4e9a06>&lt;&lt; EOF
-</span><span style=color:#4e9a06>global:
-</span><span style=color:#4e9a06>  scrape_interval: 15s
-</span><span style=color:#4e9a06>  scrape_timeout: 10s
-</span><span style=color:#4e9a06>  evaluation_interval: 15s
-</span><span style=color:#4e9a06>alerting:
-</span><span style=color:#4e9a06>  alertmanagers:
-</span><span style=color:#4e9a06>  - static_configs:
-</span><span style=color:#4e9a06>    - targets: []
-</span><span style=color:#4e9a06>    scheme: http
-</span><span style=color:#4e9a06>    timeout: 10s
-</span><span style=color:#4e9a06>    api_version: v1
-</span><span style=color:#4e9a06>scrape_configs:
-</span><span style=color:#4e9a06># prometheus itself
-</span><span style=color:#4e9a06>- job_name: prometheus
-</span><span style=color:#4e9a06>  honor_timestamps: true
-</span><span style=color:#4e9a06>  scrape_interval: 15s
-</span><span style=color:#4e9a06>  scrape_timeout: 10s
-</span><span style=color:#4e9a06>  metrics_path: /metrics
-</span><span style=color:#4e9a06>  scheme: http
-</span><span style=color:#4e9a06>  static_configs:
-</span><span style=color:#4e9a06>  - targets:
-</span><span style=color:#4e9a06>    - localhost:9090
-</span><span style=color:#4e9a06># my new exporter app
-</span><span style=color:#4e9a06>- job_name: exporter-app
-</span><span style=color:#4e9a06>  honor_timestamps: true
-</span><span style=color:#4e9a06>  scrape_interval: 15s
-</span><span style=color:#4e9a06>  scrape_timeout: 10s
-</span><span style=color:#4e9a06>  metrics_path: /metrics
-</span><span style=color:#4e9a06>  scheme: https
-</span><span style=color:#4e9a06>  basic_auth:
-</span><span style=color:#4e9a06>    username: metrics-auth-username # change to your exporter basic-auth username
-</span><span style=color:#4e9a06>    password: metrics-auth-password # change to your exporter basic-auth password
-</span><span style=color:#4e9a06>  static_configs:
-</span><span style=color:#4e9a06>  - targets:
-</span><span style=color:#4e9a06>    - my-metrics-exporter-app.applicationcloud.io
-</span><span style=color:#4e9a06>EOF</span>
-</code></pre></div><p>And then run it locally inside a Docker container:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh>docker rm -f prometheus<span style=color:#000;font-weight:700>;</span> docker run <span style=color:#4e9a06>\
-</span><span style=color:#4e9a06></span>    -p 9090:9090 <span style=color:#4e9a06>\
-</span><span style=color:#4e9a06></span>    -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml <span style=color:#4e9a06>\
-</span><span style=color:#4e9a06></span>    --name prometheus prom/prometheus:latest
-</code></pre></div><p>We can now access the Prometheus UI and check that our scrape target is working correctly:</p>
-<p><img src=/images/prometheus-targets.png alt=Loggregator></p>
-<p>To verify if we are now really scraping metrics from our apps and get live data from Cloud Foundry we can query the CPU metrics in Prometheus:</p>
-<p><img src=/images/prometheus-graph.png alt=Loggregator></p>
-<p>Success! 🎉</p>
-<p>We now have a working Prometheus setup, with our Prometheus-Exporter app being responsible to collect and present application metrics via its /metrics endpoint to Prometheus.
-At this point we could also start thinking about building some nice dashboards with <a href=https://grafana.com/>Grafana</a>, or some alerting with the Prometheus <a href=https://prometheus.io/docs/alerting/alertmanager/>Alertmanager</a>.</p>
-</div>
-<div class=post-footer>
-</div>
-</article>
-</main>
-</body>
-</html>
+You can then assign the roles OrgAuditor and SpaceAuditor to this new user for any orgs and/or spaces you want it to collect app metrics from.</p><p>Once pushed the exporter app will automatically detect any other apps from these orgs/spaces and collect their metrics information from Log-Cache in order to present it to you via its own <code>/metrics</code> endpoint.
+You can then configure your Prometheus to scrape metrics from there. An example <code>manifest.yml</code> and instructions on how to push/configure the app can be found in the <a href=https://github.com/swisscom/paas-prometheus-exporter#usage-on-swisscom-appcloud>Readme</a>.</p><p>The following metrics will be exported for every application instance:</p><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><strong>cpu</strong></td><td><em>gauge</em></td><td>CPU</td></tr><tr><td><strong>disk_bytes</strong></td><td><em>gauge</em></td><td>Disk usage in bytes</td></tr><tr><td><strong>disk_utilization</strong></td><td><em>gauge</em></td><td>Disk utilisation in percent (0-100)</td></tr><tr><td><strong>memory_bytes</strong></td><td><em>gauge</em></td><td>Memory usage in bytes</td></tr><tr><td><strong>memory_utilization</strong></td><td><em>gauge</em></td><td>Memory utilisation in percent (0-100)</td></tr><tr><td><strong>crash</strong></td><td><em>counter</em></td><td>Increased by one if the application crashed for any reason</td></tr><tr><td><strong>requests</strong></td><td><em>counter</em></td><td>Number of requests processed broken down by status_range label</td></tr><tr><td><strong>response_time</strong></td><td><em>histogram</em></td><td>Timing of processed requests broken down by status_range label</td></tr></tbody></table><p>Let&rsquo;s deploy a test setup with Prometheus and Grafana now on the appCloud to see how this can be used.</p><p>First we&rsquo;ll prepare a configuration file for Prometheus:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ cat &gt; /tmp/prometheus.yml <span style=color:#4e9a06>&lt;&lt; EOF
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>global:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_interval: 15s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_timeout: 10s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  evaluation_interval: 15s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>alerting:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  alertmanagers:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  - static_configs:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    - targets: []
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    scheme: http
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    timeout: 10s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    api_version: v1
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>scrape_configs:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06># prometheus itself
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>- job_name: prometheus
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  honor_timestamps: true
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_interval: 15s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_timeout: 10s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  metrics_path: /metrics
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scheme: http
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  static_configs:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  - targets:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    - localhost:9090
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06># my new exporter app
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>- job_name: exporter-app
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  honor_timestamps: true
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_interval: 15s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scrape_timeout: 10s
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  metrics_path: /metrics
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  scheme: https
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  basic_auth:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    username: metrics-auth-username # change to your exporter basic-auth username
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    password: metrics-auth-password # change to your exporter basic-auth password
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  static_configs:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>  - targets:
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>    - my-metrics-exporter-app.applicationcloud.io
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06>EOF</span>
+</span></span></code></pre></div><p>And then run it locally inside a Docker container:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>docker rm -f prometheus<span style=color:#000;font-weight:700>;</span> docker run <span style=color:#4e9a06>\
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06></span>    -p 9090:9090 <span style=color:#4e9a06>\
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06></span>    -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml <span style=color:#4e9a06>\
+</span></span></span><span style=display:flex><span><span style=color:#4e9a06></span>    --name prometheus prom/prometheus:latest
+</span></span></code></pre></div><p>We can now access the Prometheus UI and check that our scrape target is working correctly:</p><p><img src=/images/prometheus-targets.png alt=Loggregator></p><p>To verify if we are now really scraping metrics from our apps and get live data from Cloud Foundry we can query the CPU metrics in Prometheus:</p><p><img src=/images/prometheus-graph.png alt=Loggregator></p><p>Success! 🎉</p><p>We now have a working Prometheus setup, with our Prometheus-Exporter app being responsible to collect and present application metrics via its /metrics endpoint to Prometheus.
+At this point we could also start thinking about building some nice dashboards with <a href=https://grafana.com/>Grafana</a>, or some alerting with the Prometheus <a href=https://prometheus.io/docs/alerting/alertmanager/>Alertmanager</a>.</p></div><div class=post-footer></div></article></main></body></html>

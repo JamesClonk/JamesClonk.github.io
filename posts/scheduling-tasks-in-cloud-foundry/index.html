@@ -1,123 +1,31 @@
-<!doctype html><html lang=en-us>
-<head>
-<title>Scheduling Tasks in Cloud Foundry // Ramblings about all things technical</title>
-<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
-<meta charset=utf-8>
-<meta name=generator content="Hugo 0.88.1">
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=author content="Fabio Berchtold">
-<meta name=description content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc.">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css>
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="Scheduling Tasks in Cloud Foundry">
-<meta name=twitter:description content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc.">
-<meta property="og:title" content="Scheduling Tasks in Cloud Foundry">
-<meta property="og:description" content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.jamesclonk.io/posts/scheduling-tasks-in-cloud-foundry/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2019-09-03T14:23:30+02:00">
-<meta property="article:modified_time" content="2019-09-03T14:23:30+02:00">
-</head>
-<body>
-<header class=app-header>
-<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
-<h1>Ramblings about all things technical</h1>
-<nav class=app-header-menu>
-<a class=app-header-menu-item href=/>Home</a>
+<!doctype html><html lang=en-us><head><title>Scheduling Tasks in Cloud Foundry // Ramblings about all things technical</title><link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Fabio Berchtold"><meta name=description content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc."><link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css><meta name=twitter:card content="summary"><meta name=twitter:title content="Scheduling Tasks in Cloud Foundry"><meta name=twitter:description content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc."><meta property="og:title" content="Scheduling Tasks in Cloud Foundry"><meta property="og:description" content="The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc."><meta property="og:type" content="article"><meta property="og:url" content="https://blog.jamesclonk.io/posts/scheduling-tasks-in-cloud-foundry/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-09-03T14:23:30+02:00"><meta property="article:modified_time" content="2019-09-03T14:23:30+02:00"></head><body><header class=app-header><a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a><h1>Ramblings about all things technical</h1><nav class=app-header-menu><a class=app-header-menu-item href=/>Home</a>
 -
 <a class=app-header-menu-item href=/tags/>Tags</a>
 -
-<a class=app-header-menu-item href=/about/>About</a>
-</nav>
-<p>Working with tech is fun!</p>
-<div class=app-header-social>
-<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
-</a>
-</div>
-</header>
-<main class=app-container>
-<article class=post>
-<header class=post-header>
-<h1 class=post-title>Scheduling Tasks in Cloud Foundry</h1>
-<div class=post-meta>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-Fabio Berchtold
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-Sep 3, 2019
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-4 min read
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-<a class=tag href=/tags/cloud-foundry/>cloud foundry</a>
+<a class=app-header-menu-item href=/about/>About</a></nav><p>Working with tech is fun!</p><div class=app-header-social><a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>Scheduling Tasks in Cloud Foundry</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fabio Berchtold</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sep 3, 2019</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>4 min read</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class=tag href=/tags/cloud-foundry/>cloud foundry</a>
 <a class=tag href=/tags/scheduling/>scheduling</a>
 <a class=tag href=/tags/containers/>containers</a>
-<a class=tag href=/tags/app-cloud/>app cloud</a>
-</div>
-</div>
-</header>
-<div class=post-content>
-<blockquote>
-<p><em>The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc.</em></p>
-</blockquote>
-<h2 id=what-are-tasks>What are Tasks?</h2>
-<p>While most of the time you are probably using the <a href=http://developer.swisscom.com/>Swisscom Application Cloud</a> (A managed Cloud Foundry platform-as-a-service) to push long running processes or <em>&ldquo;apps&rdquo;</em> as they are commonly called, there is the occasional use case for tasks.</p>
-<p>Now tasks in Cloud Foundry are defined as a process that runs only for a finite amount of time, and then stops. A task runs in its own container, inheriting memory and disk limits from its parent app, and should be designed to use minimal resources while executing a <em>&ldquo;task&rdquo;</em>. After such a task exits Cloud Foundry will destroy and remove this container again. Tasks can also be checked for their current state and for a success or failure message after they finished.</p>
-<p>Tasks are an example of a one-off or on-demand single use job that needs to do some kind of work and then exit, like:</p>
-<ul>
-<li>Running a database migration</li>
-<li>Sending emails</li>
-<li>Running batch jobs</li>
-<li>Processing data input/output</li>
-<li>Running backups</li>
-<li>etc..</li>
-</ul>
-<p>Documentation on using tasks in Cloud Foundry can be found here: <a href=https://docs.developer.swisscom.com/devguide/using-tasks.html>https://docs.developer.swisscom.com/devguide/using-tasks.html</a></p>
-<h2 id=what-is-the-task-scheduler>What is the Task-Scheduler?</h2>
-<p>While tasks are a great tool to run short running processes or batch jobs, triggering them manually can be quite tedious. You might want to run your daily database backup every at two o&rsquo;clock in the morning perhaps, or processing some data every 15 minutes? With any of these the need for some way of automatic scheduling arises..</p>
-<h3 id=enter-the-task-scheduler-service>Enter the Task-Scheduler service</h3>
-<p>On the Swisscom Application Cloud there is the Task-Scheduler service available in the marketplace to help you with all your task-scheduling needs.</p>
-<p>It is a distributed, highly-available system running in the backend that accepts scheduling requests coming from Cloud Foundry users, creates and manages jobs and their schedule, and executes these jobs as tasks on Cloud Foundry at the scheduled time and date.</p>
-<p>Integration into the marketplace is done via the standardized <a href=https://www.openservicebrokerapi.org/>Open Service Broker API</a>, to make the experience seamless for all users of the Swisscom Application Cloud.
-Thanks to this a user can simply create service instances, bind these to his apps and define tasks to be scheduled all through the <a href=https://docs.developer.swisscom.com/cf-cli/>CF CLI</a> without the need for any additional tools.</p>
-<h3 id=task-scheduler-architecture-overview>Task-Scheduler architecture overview</h3>
-<p><img src=/images/task-scheduler.png alt=Loggregator></p>
-<h2 id=great-how-do-i-use-it>Great, how do I use it?</h2>
-<p>To use the Task-Scheduler you must first create a service instance of it.</p>
-<p>Check the marketplace and you should see the Task-Scheduler service listed there, then create a new service instance:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf marketplace
-Getting services from marketplace in org swisscom / space examples as fabio.berchtold@swisscom.com...
-OK
-service          plans      description
-task-scheduler   free       Task-Scheduler to schedule periodical runs of tasks
-$ cf create-service task-scheduler free my-scheduler
-Creating service instance my-scheduler in org swisscom / space examples as fabio.berchtold@swisscom.com...
-OK
-$ cf services
-Getting services in org swisscom / space examples as fabio.berchtold@swisscom.com...
-name                         service          plan    bound apps
-my-scheduler                 task-scheduler   free
-</code></pre></div><p>Once the service instance has been created you can then bind it to an existing app. During binding you specify via binding parameters the requested schedule, task, and optionally memory/disk limit overwrites. The service can be bound to as many different apps as you wish, the binding only acts as a registration action for the Task-Scheduler service:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf bind-service my-app my-scheduler -c <span style=color:#4e9a06>&#39;{&#34;schedule&#34;:&#34;0 2 * * *&#34;, &#34;task&#34;:&#34;rake cleanup-db&#34;, &#34;memory_in_mb&#34;:128, &#34;disk_in_mb&#34;:512}&#39;</span>
-Binding service my-scheduler to my-app in org swisscom / space examples as fabio.berchtold@swisscom.com...
-OK
-</code></pre></div><p>After binding a Task-Scheduler instance to your app, the configured task will be executed automatically according to the provided cron schedule. To remove the scheduled task again simply unbind the service from the app.</p>
-<p>Running or finished tasks can be checked with the CF CLI:</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell>$ cf tasks my-app
-Getting tasks <span style=color:#204a87;font-weight:700>for</span> app my-app in org swisscom / space examples as fabio.berchtold@swisscom.com...
-OK
-id  name                                   state       start <span style=color:#204a87>time</span>                      <span style=color:#204a87>command</span>
-<span style=color:#0000cf;font-weight:700>3</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Thu, <span style=color:#0000cf;font-weight:700>29</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:05 UTC   rake cleanup-db
-<span style=color:#0000cf;font-weight:700>2</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Wed, <span style=color:#0000cf;font-weight:700>28</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:19 UTC   rake cleanup-db
-<span style=color:#0000cf;font-weight:700>1</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Tue, <span style=color:#0000cf;font-weight:700>27</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:03 UTC   rake cleanup-db
-</code></pre></div><p>And that&rsquo;s all there is to it.. I wish you a happy scheduling! ⏲️</p>
-<h3 id=see-also>See also:</h3>
-<p><a href=https://docs.developer.swisscom.com/service-offerings/task-scheduler.html>Task-Scheduler documentation</a></p>
-</div>
-<div class=post-footer>
-</div>
-</article>
-</main>
-</body>
-</html>
+<a class=tag href=/tags/app-cloud/>app cloud</a></div></div></header><div class=post-content><blockquote><p><em>The Task-Scheduler service on the Swisscom Application Cloud allows you to schedule and automatically run tasks for your applications. You can use it to schedule periodical execution of any tasks on the Application Cloud, including database migrations, emails, batch jobs, etc.</em></p></blockquote><h2 id=what-are-tasks>What are Tasks?</h2><p>While most of the time you are probably using the <a href=http://developer.swisscom.com/>Swisscom Application Cloud</a> (A managed Cloud Foundry platform-as-a-service) to push long running processes or <em>&ldquo;apps&rdquo;</em> as they are commonly called, there is the occasional use case for tasks.</p><p>Now tasks in Cloud Foundry are defined as a process that runs only for a finite amount of time, and then stops. A task runs in its own container, inheriting memory and disk limits from its parent app, and should be designed to use minimal resources while executing a <em>&ldquo;task&rdquo;</em>. After such a task exits Cloud Foundry will destroy and remove this container again. Tasks can also be checked for their current state and for a success or failure message after they finished.</p><p>Tasks are an example of a one-off or on-demand single use job that needs to do some kind of work and then exit, like:</p><ul><li>Running a database migration</li><li>Sending emails</li><li>Running batch jobs</li><li>Processing data input/output</li><li>Running backups</li><li>etc..</li></ul><p>Documentation on using tasks in Cloud Foundry can be found here: <a href=https://docs.developer.swisscom.com/devguide/using-tasks.html>https://docs.developer.swisscom.com/devguide/using-tasks.html</a></p><h2 id=what-is-the-task-scheduler>What is the Task-Scheduler?</h2><p>While tasks are a great tool to run short running processes or batch jobs, triggering them manually can be quite tedious. You might want to run your daily database backup every at two o&rsquo;clock in the morning perhaps, or processing some data every 15 minutes? With any of these the need for some way of automatic scheduling arises..</p><h3 id=enter-the-task-scheduler-service>Enter the Task-Scheduler service</h3><p>On the Swisscom Application Cloud there is the Task-Scheduler service available in the marketplace to help you with all your task-scheduling needs.</p><p>It is a distributed, highly-available system running in the backend that accepts scheduling requests coming from Cloud Foundry users, creates and manages jobs and their schedule, and executes these jobs as tasks on Cloud Foundry at the scheduled time and date.</p><p>Integration into the marketplace is done via the standardized <a href=https://www.openservicebrokerapi.org/>Open Service Broker API</a>, to make the experience seamless for all users of the Swisscom Application Cloud.
+Thanks to this a user can simply create service instances, bind these to his apps and define tasks to be scheduled all through the <a href=https://docs.developer.swisscom.com/cf-cli/>CF CLI</a> without the need for any additional tools.</p><h3 id=task-scheduler-architecture-overview>Task-Scheduler architecture overview</h3><p><img src=/images/task-scheduler.png alt=Loggregator></p><h2 id=great-how-do-i-use-it>Great, how do I use it?</h2><p>To use the Task-Scheduler you must first create a service instance of it.</p><p>Check the marketplace and you should see the Task-Scheduler service listed there, then create a new service instance:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ cf marketplace
+</span></span><span style=display:flex><span>Getting services from marketplace in org swisscom / space examples as fabio.berchtold@swisscom.com...
+</span></span><span style=display:flex><span>OK
+</span></span><span style=display:flex><span>service          plans      description
+</span></span><span style=display:flex><span>task-scheduler   free       Task-Scheduler to schedule periodical runs of tasks
+</span></span><span style=display:flex><span>$ cf create-service task-scheduler free my-scheduler
+</span></span><span style=display:flex><span>Creating service instance my-scheduler in org swisscom / space examples as fabio.berchtold@swisscom.com...
+</span></span><span style=display:flex><span>OK
+</span></span><span style=display:flex><span>$ cf services
+</span></span><span style=display:flex><span>Getting services in org swisscom / space examples as fabio.berchtold@swisscom.com...
+</span></span><span style=display:flex><span>name                         service          plan    bound apps
+</span></span><span style=display:flex><span>my-scheduler                 task-scheduler   free
+</span></span></code></pre></div><p>Once the service instance has been created you can then bind it to an existing app. During binding you specify via binding parameters the requested schedule, task, and optionally memory/disk limit overwrites. The service can be bound to as many different apps as you wish, the binding only acts as a registration action for the Task-Scheduler service:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ cf bind-service my-app my-scheduler -c <span style=color:#4e9a06>&#39;{&#34;schedule&#34;:&#34;0 2 * * *&#34;, &#34;task&#34;:&#34;rake cleanup-db&#34;, &#34;memory_in_mb&#34;:128, &#34;disk_in_mb&#34;:512}&#39;</span>
+</span></span><span style=display:flex><span>Binding service my-scheduler to my-app in org swisscom / space examples as fabio.berchtold@swisscom.com...
+</span></span><span style=display:flex><span>OK
+</span></span></code></pre></div><p>After binding a Task-Scheduler instance to your app, the configured task will be executed automatically according to the provided cron schedule. To remove the scheduled task again simply unbind the service from the app.</p><p>Running or finished tasks can be checked with the CF CLI:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>$ cf tasks my-app
+</span></span><span style=display:flex><span>Getting tasks <span style=color:#204a87;font-weight:700>for</span> app my-app in org swisscom / space examples as fabio.berchtold@swisscom.com...
+</span></span><span style=display:flex><span>OK
+</span></span><span style=display:flex><span>id  name                                   state       start <span style=color:#204a87>time</span>                      <span style=color:#204a87>command</span>
+</span></span><span style=display:flex><span><span style=color:#0000cf;font-weight:700>3</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Thu, <span style=color:#0000cf;font-weight:700>29</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:05 UTC   rake cleanup-db
+</span></span><span style=display:flex><span><span style=color:#0000cf;font-weight:700>2</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Wed, <span style=color:#0000cf;font-weight:700>28</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:19 UTC   rake cleanup-db
+</span></span><span style=display:flex><span><span style=color:#0000cf;font-weight:700>1</span>   2f458b3f-c383-4422-866f-31bd7fda9ac3   SUCCEEDED   Tue, <span style=color:#0000cf;font-weight:700>27</span> Aug <span style=color:#0000cf;font-weight:700>2019</span> 02:00:03 UTC   rake cleanup-db
+</span></span></code></pre></div><p>And that&rsquo;s all there is to it.. I wish you a happy scheduling! ⏲️</p><h3 id=see-also>See also:</h3><p><a href=https://docs.developer.swisscom.com/service-offerings/task-scheduler.html>Task-Scheduler documentation</a></p></div><div class=post-footer></div></article></main></body></html>

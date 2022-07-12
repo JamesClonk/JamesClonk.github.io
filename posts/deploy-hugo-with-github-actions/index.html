@@ -1,205 +1,42 @@
-<!doctype html><html lang=en-us>
-<head>
-<title>A blog with Hugo on GitHub // Ramblings about all things technical</title>
-<link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico>
-<meta charset=utf-8>
-<meta name=generator content="Hugo 0.88.1">
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=author content="Fabio Berchtold">
-<meta name=description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions">
-<link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css>
-<meta name=twitter:card content="summary">
-<meta name=twitter:title content="A blog with Hugo on GitHub">
-<meta name=twitter:description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions">
-<meta property="og:title" content="A blog with Hugo on GitHub">
-<meta property="og:description" content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://blog.jamesclonk.io/posts/deploy-hugo-with-github-actions/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2021-07-28T20:57:18+02:00">
-<meta property="article:modified_time" content="2021-07-28T20:57:18+02:00">
-</head>
-<body>
-<header class=app-header>
-<a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a>
-<h1>Ramblings about all things technical</h1>
-<nav class=app-header-menu>
-<a class=app-header-menu-item href=/>Home</a>
+<!doctype html><html lang=en-us><head><title>A blog with Hugo on GitHub // Ramblings about all things technical</title><link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Fabio Berchtold"><meta name=description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions"><link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.facf7c1371b8cc075f6eb13fb8053976f744494dc18315ac8719a036e2dfadaf.css><meta name=twitter:card content="summary"><meta name=twitter:title content="A blog with Hugo on GitHub"><meta name=twitter:description content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions"><meta property="og:title" content="A blog with Hugo on GitHub"><meta property="og:description" content="Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.jamesclonk.io/posts/deploy-hugo-with-github-actions/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2021-07-28T20:57:18+02:00"><meta property="article:modified_time" content="2021-07-28T20:57:18+02:00"></head><body><header class=app-header><a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a><h1>Ramblings about all things technical</h1><nav class=app-header-menu><a class=app-header-menu-item href=/>Home</a>
 -
 <a class=app-header-menu-item href=/tags/>Tags</a>
 -
-<a class=app-header-menu-item href=/about/>About</a>
-</nav>
-<p>Working with tech is fun!</p>
-<div class=app-header-social>
-<a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg>
-</a>
-</div>
-</header>
-<main class=app-container>
-<article class=post>
-<header class=post-header>
-<h1 class=post-title>A blog with Hugo on GitHub</h1>
-<div class=post-meta>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-Fabio Berchtold
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-Jul 28, 2021
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-6 min read
-</div>
-<div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-<a class=tag href=/tags/github/>github</a>
+<a class=app-header-menu-item href=/about/>About</a></nav><p>Working with tech is fun!</p><div class=app-header-social><a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>A blog with Hugo on GitHub</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fabio Berchtold</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jul 28, 2021</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>6 min read</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class=tag href=/tags/github/>github</a>
 <a class=tag href=/tags/github-actions/>github actions</a>
 <a class=tag href=/tags/hugo/>hugo</a>
-<a class=tag href=/tags/deployment/>deployment</a>
-</div>
-</div>
-</header>
-<div class=post-content>
-<h1 id=i-want-to-do-some-blogging>I want to do some blogging</h1>
-<p>So I wanted to migrate all of my existing blog posts (and create some new ones of course) to a new self-hosted system.
-My requirements for this have been the following:</p>
-<ul>
-<li>Simple and easy to use (I <em><strong>hate</strong></em> complicated UI editors!)
-<ul>
-<li>Preferably Markdown or similar format support</li>
-</ul>
-</li>
-<li>Open source</li>
-<li>Self-hosted</li>
-<li>Easily runnable on my personal K8s cluster
-<ul>
-<li>Tucked away behind an Ingress-Nginx controller, it must not try to do its own TLS / HTTPS handling</li>
-</ul>
-</li>
-<li>Preferably no need for a database
-<ul>
-<li>If it needs to have a database, then it must be Postgres (as that is what I already manage on my K8s infrastructure)</li>
-</ul>
-</li>
-<li>Secure</li>
-<li>Preferably written in Golang
-<ul>
-<li>PHP based software is out of the question by default! 🙄</li>
-</ul>
-</li>
-</ul>
-<p>After a bit of Googling and some research this gave me the following options to choose from at the end:</p>
-<ul>
-<li><a href=https://kabukky.github.io/journey/>Journey</a>
-<ul>
-<li>Looked interesting at first, but seems to not be maintained anymore</li>
-</ul>
-</li>
-<li><a href=https://writefreely.org/>WriteFreely</a>
-<ul>
-<li>Quickly dismissed for being unnecessarily complicated and needing a MySQL database</li>
-<li>It seemed fine initially, but the whole software being the webserver itself that needs to be hosted to serve content proved to be something I ultimately didn&rsquo;t want. (More on that when looking at the final solution below: Hugo)</li>
-</ul>
-</li>
-<li><a href=https://github.com/jhvst/vertigo>Vertigo</a>
-<ul>
-<li>Unmaintained and unfinished</li>
-</ul>
-</li>
-<li><a href=https://pkg.go.dev/golang.org/x/tools/blog>golang.org/x/tools/blog</a>
-<ul>
-<li>Part of the extended stdlib of Golang, used by the Golang website itself to host its blogs. Why not, would be fun to use it seemed. But requires coding and work first. Meh, for this project I just want to write blog posts and get started doing so immediately</li>
-</ul>
-</li>
-<li><a href=https://gohugo.io/>Hugo</a>
-<ul>
-<li>Popular static site generator, requires no database</li>
-</ul>
-</li>
-<li><a href=https://jekyllrb.com/>Jekyll</a>, <a href=https://hexo.io/>Hexo</a>, <a href=https://vuepress.vuejs.org/>VuePress</a>, <a href=https://github.com/getpelican/pelican>Pelican</a>
-<ul>
-<li>All similar to Hugo but none of them is written in Golang. I don&rsquo;t want to deal with runtimes of dynamic languages and their package managers 🤷</li>
-</ul>
-</li>
-</ul>
-<h2 id=hugo>Hugo</h2>
-<p><a href=https://gohugo.io/>Hugo</a> is a static website generator written in Golang (yay!). It consists of a single binary that can generate all my blog posts and website content on-demand, or additionally also serve the content itself. It boosts great performance and easy of use, tons of themes and templates and a big community around it.</p>
-<p>Content for pages/post/etc. can be written in Markdown or other simplified formats and is then rendered into static HTML files. Thus it has no need for a backend database or datastore of any kind. All your pages are just files.</p>
-<p>I choose Hugo because of all of the above qualities. Being able to write just Markdown is simple and efficient, and no annoying WYSISWYG editor getting in my way. Having everything being &ldquo;compiled&rdquo; down into static HTML files is a big plus in my book and makes the blog extremely easy to maintain with a lot possible options on how to approach hosting and deployments.</p>
-<h2 id=hosting-on-github-pages>Hosting on GitHub Pages</h2>
-<p>GitHub provides free static hosting over SSL (using <a href=https://letsencrypt.org/>Let&rsquo;s Encrypt</a>) directly from a GitHub repository via its <a href=https://help.github.com/articles/what-is-github-pages/>GitHub Pages service</a> and automating the deployment workflow of Hugo with <a href=https://docs.github.com/en/actions>GitHub Actions</a>.</p>
-<h3 id=using-github-pages>Using GitHub Pages</h3>
-<p>There are two types of GitHub Pages:</p>
-<ul>
-<li>User/Organization Pages (<code>https://&lt;USERNAME|ORGANIZATION>.github.io/</code>)</li>
-<li>Project Pages (<code>https://&lt;USERNAME|ORGANIZATION>.github.io/&lt;PROJECT>/</code>)</li>
-</ul>
-<p>For my personal blog I decided to use the <code>&lt;USERNAME>.github.io</code> approach and host Hugo itself and all of its generated files in the repository <a href=https://github.com/JamesClonk/JamesClonk.github.io>JamesClonk/JamesClonk.github.io</a></p>
-<ol>
-<li>The <code>master</code> branch hosts all Hugo configuration, assets and content</li>
-<li>The <code>gh-pages</code> branch hosts the Hugo generated output, which GitHub will display under <a href=https://blog.jamesclonk.io>blog.jamesclonk.io</a></li>
-<li>A GitHub Actions workflow will trigger on commit to the <code>master</code> branch, run Hugo to generate all site content and commit this into the <code>gh-pages</code> branch</li>
-<li>The repository is configured to serve its GitHub Pages from the <code>gh-pages</code> branch root <code>/</code></li>
-</ol>
-<p><img src=/images/github-pages.png alt="GitHub Pages"></p>
-<h3 id=build-hugo-with-a-github-actions>Build Hugo with a GitHub Actions</h3>
-<p>GitHub Actions allows you to define workflows that can build your software or otherwise execute various steps as part of a CI/CD pipeline. With this setup I have a workflow which will build and publish this blog automatically everytime I push / create a new commit on the <code>master</code> branch of my Hugo Github repository.</p>
-<p>All I needed for this was to create <code>.github/workflows/gh-pages.yml</code> containing the following content (based on <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a>):</p>
-<div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github pages</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>push</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>branches</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000;font-weight:700>[</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>master ]</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>jobs</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>deploy</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>deploy Hugo to gh-pages</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>runs-on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>ubuntu-latest</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>steps</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>actions/checkout@v2</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>submodules</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>fetch-depth</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>0</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Setup Hugo</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-hugo@v2</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>hugo-version</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#39;latest&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>extended</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Build</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>run</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>hugo --minify</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Deploy</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-gh-pages@v3</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>if</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github.ref == &#39;refs/heads/master&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>github_token</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>${{ secrets.GITHUB_TOKEN }}</span><span style=color:#f8f8f8;text-decoration:underline>
-</span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>publish_dir</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>./public</span><span style=color:#f8f8f8;text-decoration:underline>
-</span></code></pre></div><p>The steps being executed by this workflow are as follows:</p>
-<ol>
-<li>If we get a push on branch <code>master</code></li>
-<li>Then checkout the repository (with submodules, since we have a theme in here as a submodule)</li>
-<li>Setup the Hugo binary (using the latest version of <code>hugo_extended</code>)</li>
-<li>Run <code>hugo --minify</code>, which will generate the site content under <code>publish/</code></li>
-<li>Commit and push the generated <code>publish/</code> folder into <code>gh-pages</code></li>
-</ol>
-<p>The result being that every time a commit happens on <code>master</code> branch this workflow will be trigger, generate the site content and publish it by pushing it into the <code>gh-pages</code> branch.</p>
-<p>For more advanced settings see <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a> and <a href=https://github.com/marketplace/actions/github-pages-action>actions-gh-pages</a>.</p>
-<h3 id=use-a-custom-domain-with-github-pages>Use a custom domain with GitHub Pages</h3>
-<p>Since I wanted to use a <a href=https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site>custom domain</a> for this blog (<a href=https://blog.jamesclonk.io>blog.jamesclonk.io</a>) I needed to create the file <code>static/CNAME</code> in the <code>master</code> branch, containing the custom domain name as the only contents inside that file. This <code>CNAME</code> file is used to inform GitHub Pages about the DNS entry it&rsquo;s going to use. Since it&rsquo;s inside Hugo&rsquo;s <code>static</code> directory, the <code>CNAME</code> file will be contained at the root of the published site generated by Hugo, to fulfill this requirement of GitHub Pages.</p>
-<h2 id=other-hosting-options>Other hosting options</h2>
-<h3 id=hosting-on-s3>Hosting on S3</h3>
-<p>I briefly considered deploying my Hugo blog on AWS S3, but since Amazon does not provide any effective means of cost control ultimately I decided against this solution. While it would be very easy and is supported out of the box by Hugo (<a href=https://gohugo.io/hosting-and-deployment/hugo-deploy/>Deploy to S3</a>) I would have no way to prevent my AWS bill from potentially exploding if a malicious actor were to cause excessive traffic on my S3 bucket.</p>
-<p>Given that I would use GitHub Actions anyway already to build the content and then run <code>hugo deploy</code>, it made sense for me to also use GitHub for hosting the blog itself. It&rsquo;s free after all!</p>
-<h3 id=hosting-on-kubernetes>Hosting on Kubernetes</h3>
-<p>The other option, which I actually thought I&rsquo;d be doing first before researching into various blogging software, was to deploy the blog on my personal Kubernetes.
-(More on that here: <a href=/posts/my-own-kubernetes/>My own Kubernetes</a>)</p>
-<p>Since Hugo generates just static HTML files and doesn&rsquo;t actually need any runtime or container environment to run and serve content itself this obviously greatly expanded on how I could approach the hosting. I was still thinking about coding a very simple static file webserver in Golang, that upon startup would download the Hugo generated content from either S3 or GitHub and just serve those files. But it boiled down to the same again as with hosting directly from S3, why even bother if GitHub itself can serve those HTML files?</p>
-<p>GitHub Pages is free, no need to use resources on my K8s cluster for hosting this blog then.
-If GitHub ever chooses to not make Pages hosting free anymore, this however would likely be the solution I&rsquo;d go for as I value the control over costs and technical implementation details compared to just plain S3 hosting. 👨‍🏭</p>
-</div>
-<div class=post-footer>
-</div>
-</article>
-</main>
-</body>
-</html>
+<a class=tag href=/tags/deployment/>deployment</a></div></div></header><div class=post-content><h1 id=i-want-to-do-some-blogging>I want to do some blogging</h1><p>So I wanted to migrate all of my existing blog posts (and create some new ones of course) to a new self-hosted system.
+My requirements for this have been the following:</p><ul><li>Simple and easy to use (I <em><strong>hate</strong></em> complicated UI editors!)<ul><li>Preferably Markdown or similar format support</li></ul></li><li>Open source</li><li>Self-hosted</li><li>Easily runnable on my personal K8s cluster<ul><li>Tucked away behind an Ingress-Nginx controller, it must not try to do its own TLS / HTTPS handling</li></ul></li><li>Preferably no need for a database<ul><li>If it needs to have a database, then it must be Postgres (as that is what I already manage on my K8s infrastructure)</li></ul></li><li>Secure</li><li>Preferably written in Golang<ul><li>PHP based software is out of the question by default! 🙄</li></ul></li></ul><p>After a bit of Googling and some research this gave me the following options to choose from at the end:</p><ul><li><a href=https://kabukky.github.io/journey/>Journey</a><ul><li>Looked interesting at first, but seems to not be maintained anymore</li></ul></li><li><a href=https://writefreely.org/>WriteFreely</a><ul><li>Quickly dismissed for being unnecessarily complicated and needing a MySQL database</li><li>It seemed fine initially, but the whole software being the webserver itself that needs to be hosted to serve content proved to be something I ultimately didn&rsquo;t want. (More on that when looking at the final solution below: Hugo)</li></ul></li><li><a href=https://github.com/jhvst/vertigo>Vertigo</a><ul><li>Unmaintained and unfinished</li></ul></li><li><a href=https://pkg.go.dev/golang.org/x/tools/blog>golang.org/x/tools/blog</a><ul><li>Part of the extended stdlib of Golang, used by the Golang website itself to host its blogs. Why not, would be fun to use it seemed. But requires coding and work first. Meh, for this project I just want to write blog posts and get started doing so immediately</li></ul></li><li><a href=https://gohugo.io/>Hugo</a><ul><li>Popular static site generator, requires no database</li></ul></li><li><a href=https://jekyllrb.com/>Jekyll</a>, <a href=https://hexo.io/>Hexo</a>, <a href=https://vuepress.vuejs.org/>VuePress</a>, <a href=https://github.com/getpelican/pelican>Pelican</a><ul><li>All similar to Hugo but none of them is written in Golang. I don&rsquo;t want to deal with runtimes of dynamic languages and their package managers 🤷</li></ul></li></ul><h2 id=hugo>Hugo</h2><p><a href=https://gohugo.io/>Hugo</a> is a static website generator written in Golang (yay!). It consists of a single binary that can generate all my blog posts and website content on-demand, or additionally also serve the content itself. It boosts great performance and easy of use, tons of themes and templates and a big community around it.</p><p>Content for pages/post/etc. can be written in Markdown or other simplified formats and is then rendered into static HTML files. Thus it has no need for a backend database or datastore of any kind. All your pages are just files.</p><p>I choose Hugo because of all of the above qualities. Being able to write just Markdown is simple and efficient, and no annoying WYSISWYG editor getting in my way. Having everything being &ldquo;compiled&rdquo; down into static HTML files is a big plus in my book and makes the blog extremely easy to maintain with a lot possible options on how to approach hosting and deployments.</p><h2 id=hosting-on-github-pages>Hosting on GitHub Pages</h2><p>GitHub provides free static hosting over SSL (using <a href=https://letsencrypt.org/>Let&rsquo;s Encrypt</a>) directly from a GitHub repository via its <a href=https://help.github.com/articles/what-is-github-pages/>GitHub Pages service</a> and automating the deployment workflow of Hugo with <a href=https://docs.github.com/en/actions>GitHub Actions</a>.</p><h3 id=using-github-pages>Using GitHub Pages</h3><p>There are two types of GitHub Pages:</p><ul><li>User/Organization Pages (<code>https://&lt;USERNAME|ORGANIZATION>.github.io/</code>)</li><li>Project Pages (<code>https://&lt;USERNAME|ORGANIZATION>.github.io/&lt;PROJECT>/</code>)</li></ul><p>For my personal blog I decided to use the <code>&lt;USERNAME>.github.io</code> approach and host Hugo itself and all of its generated files in the repository <a href=https://github.com/JamesClonk/JamesClonk.github.io>JamesClonk/JamesClonk.github.io</a></p><ol><li>The <code>master</code> branch hosts all Hugo configuration, assets and content</li><li>The <code>gh-pages</code> branch hosts the Hugo generated output, which GitHub will display under <a href=https://blog.jamesclonk.io>blog.jamesclonk.io</a></li><li>A GitHub Actions workflow will trigger on commit to the <code>master</code> branch, run Hugo to generate all site content and commit this into the <code>gh-pages</code> branch</li><li>The repository is configured to serve its GitHub Pages from the <code>gh-pages</code> branch root <code>/</code></li></ol><p><img src=/images/github-pages.png alt="GitHub Pages"></p><h3 id=build-hugo-with-a-github-actions>Build Hugo with a GitHub Actions</h3><p>GitHub Actions allows you to define workflows that can build your software or otherwise execute various steps as part of a CI/CD pipeline. With this setup I have a workflow which will build and publish this blog automatically everytime I push / create a new commit on the <code>master</code> branch of my Hugo Github repository.</p><p>All I needed for this was to create <code>.github/workflows/gh-pages.yml</code> containing the following content (based on <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a>):</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yml data-lang=yml><span style=display:flex><span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github pages</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>push</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>branches</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000;font-weight:700>[</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>master ]</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline></span><span style=color:#204a87;font-weight:700>jobs</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>  </span><span style=color:#204a87;font-weight:700>deploy</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>deploy Hugo to gh-pages</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>runs-on</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>ubuntu-latest</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span><span style=color:#204a87;font-weight:700>steps</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>actions/checkout@v2</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>submodules</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>fetch-depth</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#0000cf;font-weight:700>0</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Setup Hugo</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-hugo@v2</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>hugo-version</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#4e9a06>&#39;latest&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>extended</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#204a87;font-weight:700>true</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Build</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>run</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>hugo --minify</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>    </span>- <span style=color:#204a87;font-weight:700>name</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>Deploy</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>uses</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>peaceiris/actions-gh-pages@v3</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>if</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>github.ref == &#39;refs/heads/master&#39;</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>      </span><span style=color:#204a87;font-weight:700>with</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>github_token</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>${{ secrets.GITHUB_TOKEN }}</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span><span style=display:flex><span><span style=color:#f8f8f8;text-decoration:underline>        </span><span style=color:#204a87;font-weight:700>publish_dir</span><span style=color:#000;font-weight:700>:</span><span style=color:#f8f8f8;text-decoration:underline> </span><span style=color:#000>./public</span><span style=color:#f8f8f8;text-decoration:underline>
+</span></span></span></code></pre></div><p>The steps being executed by this workflow are as follows:</p><ol><li>If we get a push on branch <code>master</code></li><li>Then checkout the repository (with submodules, since we have a theme in here as a submodule)</li><li>Setup the Hugo binary (using the latest version of <code>hugo_extended</code>)</li><li>Run <code>hugo --minify</code>, which will generate the site content under <code>publish/</code></li><li>Commit and push the generated <code>publish/</code> folder into <code>gh-pages</code></li></ol><p>The result being that every time a commit happens on <code>master</code> branch this workflow will be trigger, generate the site content and publish it by pushing it into the <code>gh-pages</code> branch.</p><p>For more advanced settings see <a href=https://github.com/marketplace/actions/hugo-setup>actions-hugo</a> and <a href=https://github.com/marketplace/actions/github-pages-action>actions-gh-pages</a>.</p><h3 id=use-a-custom-domain-with-github-pages>Use a custom domain with GitHub Pages</h3><p>Since I wanted to use a <a href=https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site>custom domain</a> for this blog (<a href=https://blog.jamesclonk.io>blog.jamesclonk.io</a>) I needed to create the file <code>static/CNAME</code> in the <code>master</code> branch, containing the custom domain name as the only contents inside that file. This <code>CNAME</code> file is used to inform GitHub Pages about the DNS entry it&rsquo;s going to use. Since it&rsquo;s inside Hugo&rsquo;s <code>static</code> directory, the <code>CNAME</code> file will be contained at the root of the published site generated by Hugo, to fulfill this requirement of GitHub Pages.</p><h2 id=other-hosting-options>Other hosting options</h2><h3 id=hosting-on-s3>Hosting on S3</h3><p>I briefly considered deploying my Hugo blog on AWS S3, but since Amazon does not provide any effective means of cost control ultimately I decided against this solution. While it would be very easy and is supported out of the box by Hugo (<a href=https://gohugo.io/hosting-and-deployment/hugo-deploy/>Deploy to S3</a>) I would have no way to prevent my AWS bill from potentially exploding if a malicious actor were to cause excessive traffic on my S3 bucket.</p><p>Given that I would use GitHub Actions anyway already to build the content and then run <code>hugo deploy</code>, it made sense for me to also use GitHub for hosting the blog itself. It&rsquo;s free after all!</p><h3 id=hosting-on-kubernetes>Hosting on Kubernetes</h3><p>The other option, which I actually thought I&rsquo;d be doing first before researching into various blogging software, was to deploy the blog on my personal Kubernetes.
+(More on that here: <a href=/posts/my-own-kubernetes/>My own Kubernetes</a>)</p><p>Since Hugo generates just static HTML files and doesn&rsquo;t actually need any runtime or container environment to run and serve content itself this obviously greatly expanded on how I could approach the hosting. I was still thinking about coding a very simple static file webserver in Golang, that upon startup would download the Hugo generated content from either S3 or GitHub and just serve those files. But it boiled down to the same again as with hosting directly from S3, why even bother if GitHub itself can serve those HTML files?</p><p>GitHub Pages is free, no need to use resources on my K8s cluster for hosting this blog then.
+If GitHub ever chooses to not make Pages hosting free anymore, this however would likely be the solution I&rsquo;d go for as I value the control over costs and technical implementation details compared to just plain S3 hosting. 👨‍🏭</p></div><div class=post-footer></div></article></main></body></html>
