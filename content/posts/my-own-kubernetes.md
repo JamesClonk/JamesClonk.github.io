@@ -8,9 +8,15 @@ date: 2020-11-30T12:49:34+02:00
 draft: true
 ---
 
->>>>>> #### TODO: show k8s-infra repo here (and mention you now migrated k8s-deployment repo (migrating-from-cloud-foundry-to-kubernetes.md) to be deployed onto this k8s cluster)
-
 ## Managed Kubernetes?
+
+On my journey where I was (unfortunately) forced to migrate from [Cloud Foundry](https://www.cloudfoundry.org/) to Kubernetes, I first went with a "Managed Kubernetes-as-a-Service" offering. You can read about that [here](/posts/migrating-from-cloud-foundry-to-kubernetes/).
+
+But it didn't take long for problems and issues to start emerging. The cluster not being on exactly the version I wanted it to be, pre-installed components that didn't behave they way I wanted (nginx ingress controller for example), price hikes and occasional outages, not really a lot of insight into the behind the scenes of my cluster, etc.
+
+Also, I was continuously adding and deploying more additional components onto the cluster, like Prometheus, Grafana, Loki, etc.. The resource requirements kept creeping upwards, I had to add more nodes (or beef-up the existing ones), which again meant further cost increases than anticipated.
+
+At some point I was simply too fed up with the lack of direct control I had over this situation and bit the bullet: It's time to deploy and manage my own K8s cluster! After all, I'm a relentless DevOps engineer.. 😎
 
 >>>>>> #### TODO: mention cf-to-k8s migration here, went to scaleway cause cheap and simple. but problems, issues, price hikes.
 >>>>>> too expensive, what now? other providers? nope
@@ -28,7 +34,7 @@ draft: true
 ## Batteries included? 🔋
 
 We've got our cluster up and running! But what now?
-The problem is that plain Kubernetes alone is not really useful yet and still a far cry away from a PaaS like [Cloud Foundry](https://www.cloudfoundry.org/). 🤷
+The problem is that plain Kubernetes alone is not really useful yet and still a far cry away from a PaaS like Cloud Foundry. 🤷
 
 This is where the "Batteries included" part comes into play.
 
