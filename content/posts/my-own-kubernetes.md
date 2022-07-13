@@ -43,7 +43,11 @@ To turn this Kubernetes cluster into something more of a PaaS we will need to ad
 
 Now this is where the real work happens. I had to spend quite a bit of effort in figuring out the best way to solve each of these problems, and integrate everything together into one coherent solution.
 
-The result is this:
+Another thing at this point was that I also wanted to have the whole installation of K3s onto the Hetzner Cloud VM and even provisioning the VM to be completely automated and reproducible, if I ever need to spin up a new or another cluster quickly.
+
+The result is this: [https://github.com/JamesClonk/k8s-infrastructure](https://github.com/JamesClonk/k8s-infrastructure)
+### [My Kubernetes infrastructure repository](https://github.com/JamesClonk/k8s-infrastructure)
+
 
 ![Architecture](https://github.com/JamesClonk/k8s-infrastructure/raw/master/docs/architecture.png)
 
@@ -75,6 +79,8 @@ After all of these components are installed, it allows me to focus on the actual
 And that's it. The Deployment and Service are as per usual, but the magic happens thanks to the Ingress. The Ingress resource will instruct the ingress-nginx controller to create and handle all traffic for a "route", for example ht<span>tps://</span>my-app.my-k8s-cluster.com, and cert-manager will automatically issue a [Let's Encrypt certificate](https://letsencrypt.org/) for it. Also thanks to oauth2-proxy all I need to do is add a specific annotation on the Ingress resource to instruct the ingress controller to redirect all traffic for this particular route through oauth2-proxy, which will then in turn authenticate against my [GitHub OAuth2 app](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app) configuration.
 
 It's still a lot more involved than a simple `cf push` on Cloud Foundry, but it's worlds apart from having to deal with just plain Kubernetes as an app developer.
+
+With Prometheus and Alertmanager being installed on the cluster I've now also got the benefit of being able to monitor everything with Grafana dashboards and set up automated alerts that ping me on Slack.
 
 ## Automation via GitHub Actions
 
