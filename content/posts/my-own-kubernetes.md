@@ -8,17 +8,26 @@ date: 2020-11-30T12:49:34+02:00
 draft: true
 ---
 
-#### TODO: show k8s-infra repo here (and mention you now migrated k8s-deployment repo (migrating-from-cloud-foundry-to-kubernetes.md) to be deployed onto this k8s cluster)
+>>>>>> #### TODO: show k8s-infra repo here (and mention you now migrated k8s-deployment repo (migrating-from-cloud-foundry-to-kubernetes.md) to be deployed onto this k8s cluster)
 
 ## Managed Kubernetes?
 
+>>>>>> #### TODO: mention cf-to-k8s migration here, went to scaleway cause cheap and simple. but problems, issues, price hikes.
+>>>>>> too expensive, what now? other providers? nope
+>>>>>> manage your own k8s? oof, but okay, we have to do it..
+>>>>>> but where?
+
 ## Hetzner Cloud
+
+>>>>>> #### TODO: cheap VMs, simple to use, has CLI / API, has floating IPs and loadbalancers, has block storage, has K8s CSI driver for said block storage, has firewalls, good community support for running self-managed K8s on it
 
 ## K3s
 
+>>>>>> #### TODO: kubeadm to cumbersome, but what else? Minikube or kind? Nope, meant for dev not prod. K3s? Yes!
+
 ## Batteries included? 🔋
 
-We've got our K8s cluster up and running! But what now?
+We've got our cluster up and running! But what now?
 The problem is that plain Kubernetes alone is not really useful yet and still a far cry away from a PaaS like [Cloud Foundry](https://www.cloudfoundry.org/). 🤷
 
 This is where the "Batteries included" part comes into play.
@@ -34,7 +43,7 @@ The result is this:
 I've decided to install the following additional *system components* onto my Kubernetes cluster, to turn it into a PaaS-like experience:
 
 | Name | Description | URL |
-|-|-|-|
+| --- | --- | --- |
 | [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx) | An Ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer | https://github.com/kubernetes/ingress-nginx |
 | [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) | A proxy that provides authentication with Google, Azure, OpenID Connect and many more identity providers | https://github.com/oauth2-proxy/oauth2-proxy |
 | [cert-manager](https://cert-manager.io) | Automatic certificate management on top of Kubernetes, using [Let's Encrypt](https://letsencrypt.org) | https://github.com/jetstack/cert-manager |
