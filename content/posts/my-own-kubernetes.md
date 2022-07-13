@@ -45,9 +45,9 @@ I've decided to install the following additional *system components* onto my Kub
 | [Grafana](https://grafana.com/grafana) | Monitoring and metric analytics & dashboards for Prometheus and Loki | https://github.com/grafana/grafana |
 | [PostgreSQL](https://www.postgresql.org) | The world's most advanced open source relational database | https://www.postgresql.org/docs |
 
-I've added each of these components into a [vendired](https://carvel.dev/vendir/) subdirectory in the main k8s-infrastructure repository, containing upstream deployment templates (be it a Helm chart, kustomize templates, release.yaml's, or in whatever other format the component is made available by its maintainers).
+I've added each of these components vendored with vendir[^1] into a subdirectory in the main k8s-infrastructure repository, containing upstream deployment templates (be it a Helm chart, kustomize templates, release.yaml's, or in whatever other format the component is made available by its maintainers).
 
-Each of them has its own `deploy.sh` shellscript, which uses the vendired upstream templates together with additional [ytt overlay templates](https://carvel.dev/ytt/) to deploy against Kubernetes with [kapp](https://carvel.dev/kapp/). Whenever I want to deploy let's say for example `oauth2-proxy`, all I need to do is go into that directoy and run the shellscript.
+Each of them has its own `deploy.sh` shellscript, which uses the vendired upstream templates together with additional ytt[^2] overlay templates to deploy against Kubernetes with kapp[^3]. Whenever I want to deploy let's say for example `oauth2-proxy`, all I need to do is go into that directoy and run the shellscript.
 
 The idea behind this is that it must be entirely reproducable and idempotent, I want to be able to re-run the `deploy.sh` as often as I like and it should just do its thing and ensure the same components with the same configuration get applied to the cluster each time as expected.
 
@@ -63,3 +63,7 @@ It's still a lot more involved than a simple `cf push` on Cloud Foundry, but it'
 ## Automation via GitHub Actions
 
 But why run a `deploy.sh` shellscript manually for all of these components if you can automate it, right? Same with installing or updating K3s on the Hetzner Cloud VM, I can't be bothered to do that myself. Let's automate everything with GitHub Actions! 😁
+
+[^1]: [vendir](https://carvel.dev/vendir/) - Declaratively state what files should be in a directory
+[^2]: [ytt](https://carvel.dev/ytt/) - Template and overlay Kubernetes configuration via YAML structures
+[^3]: [kapp](https://carvel.dev/kapp/) - Deploy and view groups of Kubernetes resources as applications
