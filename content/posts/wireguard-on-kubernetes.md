@@ -480,12 +480,12 @@ Or by writing it to a PNG file to display:
 ```sh
 $ qrencode -t PNG -r client.conf -o client_conf.png
 ```
-![GitHub Pages](/images/wireguard-qrcode.png)
+![Wireguard QR Code](/images/wireguard-qrcode.png)
 
 Simply scan the resulting QR-code with the WireGuard app on your phone to import the client configuration.
 
 After importing you can then connect to the VPN and enjoy an ad-free internet experience on your whole Android phone, be it in the browser or inside apps! 😃
 
-![GitHub Pages](/images/wireguard-android.png)
+![WireGuard connected](/images/wireguard-android.png)
 
 WireGuard is *very fast*, stable and also handles reconnects gracefully, allowing you to basically have the VPN connection open 24/7.

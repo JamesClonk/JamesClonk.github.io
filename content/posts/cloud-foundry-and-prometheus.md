@@ -39,7 +39,7 @@ For example for the Swisscom AppCloud this would be at https://log-stream.lyra-8
 [Prometheus](https://prometheus.io/) is a system used for event monitoring and alerting. It records real-time metrics in its own time-series database with flexible queries and real-time alerting.
 It works based on a PULL model, scraping metrics from available remote `/metrics` endpoints. It is very commonly used as the main monitoring system for cloud native applications.
 
-![Loggregator](/images/prometheus.png)
+![Prometheus](/images/prometheus.png)
 
 ## App metrics
 
@@ -123,11 +123,11 @@ docker rm -f prometheus; docker run \
 
 We can now access the Prometheus UI and check that our scrape target is working correctly:
 
-![Loggregator](/images/prometheus-targets.png)
+![Prometheus Targets](/images/prometheus-targets.png)
 
 To verify if we are now really scraping metrics from our apps and get live data from Cloud Foundry we can query the CPU metrics in Prometheus:
 
-![Loggregator](/images/prometheus-graph.png)
+![Prometheus Graph](/images/prometheus-graph.png)
 
 Success! 🎉
 
