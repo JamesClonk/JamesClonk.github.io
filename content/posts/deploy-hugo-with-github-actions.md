@@ -23,7 +23,7 @@ My requirements for this have been the following:
 - Preferably written in Golang
 	- PHP based software is out of the question by default! 🙄
 
-After a bit of Googling and some research this gave me the following options to choose from at the end:
+After a bit of googling and some research this gave me the following options to choose from at the end:
 - [Journey](https://kabukky.github.io/journey/)
 	- Looked interesting at first, but seems to not be maintained anymore
 - [WriteFreely](https://writefreely.org/)
