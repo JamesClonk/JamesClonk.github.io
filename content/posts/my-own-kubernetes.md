@@ -5,7 +5,7 @@ tags: [kubernetes,hetzner,continuous deployment,github actions,github,containers
 authors: []
 author: Fabio Berchtold
 date: 2020-11-30T12:49:34+02:00
-draft: true
+draft: false
 ---
 
 ## Managed Kubernetes?
@@ -18,15 +18,28 @@ Also, I was continuously adding and deploying more additional components onto th
 
 At some point I was simply too fed up with the lack of direct control I had over this situation and bit the bullet: It's time to deploy and manage my own K8s cluster! After all, I'm a relentless DevOps engineer.. 😎
 
->>>>>> #### TODO: mention cf-to-k8s migration here, went to scaleway cause cheap and simple. but problems, issues, price hikes.
->>>>>> too expensive, what now? other providers? nope
->>>>>> manage your own k8s? oof, but okay, we have to do it..
->>>>>> but where?
+To install and manage your own Kubernetes cluster you will need some (well, at least one) VMs. Now, where can I find some of these?
 
 ## Hetzner Cloud
 
->>>>>> #### TODO: cheap VMs, simple to use, has CLI / API, has floating IPs and loadbalancers, has block storage, has K8s CSI driver for said block storage, has firewalls, good community support for running self-managed K8s on it
->>>>>> #### hcloud[^1] CLI
+While looking for the ideal place to host my Kubernetes cluster I was going through all of the usual cloud providers to see which one would fit my use case best.
+
+The 3 big ones are just way too expensive to host VMs with my small-ish vCPU and RAM requirements (I was looking for something with around 4+ vCPUs and 8GB RAM), so that's a no-go.
+DigitalOcean, Linode and Vultr were still a bit too pricey for my taste, I really didn't care too much about performance. The most important factor really was just how much RAM does the VM have, as that will determine what K8s deployments and pods, etc. I can cram onto the cluster at once. 4 vCPUs and 8GB RAM was around $50 per month on these, that was still more than I was willing to pay.
+
+The winner in the end was [Hetzner Cloud](https://www.hetzner.com/cloud). They offer such a 4/8 VM for as low as $15 per month.
+This turned out to be so cheap that I actually ended up choosing a much beefier VM, the CPX41, which has 8 vCPUs and 16GB of RAM for just $28 per month. Wow! 😲
+
+Looking through all the features of Hetzner Cloud I saw that they also provide all the other things I might need for my Kubernetes cluster. They've got attachable, persistent block storage volumes for their VMs and provide a Kubernetes [CSI driver](https://github.com/hetznercloud/csi-driver) for them. They've got Floating IPs I can attach to VMs (to have a persistent IP thats decoupled from the VMs lifecycle), HTTP(S)/TLS Load Balancers (I don't need one but the fact it's available is a big plus!), custom private networks for my VMs, configurable firewalls, and everything fully accessible via an [API](https://developers.hetzner.com/cloud/) (with Terraform plugins available for it) or the handy hcloud[^1] CLI.
+
+A bit of googling revealed that I seem to be not the only one making that choice, there's loads of projects and tools out there that provision Kubernetes on Hetzner Cloud one way or another.
+
+In the end my setup ended up rather simple:
+- Provision a CPX41 VM
+- Attach a Floating IP to it
+- Configure my DNS entries to point to said IP
+- Configure the Hetzner Cloud Firewall for the VM
+- ... aaaand that's it. Nothing else left to do here.
 
 ## K3s
 
@@ -84,6 +97,7 @@ I've decided to install the following additional *system components* onto my Kub
 
 | Name | Description | URL |
 | --- | --- | --- |
+| [Hetzner Cloud CSI driver](https://github.com/hetznercloud/csi-driver) | Kubernetes Container Storage Interface driver for Hetzner Cloud Volumes | https://github.com/hetznercloud/csi-driver |
 | [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx) | An Ingress controller for Kubernetes using NGINX as a reverse proxy and load balancer | https://github.com/kubernetes/ingress-nginx |
 | [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) | A proxy that provides authentication with Google, Azure, OpenID Connect and many more identity providers | https://github.com/oauth2-proxy/oauth2-proxy |
 | [cert-manager](https://cert-manager.io) | Automatic certificate management on top of Kubernetes, using [Let's Encrypt](https://letsencrypt.org) | https://github.com/jetstack/cert-manager |
