@@ -9,11 +9,11 @@ draft: false
 
 # WireGuard
 
-So, after being back from a recent vacation trip and having to use the hotel Wi-Fi for my mobile phone, I once more started thinking about setting up a VPN endpoint for myself. I simply don't trust "foreign" Wi-Fi hotspots.
+So, after being back from a recent vacation trip and having to use the hotel Wi-Fi on my mobile phone, I once more started thinking about setting up a VPN endpoint for myself. I simply don't trust "foreign" Wi-Fi hotspots.
 
 A few years ago I kept a simple OpenVPN installation up and running on a DigitalOcean droplet, but let it deteriorate and stopped using it at some point. Also because of the Coronavirus pandemic that started last year there wasn't much travelling around anyway, thus I had no immediate need for a VPN.
 
-But thanks to the wonders of modern medicine (thank you very much [Katalin Karikó](https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3)! 👍️) the situation has changed this summer and I was once again able to travel abroad. Which let to my decision to once more setup a VPN endpoint for myself. 😆
+But thanks to the wonders of modern medicine (thank you very much [Katalin Karikó](https://en.wikipedia.org/wiki/Katalin_Karik%C3%B3)! 👍️) the situation has changed this summer and I was once again able to travel abroad. Which led to my decision to once more setup a VPN endpoint for myself. 😆
 
 The question was, what software to pick and how do I deploy and operate it this time?
 
@@ -30,7 +30,7 @@ It's the year 2021 after all, using anything other than WireGuard as your VPN is
 
 ## WireGuard on Kubernetes
 
-Well, these days I've more or less migrated almost all my projects onto [my own personal Kubernetes](/posts/my-own-kubernetes/) cluster. Whether it's just to use it for config management purposes or more actual technical reasons is moot at this point.
+Well, these days I've more or less migrated almost of all my projects onto [my own personal Kubernetes](/posts/my-own-kubernetes/) cluster. Whether it's just to use it for config management purposes or more actual technical reasons is moot at this point.
 So Kubernetes it is!
 
 But then the question is, how do I run WireGuard on Kubernetes?
