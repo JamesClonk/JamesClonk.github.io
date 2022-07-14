@@ -30,7 +30,36 @@ At some point I was simply too fed up with the lack of direct control I had over
 
 ## K3s
 
->>>>>> #### TODO: kubeadm to cumbersome, but what else? Minikube or kind? Nope, meant for dev not prod. K3s? Yes!
+Now, how do we install and setup Kubernetes on this VM? What "*distribution*" do we want to use?
+
+Using plain [`kubeadm`](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) would be way too cumbersome, I certainly did not want to invest that much time in setting up my cluster and having to maintain and babysit it on such a low level.
+
+[Minikube](https://minikube.sigs.k8s.io/) or [kind](https://kind.sigs.k8s.io/)? Nope. These are fantastic tools for local K8s development, but I do not want to use them for running a production cluster (and neither should you!). [kOps](https://kops.sigs.k8s.io/)? Meh, tries to do too many things at once while still being quite fiddly.
+
+[MicroK8s](https://microk8s.io/)? Hmm, now we're getting closer. MicroK8s ticks a lot of the right boxes, but it is from Canonical and unfortunately distributed as a Snap install, and that's something that can go burn in hell! 🔥
+
+In the end it was a showdown between [K0s](https://k0sproject.io/) and [K3s](https://k3s.io/), both being very similar to each other and focused on small, self-contained single binaries with low resource usage. I went with K3s, because ultimately it had an edge in terms resource consumption and usability. Plus I'm fond of Rancher Labs products, so that was a plus already.
+
+So what is [**K3s**](https://k3s.io/)?
+
+> *K3s is a lightweight, CNCF certified Kubernetes distribution created by Rancher Labs, that is highly available and designed for production workloads in unattended, resource-constrained, remote locations or inside IoT appliances. It is built and packaged into a single small binary with low resource requirements and very easy to install, run and auto-update a production-grade Kubernetes cluster with.*
+
+In short, it is exactly what I need, perfect for my use case! Especially the low resource requirements make it perfect for my purpose, after all the single VM I'm going to use will not be super large and powerful, I only need to run some of the usual suspects (Prometheus, Grafana, Loki, etc.) plus my own applications on that Kubernetes cluster.
+
+Installing K3s turned out to be as simple as running this:
+
+```bash
+curl -sfL https://get.k3s.io | \
+	INSTALL_K3S_VERSION='v1.20.8+k3s1' \
+	INSTALL_K3S_EXEC='--disable=traefik --disable=servicelb' \
+	sh -
+```
+
+Using the installation script, it will install K3s as a systemd service and start it. If the service already exists it will update if necessary and check if it is running.
+
+I've explicitely specified and pinned the Kubernetes version that I want via `$INSTALL_K3S_VERSION` environment variable, and also disabled the default installation of Traefik and Klipper through `$INSTALL_K3S_EXEC` and `--disable`. These and many more options are all described in the excellent [K3s documentation](https://rancher.com/docs/k3s/latest/en/installation/).
+
+The reason for disabling those two components was that I intend to use the much simpler and more common [Ingress-NGINX](https://kubernetes.github.io/ingress-nginx/) as my ingress controller instead of Traefik, and also have no need for Load Balancer support since I'm going to deploy Ingress-NGINX with **hostPort**'s 80 and 443 assigned to it directly. After all it is only a single VM Kubernetes "cluster".
 
 ## Batteries included? 🔋
 
@@ -88,12 +117,99 @@ But why run a `deploy.sh` shellscript manually for all of these components if yo
 
 Since I've already insisted on having everything fully scripted idempotently within shellscripts, and each component having its own set of them, I had no trouble turning this into GitHub Actions pipeline:
 
+##### .github/workflows/pipeline.yml
+```yaml
+name: kubernetes production
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ENVIRONMENT: production
+
+jobs:
+  hetzner-k3s: # pipeline entry job, installs k3s on hetzner cloud VM
+    name: kubernetes
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install and upgrade k3s on hetzner cloud
+      working-directory: hetzner-k3s
+      run: ./deploy.sh
+
+  kube-system: # do some modifications to kube-system namespace
+    name: kube-system
+    needs: [ hetzner-k3s ] # depends on installed k3s, obviously
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: prepare kube-system namespace
+      working-directory: kube-system
+      run: ./deploy.sh
+
+  hcloud-csi: # install the hetzner cloud CSI driver for Kubernetes
+    name: hcloud-csi
+    needs: [ kube-system ] # depends on kube-system namespace
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install hetzner csi driver
+      working-directory: hcloud-csi
+      run: ./deploy.sh
+
+  ingress-nginx: # install nginx ingress controller, we want to use Ingress resources!
+    name: ingress-nginx
+    needs: [ kube-system ] # depends on kube-system namespace
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: deploy kubernetes ingress controller
+      working-directory: ingress-nginx
+      run: ./deploy.sh
+
+  cert-manager: # install cert-manager for certificate handling of ingress routes
+    name: cert-manager
+    needs: [ ingress-nginx ] # depends on ingress-nginx being installed already
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: deploy cert-manager for let's encrypt
+      working-directory: cert-manager
+      run: ./deploy.sh
+
+... and much more
+```
 ![GitHub Actions Pipeline](/images/k8s-github-actions.png)
 
 Each of the components corresponds to a GitHub Actions [job](https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow) within the same [workflow](https://docs.github.com/en/actions/using-workflows/about-workflows), defining its dependencies / prerequisites if it has any. All a job has to do is simply run `./deploy.sh`. The whole workflow in turn gets triggered by any new `git push` on the `master` branch, and goes through all these jobs as defined.
 
 I've also added several on-demand workflows to the repository, so I could for example restart the K3s systemd service on the VM if I want to via manually triggering that on GitHub Actions:
 
+##### .github/workflows/restart-k3s.yml
+```yaml
+name: restart k3s service
+
+on: # workflow_dispatch means on-demand / manual triggering on GitHub web UI
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ENVIRONMENT: production
+
+jobs:
+  restart-k3s: # restart k3s systemd service on hetzner cloud VM
+    name: kubernetes
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: restart k3s service
+      working-directory: hetzner-k3s
+      run: ./restart.sh
+```
 ![On-Demand Workflows](/images/k8s-github-actions-dispatch.png)
 
 Now I don't even have to log-in anymore to the Hetzner Cloud VM, I can control most of what I need to do through the GitHub web UI. 😄
