@@ -13,6 +13,8 @@ For quite a few years now I've been hosting and running all my personal projects
 But with dark and grey clouds looming ever so threatening in the sky, I was suddenly facing a problem this year. ⛈      
 The preferred provider I was using until now, [developer.swisscom.com](https://developer.swisscom.com), out of the blue announced the end of life for its managed Cloud Foundry based hosting.
 
+Blimey! What do I do now? 😱
+
 >>>>>> #### TODO: developer.swisscom.com EOL, what now?
 >>>>>> Heroku? too expensive
 >>>>>> Other CF? IBM Bluemix? nope
