@@ -228,6 +228,8 @@ jobs:
 
 Now I don't even have to log-in anymore to the Hetzner Cloud VM, I can control most of what I need to do through the GitHub web UI. 😄
 
+For my actual applications that I want to host on Kubernetes (the reason why I have a K8s cluster in the first place) I did pretty much the same, they are all bundled together in [https://github.com/JamesClonk/k8s-deployments](https://github.com/JamesClonk/k8s-deployments), and are automatically deployed via GitHub Actions too.
+
 [^1]: [hcloud](https://github.com/hetznercloud/cli) - A command-line interface for Hetzner Cloud
 [^2]: [vendir](https://carvel.dev/vendir/) - Declaratively state what files should be in a directory
 [^3]: [ytt](https://carvel.dev/ytt/) - Template and overlay Kubernetes configuration via YAML structures
