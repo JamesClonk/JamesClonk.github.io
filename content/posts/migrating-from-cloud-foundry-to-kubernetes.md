@@ -55,6 +55,6 @@ To add the missing batteries needed for Kubernetes I've included the following i
 
 With all of these it finally started coming together and Kubernetes was getting somewhere. After adding and deploying so many things though, I started wondering if I might have taken the wrong road and got lost somewhere along the way. 🙈
 
-Check out my next blog post where its getting even more insane:
+Check out my next blog post where its getting even more insane:      
 [Why use a managed K8s when you can be your own admin and waste all your free time?!](/posts/my-own-kubernetes/) 🤣
 
