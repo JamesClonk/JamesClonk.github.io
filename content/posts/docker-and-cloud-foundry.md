@@ -2,7 +2,6 @@
 title: "Docker and Cloud Foundry"
 description: "Cloud Foundry is the leading open source industry standard for a Platform-as-a-Service. With the next version of the Cloud Foundry scheduler, the user is now able to run his Docker images with a full PaaS experience on the Swisscom Application Cloud."
 tags: [cloud foundry,containers,docker,app cloud]
-authors: []
 author: Fabio Berchtold
 date: 2016-05-04T14:35:57+02:00
 draft: false

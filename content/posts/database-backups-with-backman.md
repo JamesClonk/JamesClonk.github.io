@@ -2,7 +2,6 @@
 title: "Automatic database backups with Backman"
 description: "Creating Postgres backups with Backman, a Cloud Foundry application that can backup and restore your databases"
 tags: [database,postgres,backups,backman,cloud foundry,kubernetes]
-authors: []
 author: Fabio Berchtold
 date: 2020-03-17T11:17:37+02:00
 draft: false

@@ -2,7 +2,6 @@
 title: "IP-whitelisting with a Cloud Foundry Route-Service"
 description: "Route-services allow you to apply transformation or preprocessing of HTTP requests before they reach a target application, with common examples of use cases being rate limiting, authentication and authorization, and caching services"
 tags: [cloud foundry,app cloud,networking]
-authors: []
 author: Fabio Berchtold
 date: 2020-06-28T10:13:15+02:00
 draft: false

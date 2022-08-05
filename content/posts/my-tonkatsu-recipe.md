@@ -1,6 +1,6 @@
 ---
 title: "My Tonkatsu Recipe"
-description: How to cook Tonkatsu at home
+description: "How to cook Tonkatsu at home"
 tags: [recipe,cooking]
 author: Fabio Berchtold
 date: 2019-11-23T20:30:35+02:00
