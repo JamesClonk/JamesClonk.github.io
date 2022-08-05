@@ -29,10 +29,302 @@ One of the most popular and commonly used tools for IaC is HashiCorp [Terraform]
 
 Now let's go back to our NSX-T firewall rules we want to setup.
 
+https://registry.terraform.io/providers/vmware/nsxt/latest/docs
+
 // TODO: go through example DFW rules, services, ipsets, segments, etc..
 // TODO: show howto write it in tf nsx-t plugin format..
-// TODO: tf init, tf plan, tf apply..
-// TODO: show screenshots from UI
+
+
+#### provider.tf
+```terraform
+terraform {
+  required_providers {
+    nsxt = {
+      source  = "vmware/nsxt"
+      version = "~> 3.2.8"
+    }
+  }
+  required_version = ">= 1.2.0"
+}
+
+provider "nsxt" {
+  host                 = var.nsx_manager
+  username             = var.nsx_username
+  password             = var.nsx_password
+  allow_unverified_ssl = true
+  max_retries          = 5
+  retry_min_delay      = 50
+  retry_max_delay      = 2000
+}
+```
+
+#### variables.tf
+```terraform
+variable "nsx_manager" {}
+variable "nsx_username" {}
+variable "nsx_password" {}
+variable "nsx_policy_enabled" {
+  default = true
+}
+
+variable "nsx_env_tag_scope" {
+  default = "env"
+}
+variable "nsx_env" {}
+
+variable "ipset_all_cidrs" {}
+variable "ipset_k8s_node_cidrs" {}
+variable "ipset_k8s_master_cidrs" {}
+variable "ipset_bastionhost" {}
+```
+
+#### terraform.tfvars
+```terraform
+nsx_manager        = "nsx-t.manager.domain"
+nsx_username       = "my-username"
+nsx_password       = "********"
+nsx_policy_enabled = false
+
+nsx_env = "k8s-dev"
+
+ipset_all_cidrs        = ["10.8.5.0/24", "10.8.10.0/24", "10.8.11.0/24", "10.8.12.0/24"]
+ipset_k8s_node_cidrs   = ["10.8.11.0/24", "10.8.12.0/24"]
+ipset_k8s_master_cidrs = ["10.8.10.0/24"]
+ipset_bastionhost      = ["10.8.5.10", "10.8.5.11"]
+```
+
+Let's start by defining some NSX-T inventory groups in a Terraform file.
+
+We will need a group which encompases all segments to use for targeting scope purposes, some CIDR groups for the various collection of VMs and their networks and finally a group for an example bastion host and its IP:
+
+#### groups.tf
+<details>
+  <summary>Click to expand!</summary>
+
+```terraform
+resource "nsxt_policy_group" "all_segments" {
+  display_name = "all_segments"
+  description  = "All ${var.nsx_env} segments"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+  criteria {
+    condition {
+      member_type = "Segment"
+      operator    = "EQUALS"
+      key         = "Tag"
+      value       = "${var.nsx_env_tag_scope}|${var.nsx_env}"
+    }
+  }
+}
+
+resource "nsxt_policy_group" "bastionhost" {
+  display_name = "bastionhost"
+  description  = "All bastionhost IPs"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = var.ipset_bastionhost
+    }
+  }
+}
+
+resource "nsxt_policy_group" "all_cidrs" {
+  display_name = "k8s_all_cidrs"
+  description  = "All CIDRs"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = var.ipset_all_cidrs
+    }
+  }
+}
+
+resource "nsxt_policy_group" "k8s_master_cidrs" {
+  display_name = "k8s_master_cidrs"
+  description  = "All K8s master CIDRs"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = var.ipset_k8s_master_cidrs
+    }
+  }
+}
+
+resource "nsxt_policy_group" "k8s_node_cidrs" {
+  display_name = "k8s_node_cidrs"
+  description  = "All K8s nodes CIDRs"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = var.ipset_k8s_node_cidrs
+    }
+  }
+}
+```
+</details>
+
+Finally we have all the bits and pieces together to write out the actual DFW firewall rules into a policy:
+
+#### dfw_policy.tf
+<details>
+  <summary>Click to expand!</summary>
+
+```terraform
+data "nsxt_policy_service" "ssh" {
+  display_name = "SSH"
+}
+
+resource "nsxt_policy_service" "k8s_api_server" {
+  display_name = "k8s_api_server"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+
+  l4_port_set_entry {
+    display_name      = "TCP"
+    protocol          = "TCP"
+    destination_ports = ["443", "6443"]
+  }
+}
+
+resource "nsxt_policy_service" "k8s_kubelet_api" {
+  display_name = "k8s_kubelet_api"
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+
+  l4_port_set_entry {
+    display_name      = "TCP"
+    protocol          = "TCP"
+    destination_ports = ["10250"]
+  }
+}
+
+resource "nsxt_policy_security_policy" "k8s_policy" {
+  display_name = "DFW_K8s_policy"
+  description  = "DFW rules for ${var.nsx_env}"
+
+  category   = "Application"
+  locked     = false
+  stateful   = true
+  tcp_strict = false
+  # scope      = [nsxt_policy_group.all_segments.path]
+  tag {
+    scope = var.nsx_env_tag_scope
+    tag   = var.nsx_env
+  }
+
+  # allow SSH to bastion host
+  rule {
+    display_name = "allow_ssh_to_bastionhost"
+    description  = "Allow SSH from Any to bastion host"
+
+    destination_groups = [nsxt_policy_group.bastionhost.path]
+    services           = [data.nsxt_policy_service.ssh.path]
+    scope              = [nsxt_policy_group.all_segments.path]
+
+    action   = "ALLOW"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+
+  # allow bastion host to do anything
+  rule {
+    display_name = "allow_bastionhost_to_any"
+    description  = "Allow Any for ${var.nsx_env} bastion host"
+
+    source_groups = [nsxt_policy_group.bastionhost.path]
+    scope         = [nsxt_policy_group.all_segments.path]
+
+    action   = "ALLOW"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+
+  # block any other SSH
+  rule {
+    display_name = "block_ssh_to_any"
+    description  = "Block SSH to/from anything else"
+
+    services = [data.nsxt_policy_service.ssh.path]
+    scope    = [nsxt_policy_group.all_segments.path]
+
+    action   = "DROP"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+
+  # allow ingress to k8s api-server
+  rule {
+    display_name = "allow_k8s_api_server"
+    description  = "Allow Any for ${var.nsx_env} K8s API-server ports"
+
+    destination_groups = [nsxt_policy_group.k8s_master_cidrs.path]
+    services           = [nsxt_policy_service.k8s_api_server.path]
+    scope              = [nsxt_policy_group.all_segments.path]
+
+    action   = "ALLOW"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+
+  # allow k8s master to kubelet api
+  rule {
+    display_name = "allow_k8s_kubelets"
+    description  = "Allow K8s master to Kubelet API ports"
+
+    source_groups      = [nsxt_policy_group.k8s_master_cidrs.path]
+    destination_groups = [nsxt_policy_group.k8s_node_cidrs.path]
+    services           = [nsxt_policy_service.k8s_kubelet_api.path]
+    scope              = [nsxt_policy_group.all_segments.path]
+
+    action   = "ALLOW"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+
+  # block anything that was not yet explicitely allowed, for all CIDRs
+  rule {
+    display_name = "block_all_remaining"
+    description  = "Block anything remaining for all ${var.nsx_env} CIDRs"
+
+    source_groups      = [nsxt_policy_group.all_cidrs.path]
+    destination_groups = [nsxt_policy_group.all_cidrs.path]
+    scope              = [nsxt_policy_group.all_segments.path]
+
+    action   = "DROP"
+    logged   = false
+    disabled = !var.nsx_policy_enabled
+  }
+}
+```
+</details>
+
+Note: All of these rules and definitions shown above are just examples, they are not meant to be used on any actual environment and very likely are incomplete or do not work for your use-case at all. Don't blindly copy and paste this stuff. 😉
+
+## Apply configuration to NSX-T
+
+Now it's time to create some stuff on our infrastructure! 😎
+
+#### terraform init
+
+To create our new DFW policy we'll first have to initialize Terraform with `terraform init`. This will download the configured provider plugin and prepare everything to be used:
 
 ```bash
 $ terraform init
@@ -48,6 +340,12 @@ Initializing provider plugins...
 Terraform has been successfully initialized!
 ...
 ```
+
+#### terraform plan
+
+Let's first have a look at what Terraform will do to our infrastructure.
+
+We can do a "dry-run" first with `terraform plan`:
 
 ```bash
 $ terraform plan
@@ -135,6 +433,11 @@ Note: You didn't use the -out option to save this plan, so Terraform can't guara
 if you run "terraform apply" now.
 ```
 
+Looking good so far! 👍️
+
+#### terraform apply
+
+Now we will use `terraform apply`. This will again show all the expected changes to our infrastructure first and then ask you to confirm with `yes`:
 
 ```bash
 $ terraform apply
@@ -168,9 +471,17 @@ nsxt_policy_security_policy.k8s_policy: Creation complete after 0s [id=e6ce6f27-
 Apply complete! Resources: 8 added, 0 changed, 0 destroyed.
 ```
 
+### Result
+
+Lets see have a look at what was created on NSX-T.
+
+We can see all the inventory groups that have been created:
 ![NSX-T Security Groups](/images/nsx_t_groups.png)
 
+And here's the DFW security policy, exactly as defined in our configuration files:
 ![NSX-T Security Policy](/images/nsx_t_dfw_rules.png)
+
+### Cleanup
 
 Since Terraform keeps track of all the state of your infrastructure it can also do the reverse and remove all of these resources again cleanly.
 
