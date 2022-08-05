@@ -27,13 +27,12 @@ One of the most popular and commonly used tools for IaC is HashiCorp [Terraform]
 
 ## Define your NSX-T DFW rules
 
-Now let's go back to our NSX-T firewall rules we want to setup.
+Now let's go back to our NSX-T firewall rules we want to setup. For this we are going to use the [NSX-T provider plugin](https://github.com/vmware/terraform-provider-nsxt) for Terraform.
 
-https://registry.terraform.io/providers/vmware/nsxt/latest/docs
+The documentation of this plugin can be found here: [https://www.terraform.io/docs/providers/nsxt/](https://registry.terraform.io/providers/vmware/nsxt/latest/docs)
 
-// TODO: go through example DFW rules, services, ipsets, segments, etc..
-// TODO: show howto write it in tf nsx-t plugin format..
-
+### Terraform configuration files
+Let's start our Terraform project by defining what provider plugin we want to use and configure it accordingly.
 
 #### provider.tf
 ```terraform
@@ -58,7 +57,11 @@ provider "nsxt" {
 }
 ```
 
-#### variables.tf
+As you can see above we are referring to several variables and using them to configure the provider plugin's `host`, `username` and `password` parameter.
+
+These and some more variables are defined within `variables.tf`.
+
+#### variables.tf / terraform.tfvars
 ```terraform
 variable "nsx_manager" {}
 variable "nsx_username" {}
@@ -78,7 +81,6 @@ variable "ipset_k8s_master_cidrs" {}
 variable "ipset_bastionhost" {}
 ```
 
-#### terraform.tfvars
 ```terraform
 nsx_manager        = "nsx-t.manager.domain"
 nsx_username       = "my-username"
@@ -93,14 +95,11 @@ ipset_k8s_master_cidrs = ["10.8.10.0/24"]
 ipset_bastionhost      = ["10.8.5.10", "10.8.5.11"]
 ```
 
-Let's start by defining some NSX-T inventory groups in a Terraform file.
+We use these variables to define all the network ranges and IPs we expect to play around with in the DFW policy and rules.
 
-We will need a group which encompases all segments to use for targeting scope purposes, some CIDR groups for the various collection of VMs and their networks and finally a group for an example bastion host and its IP:
+The next step is to configure the NSX-T policy groups as described in [https://registry.terraform.io/providers/vmware/nsxt/latest/docs/resources/policy_group](https://registry.terraform.io/providers/vmware/nsxt/latest/docs/resources/policy_group). For our example project we will need a group which encompasses all segments to use for targeting scope purposes, some CIDR groups for the various collection of VMs and their networks and finally a group for an example bastion host and its IP.
 
 #### groups.tf
-<details>
-  <summary>Click to expand!</summary>
-
 ```terraform
 resource "nsxt_policy_group" "all_segments" {
   display_name = "all_segments"
@@ -175,14 +174,10 @@ resource "nsxt_policy_group" "k8s_node_cidrs" {
   }
 }
 ```
-</details>
 
-Finally we have all the bits and pieces together to write out the actual DFW firewall rules into a policy:
+Finally we have all the bits and pieces together to write out the actual DFW firewall rules into a policy.
 
 #### dfw_policy.tf
-<details>
-  <summary>Click to expand!</summary>
-
 ```terraform
 data "nsxt_policy_service" "ssh" {
   display_name = "SSH"
@@ -314,7 +309,6 @@ resource "nsxt_policy_security_policy" "k8s_policy" {
   }
 }
 ```
-</details>
 
 Note: All of these rules and definitions shown above are just examples, they are not meant to be used on any actual environment and very likely are incomplete or do not work for your use-case at all. Don't blindly copy and paste this stuff. 😉
 
