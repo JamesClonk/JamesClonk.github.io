@@ -1,0 +1,637 @@
+<!doctype html><html lang=en-us><head><title>Setting up NSX-T Distributed Firewall with Terraform // Ramblings about all things technical</title><link rel="shortcut icon" href=https://jamesclonk.io/favicon.ico><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><meta name=author content="Fabio Berchtold"><meta name=description content="How to setup NSX-T DFW rules with Terraform, the Infrastructure-as-Code way"><link rel=stylesheet href=https://blog.jamesclonk.io/css/main.min.69f3560017b43a1fc9233086d35c5c1844537f85db3f349ed92009e395fa1b93.css><meta name=twitter:card content="summary"><meta name=twitter:title content="Setting up NSX-T Distributed Firewall with Terraform"><meta name=twitter:description content="How to setup NSX-T DFW rules with Terraform, the Infrastructure-as-Code way"><meta property="og:title" content="Setting up NSX-T Distributed Firewall with Terraform"><meta property="og:description" content="How to setup NSX-T DFW rules with Terraform, the Infrastructure-as-Code way"><meta property="og:type" content="article"><meta property="og:url" content="https://blog.jamesclonk.io/posts/setting-up-nsx-t-with-terraform/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-07-31T12:33:24+02:00"><meta property="article:modified_time" content="2022-07-31T12:33:24+02:00"></head><body><header class=app-header><a href=https://blog.jamesclonk.io/><img class=app-header-avatar src=/images/fabio_berchtold.jpg alt="Fabio Berchtold"></a><h1>Ramblings about all things technical</h1><nav class=app-header-menu><a class=app-header-menu-item href=/>Home</a>
+-
+<a class=app-header-menu-item href=/tags/>Tags</a>
+-
+<a class=app-header-menu-item href=/about/>About</a></nav><p>Working with tech is fun!</p><div class=app-header-social><a href=https://github.com/JamesClonk target=_blank rel="noreferrer noopener"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github"><title>GitHub</title><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></div></header><main class=app-container><article class=post><header class=post-header><h1 class=post-title>Setting up NSX-T Distributed Firewall with Terraform</h1><div class=post-meta><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-user"><title>user</title><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fabio Berchtold</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar"><title>calendar</title><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jul 31, 2022</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock"><title>clock</title><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>15 min read</div><div><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag"><title>tag</title><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><a class=tag href=/tags/terraform/>terraform</a>
+<a class=tag href=/tags/nsx-t/>nsx-t</a>
+<a class=tag href=/tags/vmware/>vmware</a>
+<a class=tag href=/tags/firewall/>firewall</a>
+<a class=tag href=/tags/kubernetes/>kubernetes</a>
+<a class=tag href=/tags/exoscale/>exoscale</a></div></div></header><div class=post-content><h2 id=nsx-t>NSX-T</h2><blockquote><p><em><a href=https://docs.vmware.com/en/VMware-NSX-T-Data-Center/>NSX-T</a> is a <a href=https://en.wikipedia.org/wiki/Software-defined_networking>software-defined networking</a> (SDN) platform by VMware to build and connect environments together. It can be used for any cloud-native workload, bare metal or hypervisor, public, private or multi-cloud environments. It allows you to abstract your phyiscal network and to create and define networks for your workloads entirely in software.</em></p></blockquote><p>One of the features in NSX-T is the so-called &ldquo;<a href=https://docs.vmware.com/en/VMware-NSX-T-Data-Center/3.2/administration/GUID-6AB240DB-949C-4E95-A9A7-4AC6EF5E3036.html>Distributed Firewall</a>&rdquo; (DFW), with which you can configure firewall rules for all your east-west traffic inside an NSX-T network.</p><p>Now why is this so interesting? Well, because a few weeks ago I needed to create a bunch of DFW policies and rules in NSX-T, and was wondering about what would probably be the best approach to do that.</p><p>Trying to figure out the overly complicated NSX-T API to try and automate any such rule creation that way unfortunately only resulted in frustration and ultimately resignation. But I explicitly wanted to have everything automated, there&rsquo;s no way I&rsquo;m going to manually maintain a set of firewall rules in a UI via <em>ClickOps</em>.</p><p>Hmm, what can we do?</p><h2 id=infrastructure-as-code-iac>Infrastructure-as-Code (IaC)</h2><p><a href=https://www.redhat.com/en/topics/automation/what-is-infrastructure-as-code-iac>Infrastructure-as-Code</a> is the process of defining, provisioning and managing infrastructure resources like VMs, networks, load-balancers, Kubernetes clusters, disks and storage, etc. through code, rather than manual work or interactive configuration tools.
+With IaC you write configuration files, or code, that then can repeatably be run to create all your infrastructure resources in a 100% reproducible and idempotent way. These configuration files are usually also store in a version control repository, like git, and can then further be used to setup automated GitOps deployment pipelines that will update your infrastructure everytime there is a new commit or change in the configuration files. It is best practice to not <em>ever</em> manually manage any infrastructure like for example VMs through any manual interaction or tampering with them in any way, all work should be done through the automated deployment and provisioning process only.</p><p>One of the most popular and commonly used tools for IaC is HashiCorp <a href=https://www.terraform.io/>Terraform</a>.</p><h2 id=terraform>Terraform</h2><p><a href=https://www.terraform.io/>Terraform</a> is (arguably) the most popular open-source Infrastructure-as-Code tool out there. It allows to easily define, provision and manage your entire infrastructure using a declarative configuration language. It works out-of-the-box with most of the well-known infrastructure provider like GCP, AWS, Azure, etc. and all of their services.</p><p>Terraform functionality and support for different infrastructure platforms and resources can also easily be extended by installing additional Terraform <a href=https://www.terraform.io/language/providers>provider plugins</a>.</p><p>Here&rsquo;s a quick example of using the <a href=https://registry.terraform.io/providers/exoscale/exoscale/latest>Exoscale provider plugin</a>, to provision and manage an entire Kubernetes cluster on <a href=https://www.exoscale.com/>Exoscale</a>:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic># Exoscale Terraform provider plugin
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span><span style=color:#000>terraform</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>required_providers</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>exoscale</span> = <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>source</span>  = <span style=color:#4e9a06>&#34;exoscale/exoscale&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>version</span> = <span style=color:#4e9a06>&#34;~&gt; 0.40.0&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>required_version</span> = <span style=color:#4e9a06>&#34;&gt;= 1.2.0&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>provider</span> <span style=color:#4e9a06>&#34;exoscale&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>key</span>    = <span style=color:#4e9a06>&#34;EXOcbdef9755bd4fce8bfc5e2a5&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>secret</span> = <span style=color:#4e9a06>&#34;xFh2vZcXyASGuZ-rEW272hiz-b8Xu75DLH5ef7Y2MhB&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic># Security groups
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span><span style=color:#204a87;font-weight:700>data</span> <span style=color:#4e9a06>&#34;exoscale_security_group&#34;</span> <span style=color:#4e9a06>&#34;default&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>name</span> = <span style=color:#4e9a06>&#34;default&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_security_group&#34;</span> <span style=color:#4e9a06>&#34;sks_security_group&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>name</span> = <span style=color:#4e9a06>&#34;sks-k8s-security-group&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_security_group_rule&#34;</span> <span style=color:#4e9a06>&#34;kubelet&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>security_group_id</span>      = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>            = <span style=color:#4e9a06>&#34;Kubelet&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>type</span>                   = <span style=color:#4e9a06>&#34;INGRESS&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>protocol</span>               = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>start_port</span>             = <span style=color:#0000cf;font-weight:700>10250</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>end_port</span>               = <span style=color:#0000cf;font-weight:700>10250</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>user_security_group_id</span> = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_security_group_rule&#34;</span> <span style=color:#4e9a06>&#34;calico_vxlan&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>security_group_id</span>      = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>            = <span style=color:#4e9a06>&#34;VXLAN (Calico)&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>type</span>                   = <span style=color:#4e9a06>&#34;INGRESS&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>protocol</span>               = <span style=color:#4e9a06>&#34;UDP&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>start_port</span>             = <span style=color:#0000cf;font-weight:700>4789</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>end_port</span>               = <span style=color:#0000cf;font-weight:700>4789</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>user_security_group_id</span> = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_security_group_rule&#34;</span> <span style=color:#4e9a06>&#34;nodeport_tcp&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>security_group_id</span> = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>       = <span style=color:#4e9a06>&#34;Nodeport TCP services&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>type</span>              = <span style=color:#4e9a06>&#34;INGRESS&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>protocol</span>          = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>start_port</span>        = <span style=color:#0000cf;font-weight:700>30000</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>end_port</span>          = <span style=color:#0000cf;font-weight:700>32767</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>cidr</span>              = <span style=color:#4e9a06>&#34;0.0.0.0/0&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_security_group_rule&#34;</span> <span style=color:#4e9a06>&#34;nodeport_udp&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>security_group_id</span> = <span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>       = <span style=color:#4e9a06>&#34;Nodeport UDP services&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>type</span>              = <span style=color:#4e9a06>&#34;INGRESS&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>protocol</span>          = <span style=color:#4e9a06>&#34;UDP&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>start_port</span>        = <span style=color:#0000cf;font-weight:700>30000</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>end_port</span>          = <span style=color:#0000cf;font-weight:700>32767</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>cidr</span>              = <span style=color:#4e9a06>&#34;0.0.0.0/0&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic># SKS cluster and nodepool
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_sks_cluster&#34;</span> <span style=color:#4e9a06>&#34;sks_cluster&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>zone</span>           = <span style=color:#4e9a06>&#34;ch-dk-2&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>name</span>           = <span style=color:#4e9a06>&#34;sks-k8s-cluster&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>    = <span style=color:#4e9a06>&#34;An example Kubernetes cluster on Exoscale&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>auto_upgrade</span>   = <span style=color:#204a87;font-weight:700>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>metrics_server</span> = <span style=color:#204a87;font-weight:700>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>service_level</span>  = <span style=color:#4e9a06>&#34;starter&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>version</span>        = <span style=color:#4e9a06>&#34;1.23.9&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_sks_nodepool&#34;</span> <span style=color:#4e9a06>&#34;sks_nodepool&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>zone</span>          = <span style=color:#4e9a06>&#34;ch-dk-2&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>cluster_id</span>    = <span style=color:#000>exoscale_sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>name</span>          = <span style=color:#4e9a06>&#34;sks-k8s-nodepool&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>instance_type</span> = <span style=color:#4e9a06>&#34;standard.medium&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>size</span>          = <span style=color:#0000cf;font-weight:700>5</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>security_group_ids</span> = <span style=color:#000;font-weight:700>[</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>    data</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>default</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span><span style=color:#000;font-weight:700>,</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>    resource</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>exoscale_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_security_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span><span style=color:#000;font-weight:700>,</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic># Kubeconfig
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;exoscale_sks_kubeconfig&#34;</span> <span style=color:#4e9a06>&#34;sks_kubeconfig&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>cluster_id</span> = <span style=color:#000>exoscale_sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>id</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>zone</span>       = <span style=color:#000>exoscale_sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>zone</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>user</span>       = <span style=color:#4e9a06>&#34;kubernetes-admin&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>groups</span>     = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;system:masters&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;local_sensitive_file&#34;</span> <span style=color:#4e9a06>&#34;sks_kubeconfig_file&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>filename</span>        = <span style=color:#4e9a06>&#34;sks_kubeconfig&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>content</span>         = <span style=color:#000>exoscale_sks_kubeconfig</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_kubeconfig</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>kubeconfig</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>file_permission</span> = <span style=color:#4e9a06>&#34;0600&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic># Terraform outputs
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>########################################################################################################################
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span><span style=color:#204a87;font-weight:700>output</span> <span style=color:#4e9a06>&#34;sks_cluster_endpoint&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>value</span> = <span style=color:#000>exoscale_sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_cluster</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>endpoint</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>output</span> <span style=color:#4e9a06>&#34;sks_kubeconfig&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>value</span> = <span style=color:#000>local_sensitive_file</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_kubeconfig_file</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>filename</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>output</span> <span style=color:#4e9a06>&#34;sks_connection&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>value</span> = <span style=color:#204a87>format</span><span style=color:#000;font-weight:700>(</span>
+</span></span><span style=display:flex><span>    <span style=color:#4e9a06>&#34;export KUBECONFIG=%s; kubectl cluster-info; kubectl get pods -A&#34;</span><span style=color:#000;font-weight:700>,</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>local_sensitive_file</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>sks_kubeconfig_file</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>filename</span><span style=color:#000;font-weight:700>,</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>)</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span></code></pre></div><p>The above Terraform configuration specifies a security group for K8s, a K8s cluster / management plane, a K8s node pool and the kubeconfig file for accessing the cluster.</p><p>All of this will be provisioned on Exoscale by simply running <code>terraform apply</code>:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ terraform apply
+</span></span><span style=display:flex><span>data.exoscale_security_group.default: Reading...
+</span></span><span style=display:flex><span>data.exoscale_security_group.default: Read <span style=color:#204a87>complete</span> after 0s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>91772b4d-a404-4717-8fa4-a82dc4060b38<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+</span></span><span style=display:flex><span>  + create
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>... <span style=color:#8f5902;font-style:italic># terraform plan preview here, lots of output</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Plan: <span style=color:#0000cf;font-weight:700>9</span> to add, <span style=color:#0000cf;font-weight:700>0</span> to change, <span style=color:#0000cf;font-weight:700>0</span> to destroy.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Changes to Outputs:
+</span></span><span style=display:flex><span>  + <span style=color:#000>sks_cluster_endpoint</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>  + <span style=color:#000>sks_connection</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;export KUBECONFIG=sks_kubeconfig; kubectl cluster-info; kubectl get pods -A&#34;</span>
+</span></span><span style=display:flex><span>  + <span style=color:#000>sks_kubeconfig</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;sks_kubeconfig&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Do you want to perform these actions?
+</span></span><span style=display:flex><span>  Terraform will perform the actions described above.
+</span></span><span style=display:flex><span>  Only <span style=color:#4e9a06>&#39;yes&#39;</span> will be accepted to approve.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  Enter a value: yes
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>exoscale_security_group.sks_security_group: Creating...
+</span></span><span style=display:flex><span>exoscale_sks_cluster.sks_cluster: Creating...
+</span></span><span style=display:flex><span>exoscale_security_group.sks_security_group: Creation <span style=color:#204a87>complete</span> after 3s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>bf6c5ebf-1091-4ca9-a427-034ccfbdae8a<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_security_group_rule.nodeport_udp: Creating...
+</span></span><span style=display:flex><span>exoscale_security_group_rule.nodeport_tcp: Creating...
+</span></span><span style=display:flex><span>exoscale_security_group_rule.kubelet: Creating...
+</span></span><span style=display:flex><span>exoscale_security_group_rule.calico_vxlan: Creating...
+</span></span><span style=display:flex><span>exoscale_security_group_rule.nodeport_udp: Creation <span style=color:#204a87>complete</span> after 4s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>f90b6619-4559-4cc9-9d0d-91d071397501<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_security_group_rule.nodeport_tcp: Creation <span style=color:#204a87>complete</span> after 4s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>23a1293b-1a2b-4b6f-8d57-46d089e61f27<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_security_group_rule.calico_vxlan: Creation <span style=color:#204a87>complete</span> after 4s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>863bb61e-7649-44d9-8ed3-b187ebadb424<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_security_group_rule.kubelet: Creation <span style=color:#204a87>complete</span> after 4s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>e18cdcc8-2b67-4bb3-a6c9-8f29380acced<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_sks_cluster.sks_cluster: Creation <span style=color:#204a87>complete</span> after 1m37s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>6a94074f-302c-446a-821e-9acfebf5d33b<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_sks_kubeconfig.sks_kubeconfig: Creating...
+</span></span><span style=display:flex><span>exoscale_sks_nodepool.sks_nodepool: Creating...
+</span></span><span style=display:flex><span>exoscale_sks_kubeconfig.sks_kubeconfig: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>115016320829257889883792189515326601296577323034:116838890743125145307630577456649047067124867913<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>local_sensitive_file.sks_kubeconfig_file: Creating...
+</span></span><span style=display:flex><span>local_sensitive_file.sks_kubeconfig_file: Creation <span style=color:#204a87>complete</span> after 0s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>becb4140b572bd2a622f02a116a3734921132e45<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>exoscale_sks_nodepool.sks_nodepool: Creation <span style=color:#204a87>complete</span> after 7s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>85a398c3-19f6-47d8-89cf-d8feab72828d<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Apply complete! Resources: <span style=color:#0000cf;font-weight:700>9</span> added, <span style=color:#0000cf;font-weight:700>0</span> changed, <span style=color:#0000cf;font-weight:700>0</span> destroyed.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Outputs:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#000>sks_cluster_endpoint</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000>sks_connection</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;export KUBECONFIG=sks_kubeconfig; kubectl cluster-info; kubectl get pods -A&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000>sks_kubeconfig</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;sks_kubeconfig&#34;</span>
+</span></span></code></pre></div><p>After <code>terraform apply</code> has finished it will print out the result and all of the defined <code>output</code>&rsquo;s.</p><p>Let&rsquo;s quickly check to confirm our new Kubernetes cluster is up and running:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ <span style=color:#204a87>export</span> <span style=color:#000>KUBECONFIG</span><span style=color:#ce5c00;font-weight:700>=</span>sks_kubeconfig<span style=color:#000;font-weight:700>;</span> kubectl cluster-info<span style=color:#000;font-weight:700>;</span> kubectl get pods -A
+</span></span><span style=display:flex><span>Kubernetes control plane is running at https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io:443
+</span></span><span style=display:flex><span>CoreDNS is running at https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io:443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>To further debug and diagnose cluster problems, use <span style=color:#4e9a06>&#39;kubectl cluster-info dump&#39;</span>.
+</span></span><span style=display:flex><span>NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+</span></span><span style=display:flex><span>kube-system   calico-kube-controllers-6b77fff45-hrn7h   1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          117s
+</span></span><span style=display:flex><span>kube-system   calico-node-hzthv                         1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          65s
+</span></span><span style=display:flex><span>kube-system   calico-node-ndvn4                         1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          64s
+</span></span><span style=display:flex><span>kube-system   calico-node-zgljr                         1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          57s
+</span></span><span style=display:flex><span>kube-system   coredns-7c85997-fbndk                     1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          113s
+</span></span><span style=display:flex><span>kube-system   coredns-7c85997-rd79q                     1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          113s
+</span></span><span style=display:flex><span>kube-system   konnectivity-agent-54dd7f4b98-8f2fd       1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          111s
+</span></span><span style=display:flex><span>kube-system   konnectivity-agent-54dd7f4b98-d26kx       1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          111s
+</span></span><span style=display:flex><span>kube-system   kube-proxy-9b9fl                          1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          64s
+</span></span><span style=display:flex><span>kube-system   kube-proxy-9dq54                          1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          65s
+</span></span><span style=display:flex><span>kube-system   kube-proxy-gdft4                          1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          57s
+</span></span><span style=display:flex><span>kube-system   metrics-server-7bbd99559d-xlskh           0/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          109s
+</span></span></code></pre></div><p>It&rsquo;s like magic! 🥳</p><p>You can now even go a step further and also add Helm chart deployments to your Terraform configuration files, by courtesy of the Helm provider plugin: <a href=https://github.com/hashicorp/terraform-provider-helm>https://github.com/hashicorp/terraform-provider-helm</a></p><p>We could for example easily add and deploy the Ingress-NGINX controller too by adding this here to our configuration:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#204a87;font-weight:700>provider</span> <span style=color:#4e9a06>&#34;helm&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>kubernetes</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>config_path</span> = <span style=color:#4e9a06>&#34;./sks_kubeconfig&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;helm_release&#34;</span> <span style=color:#4e9a06>&#34;nginx_ingress&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>name</span>       = <span style=color:#4e9a06>&#34;nginx-ingress-controller&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>repository</span> = <span style=color:#4e9a06>&#34;https://charts.bitnami.com/bitnami&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>chart</span>      = <span style=color:#4e9a06>&#34;nginx-ingress-controller&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>set</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>name</span>  = <span style=color:#4e9a06>&#34;service.type&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>value</span> = <span style=color:#4e9a06>&#34;ClusterIP&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span></code></pre></div><p>After running <code>terraform apply</code> again, we get this:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ <span style=color:#204a87>export</span> <span style=color:#000>KUBECONFIG</span><span style=color:#ce5c00;font-weight:700>=</span>sks_kubeconfig<span style=color:#000;font-weight:700>;</span> kubectl get pods -n default
+</span></span><span style=display:flex><span>NAME                                                        READY   STATUS    RESTARTS   AGE
+</span></span><span style=display:flex><span>nginx-ingress-controller-6b9cf4684f-dk6gc                   1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          96s
+</span></span><span style=display:flex><span>nginx-ingress-controller-default-backend-6798d86668-984dw   1/1     Running   <span style=color:#0000cf;font-weight:700>0</span>          96s
+</span></span></code></pre></div><p>There are many more additional possibilities out there, for example using the <a href=https://github.com/vmware-tanzu/terraform-provider-carvel>Carvel provider plugin</a> to use <a href=https://carvel.dev/ytt>ytt</a> templates and deploy with <a href=https://carvel.dev/kapp>kapp</a> instead of Helm.
+But let&rsquo;s safe that for another time.</p><h2 id=define-your-nsx-t-dfw-rules>Define your NSX-T DFW rules</h2><p>Now let&rsquo;s go back to our NSX-T firewall rules we want to setup after this small detour into the world of IaC and Terraform.</p><p>You might have already guessed it at this point, but there actually is a <a href=https://github.com/vmware/terraform-provider-nsxt>NSX-T provider plugin</a> for Terraform, and obviously we are going to use it! 😁</p><p>The documentation of this plugin can be found here: <a href=https://registry.terraform.io/providers/vmware/nsxt/latest/docs>https://www.terraform.io/docs/providers/nsxt/</a></p><h3 id=terraform-configuration-files>Terraform configuration files</h3><p>Let&rsquo;s start our Terraform project by defining what provider plugin we want to use and configure it accordingly.</p><h4 id=providertf>provider.tf</h4><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#000>terraform</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>required_providers</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>nsxt</span> = <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>source</span>  = <span style=color:#4e9a06>&#34;vmware/nsxt&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>version</span> = <span style=color:#4e9a06>&#34;~&gt; 3.2.8&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>required_version</span> = <span style=color:#4e9a06>&#34;&gt;= 1.2.0&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>provider</span> <span style=color:#4e9a06>&#34;nsxt&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>host</span>                 = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_manager</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>username</span>             = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_username</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>password</span>             = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_password</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>allow_unverified_ssl</span> = <span style=color:#204a87;font-weight:700>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>max_retries</span>          = <span style=color:#0000cf;font-weight:700>5</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>retry_min_delay</span>      = <span style=color:#0000cf;font-weight:700>50</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>retry_max_delay</span>      = <span style=color:#0000cf;font-weight:700>2000</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span></code></pre></div><p>As you can see above we are referring to several variables and using them to configure the provider plugin&rsquo;s <code>host</code>, <code>username</code> and <code>password</code> parameter.</p><p>These and some more variables are defined within <code>variables.tf</code>.</p><h4 id=variablestf--terraformtfvars>variables.tf / terraform.tfvars</h4><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_manager&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_username&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_password&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_policy_enabled&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>default</span> = <span style=color:#204a87;font-weight:700>true</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_env_tag_scope&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>default</span> = <span style=color:#4e9a06>&#34;env&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;nsx_env&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;ipset_all_cidrs&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;ipset_k8s_node_cidrs&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;ipset_k8s_master_cidrs&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>variable</span> <span style=color:#4e9a06>&#34;ipset_bastionhost&#34;</span> <span style=color:#000;font-weight:700>{}</span>
+</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#c4a000>nsx_manager</span>        = <span style=color:#4e9a06>&#34;nsx-t.manager.domain&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>nsx_username</span>       = <span style=color:#4e9a06>&#34;my-username&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>nsx_password</span>       = <span style=color:#4e9a06>&#34;********&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>nsx_policy_enabled</span> = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>nsx_env</span> = <span style=color:#4e9a06>&#34;k8s-dev&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>ipset_all_cidrs</span>        = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;10.8.5.0/24&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;10.8.10.0/24&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;10.8.11.0/24&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;10.8.12.0/24&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>ipset_k8s_node_cidrs</span>   = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;10.8.11.0/24&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;10.8.12.0/24&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>ipset_k8s_master_cidrs</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;10.8.10.0/24&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span><span style=color:#c4a000>ipset_bastionhost</span>      = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;10.8.5.10&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;10.8.5.11&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span></code></pre></div><p>We use these variables to define all the network ranges and IPs we expect to play around with in the DFW policy and rules.</p><p>The next step is to configure the NSX-T policy groups as described in <a href=https://registry.terraform.io/providers/vmware/nsxt/latest/docs/resources/policy_group>https://registry.terraform.io/providers/vmware/nsxt/latest/docs/resources/policy_group</a>. For our example project we will need a group which encompasses all segments to use for targeting scope purposes, some CIDR groups for the various collection of VMs and their networks and finally a group for an example bastion host and its IP.</p><h4 id=groupstf>groups.tf</h4><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;all_segments&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;all_segments&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;All </span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06> segments&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>criteria</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>condition</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>member_type</span> = <span style=color:#4e9a06>&#34;Segment&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>operator</span>    = <span style=color:#4e9a06>&#34;EQUALS&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>key</span>         = <span style=color:#4e9a06>&#34;Tag&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>value</span>       = <span style=color:#4e9a06>&#34;</span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06>|</span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06>&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;bastionhost&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;bastionhost&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;All bastionhost IPs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>criteria</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>ipaddress_expression</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>ip_addresses</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ipset_bastionhost</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;all_cidrs&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;k8s_all_cidrs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;All CIDRs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>criteria</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>ipaddress_expression</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>ip_addresses</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ipset_all_cidrs</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;k8s_master_cidrs&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;k8s_master_cidrs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;All K8s master CIDRs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>criteria</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>ipaddress_expression</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>ip_addresses</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ipset_k8s_master_cidrs</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;k8s_node_cidrs&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;k8s_node_cidrs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;All K8s nodes CIDRs&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>criteria</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#000>ipaddress_expression</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      <span style=color:#c4a000>ip_addresses</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ipset_k8s_node_cidrs</span>
+</span></span><span style=display:flex><span>    <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span></code></pre></div><p>Finally we have all the bits and pieces together to write out the actual DFW firewall rules into a policy.</p><h4 id=dfw_policytf>dfw_policy.tf</h4><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-terraform data-lang=terraform><span style=display:flex><span><span style=color:#204a87;font-weight:700>data</span> <span style=color:#4e9a06>&#34;nsxt_policy_service&#34;</span> <span style=color:#4e9a06>&#34;ssh&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;SSH&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_service&#34;</span> <span style=color:#4e9a06>&#34;k8s_api_server&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;k8s_api_server&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#000>l4_port_set_entry</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span>      = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>protocol</span>          = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_ports</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;443&#34;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#4e9a06>&#34;6443&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_service&#34;</span> <span style=color:#4e9a06>&#34;k8s_kubelet_api&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;k8s_kubelet_api&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#000>l4_port_set_entry</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span>      = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>protocol</span>          = <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_ports</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#4e9a06>&#34;10250&#34;</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>
+</span></span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>resource</span> <span style=color:#4e9a06>&#34;nsxt_policy_security_policy&#34;</span> <span style=color:#4e9a06>&#34;k8s_policy&#34;</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;DFW_K8s_policy&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;DFW rules for </span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06>&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>category</span>   = <span style=color:#4e9a06>&#34;Application&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>locked</span>     = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>stateful</span>   = <span style=color:#204a87;font-weight:700>true</span>
+</span></span><span style=display:flex><span>  <span style=color:#c4a000>tcp_strict</span> = <span style=color:#204a87;font-weight:700>false</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # scope      = [nsxt_policy_group.all_segments.path]
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>tag</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span> = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env_tag_scope</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>tag</span>   = <span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # allow SSH to bastion host
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;allow_ssh_to_bastionhost&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Allow SSH from Any to bastion host&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_groups</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>bastionhost</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>services</span>           = <span style=color:#000;font-weight:700>[</span><span style=color:#204a87>data</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsxt_policy_service</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ssh</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>              = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;ALLOW&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # allow bastion host to do anything
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;allow_bastionhost_to_any&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Allow Any for </span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06> bastion host&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>source_groups</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>bastionhost</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>         = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;ALLOW&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # block any other SSH
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;block_ssh_to_any&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Block SSH to/from anything else&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>services</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#204a87>data</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsxt_policy_service</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>ssh</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>    = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;DROP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # allow ingress to k8s api-server
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;allow_k8s_api_server&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Allow Any for </span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06> K8s API-server ports&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_groups</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>k8s_master_cidrs</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>services</span>           = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_service</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>k8s_api_server</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>              = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;ALLOW&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # allow k8s master to kubelet api
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;allow_k8s_kubelets&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Allow K8s master to Kubelet API ports&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>source_groups</span>      = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>k8s_master_cidrs</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_groups</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>k8s_node_cidrs</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>services</span>           = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_service</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>k8s_kubelet_api</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>              = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;ALLOW&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic>  # block anything that was not yet explicitely allowed, for all CIDRs
+</span></span></span><span style=display:flex><span><span style=color:#8f5902;font-style:italic></span>  <span style=color:#000>rule</span> <span style=color:#000;font-weight:700>{</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>display_name</span> = <span style=color:#4e9a06>&#34;block_all_remaining&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>description</span>  = <span style=color:#4e9a06>&#34;Block anything remaining for all </span><span style=color:#4e9a06>${</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_env</span><span style=color:#4e9a06>}</span><span style=color:#4e9a06> CIDRs&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>source_groups</span>      = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_cidrs</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>destination_groups</span> = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_cidrs</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>scope</span>              = <span style=color:#000;font-weight:700>[</span><span style=color:#000>nsxt_policy_group</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>all_segments</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>path</span><span style=color:#000;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>action</span>   = <span style=color:#4e9a06>&#34;DROP&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>logged</span>   = <span style=color:#204a87;font-weight:700>false</span>
+</span></span><span style=display:flex><span>    <span style=color:#c4a000>disabled</span> = <span style=color:#ce5c00;font-weight:700>!</span><span style=color:#204a87>var</span><span style=color:#000;font-weight:700>.</span><span style=color:#000>nsx_policy_enabled</span>
+</span></span><span style=display:flex><span>  <span style=color:#000;font-weight:700>}</span>
+</span></span><span style=display:flex><span><span style=color:#000;font-weight:700>}</span>
+</span></span></code></pre></div><p>Note: All of these rules and definitions shown above are just examples, they are not meant to be used on any actual environment and very likely are incomplete or do not work for your use-case at all. Don&rsquo;t blindly copy and paste this stuff. 😉</p><h2 id=apply-configuration-to-nsx-t>Apply configuration to NSX-T</h2><p>Now it&rsquo;s time to create some stuff on our infrastructure! 😎</p><h4 id=terraform-init>terraform init</h4><p>To create our new DFW policy we&rsquo;ll first have to initialize Terraform with <code>terraform init</code>. This will download the configured provider plugin and prepare everything to be used:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ terraform init
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Initializing the backend...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Initializing provider plugins...
+</span></span><span style=display:flex><span>- Finding vmware/nsxt versions matching <span style=color:#4e9a06>&#34;~&gt; 3.2.8&#34;</span>...
+</span></span><span style=display:flex><span>- Installing vmware/nsxt v3.2.8...
+</span></span><span style=display:flex><span>- Installed vmware/nsxt v3.2.8 <span style=color:#ce5c00;font-weight:700>(</span>signed by a HashiCorp partner, key ID 6B6B0F38607A2264<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>Terraform has been successfully initialized!
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><h4 id=terraform-plan>terraform plan</h4><p>Let&rsquo;s first have a look at what Terraform will do to our infrastructure.</p><p>We can do a &ldquo;dry-run&rdquo; first with <code>terraform plan</code>:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ terraform plan
+</span></span><span style=display:flex><span>data.nsxt_policy_service.ssh: Reading...
+</span></span><span style=display:flex><span>data.nsxt_policy_service.ssh: Read <span style=color:#204a87>complete</span> after 2s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>SSH<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Terraform used the selected providers to generate the following execution plan.
+</span></span><span style=display:flex><span>Resource actions are indicated with the following symbols:
+</span></span><span style=display:flex><span>  + create
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Terraform will perform the following actions:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#8f5902;font-style:italic># nsxt_policy_group.all_cidrs will be created</span>
+</span></span><span style=display:flex><span>  + resource <span style=color:#4e9a06>&#34;nsxt_policy_group&#34;</span> <span style=color:#4e9a06>&#34;all_cidrs&#34;</span> <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>description</span>  <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;All CIDRs&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>display_name</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;k8s_all_cidrs&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>domain</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;default&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>id</span>           <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>nsx_id</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>path</span>         <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>revision</span>     <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>... <span style=color:#8f5902;font-style:italic># lots of output</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#8f5902;font-style:italic># nsxt_policy_security_policy.k8s_policy will be created</span>
+</span></span><span style=display:flex><span>  + resource <span style=color:#4e9a06>&#34;nsxt_policy_security_policy&#34;</span> <span style=color:#4e9a06>&#34;k8s_policy&#34;</span> <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>category</span>        <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;Application&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>description</span>     <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;DFW rules for k8s-dev&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>display_name</span>    <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;DFW_K8s_policy&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>domain</span>          <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;default&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>sequence_number</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#0000cf;font-weight:700>0</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>stateful</span>        <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>true</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>tcp_strict</span>      <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>false</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      + rule <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>action</span>                <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;ALLOW&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>description</span>           <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;Allow SSH from Any to bastion host&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>destination_groups</span>    <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>destinations_excluded</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>false</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>direction</span>             <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;IN_OUT&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>disabled</span>              <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>true</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>display_name</span>          <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;allow_ssh_to_bastionhost&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>ip_version</span>            <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;IPV4_IPV6&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>logged</span>                <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>false</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>nsx_id</span>                <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>revision</span>              <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>rule_id</span>               <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>scope</span>                 <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>sequence_number</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>services</span>              <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>[</span>
+</span></span><span style=display:flex><span>              + <span style=color:#4e9a06>&#34;/infra/services/SSH&#34;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>sources_excluded</span>      <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#204a87>false</span>
+</span></span><span style=display:flex><span>        <span style=color:#ce5c00;font-weight:700>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>... <span style=color:#8f5902;font-style:italic># lots of output</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#8f5902;font-style:italic># nsxt_policy_service.k8s_kubelet_api will be created</span>
+</span></span><span style=display:flex><span>  + resource <span style=color:#4e9a06>&#34;nsxt_policy_service&#34;</span> <span style=color:#4e9a06>&#34;k8s_kubelet_api&#34;</span> <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>display_name</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;k8s_kubelet_api&#34;</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>id</span>           <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>nsx_id</span>       <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>path</span>         <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>      + <span style=color:#000>revision</span>     <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>(</span>known after apply<span style=color:#ce5c00;font-weight:700>)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      + l4_port_set_entry <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>destination_ports</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>[</span>
+</span></span><span style=display:flex><span>              + <span style=color:#4e9a06>&#34;10250&#34;</span>,
+</span></span><span style=display:flex><span>            <span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>display_name</span>      <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>protocol</span>          <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;TCP&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>source_ports</span>      <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#ce5c00;font-weight:700>[]</span>
+</span></span><span style=display:flex><span>        <span style=color:#ce5c00;font-weight:700>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>      + tag <span style=color:#ce5c00;font-weight:700>{</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>scope</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;env&#34;</span>
+</span></span><span style=display:flex><span>          + <span style=color:#000>tag</span>   <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#4e9a06>&#34;k8s-dev&#34;</span>
+</span></span><span style=display:flex><span>        <span style=color:#ce5c00;font-weight:700>}</span>
+</span></span><span style=display:flex><span>    <span style=color:#ce5c00;font-weight:700>}</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Plan: <span style=color:#0000cf;font-weight:700>8</span> to add, <span style=color:#0000cf;font-weight:700>0</span> to change, <span style=color:#0000cf;font-weight:700>0</span> to destroy.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+</span></span><span style=display:flex><span>Note: You didn<span style=color:#4e9a06>&#39;t use the -out option to save this plan, so Terraform can&#39;</span>t guarantee to take exactly these actions
+</span></span><span style=display:flex><span><span style=color:#204a87;font-weight:700>if</span> you run <span style=color:#4e9a06>&#34;terraform apply&#34;</span> now.
+</span></span></code></pre></div><p>Looking good so far! 👍️</p><h4 id=terraform-apply>terraform apply</h4><p>Now we will use <code>terraform apply</code>. This will again show all the expected changes to our infrastructure first and then ask you to confirm with <code>yes</code>:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ terraform apply
+</span></span><span style=display:flex><span>... <span style=color:#8f5902;font-style:italic># terraform plan preview here, lots of output</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Plan: <span style=color:#0000cf;font-weight:700>8</span> to add, <span style=color:#0000cf;font-weight:700>0</span> to change, <span style=color:#0000cf;font-weight:700>0</span> to destroy.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Do you want to perform these actions?
+</span></span><span style=display:flex><span>  Terraform will perform the actions described above.
+</span></span><span style=display:flex><span>  Only <span style=color:#4e9a06>&#39;yes&#39;</span> will be accepted to approve.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  Enter a value: yes
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_segments: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_api_server: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_node_cidrs: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_master_cidrs: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_kubelet_api: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_group.bastionhost: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_group.all_cidrs: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_kubelet_api: Creation <span style=color:#204a87>complete</span> after 0s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>7ccc1b64-db72-4a69-b344-1e3d5b3a3963<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_master_cidrs: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>45628ca7-1a87-4813-8f35-579257a3e417<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_cidrs: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>bd45ecfc-1b48-48f2-b160-af02a185b4c6<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_api_server: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>0f983f5d-5c60-4421-ae91-2d792cbf2b67<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_segments: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>08a73c98-cb55-40f1-91a0-863cf26821b9<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_node_cidrs: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>5dd6e26d-1cbc-4c83-bcf3-b2e2a47428cd<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.bastionhost: Creation <span style=color:#204a87>complete</span> after 1s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>a502410c-caa8-4893-a533-b95999d20fbb<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_security_policy.k8s_policy: Creating...
+</span></span><span style=display:flex><span>nsxt_policy_security_policy.k8s_policy: Creation <span style=color:#204a87>complete</span> after 0s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>e6ce6f27-3dc4-43ab-bf90-fd46681f4446<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Apply complete! Resources: <span style=color:#0000cf;font-weight:700>8</span> added, <span style=color:#0000cf;font-weight:700>0</span> changed, <span style=color:#0000cf;font-weight:700>0</span> destroyed.
+</span></span></code></pre></div><h3 id=result>Result</h3><p>Lets see have a look at what was created on NSX-T.</p><p>We can see all the inventory groups that have been created:
+<img src=/images/nsx_t_groups.png alt="NSX-T Security Groups"></p><p>And here&rsquo;s the DFW security policy, exactly as defined in our configuration files:
+<img src=/images/nsx_t_dfw_rules.png alt="NSX-T Security Policy"></p><h3 id=cleanup>Cleanup</h3><p>Since Terraform keeps track of all the state of your infrastructure it can also do the reverse and remove all of these resources again cleanly.</p><p>All you need to do is run <code>terraform destroy</code>, review what it will do carefully, and confirm by typing <code>yes</code>:</p><div class=highlight><pre tabindex=0 style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ terraform destroy
+</span></span><span style=display:flex><span>data.nsxt_policy_service.ssh: Reading...
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_kubelet_api: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>7ccc1b64-db72-4a69-b344-1e3d5b3a3963<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_node_cidrs: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>5dd6e26d-1cbc-4c83-bcf3-b2e2a47428cd<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.bastionhost: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>a502410c-caa8-4893-a533-b95999d20fbb<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_segments: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>08a73c98-cb55-40f1-91a0-863cf26821b9<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_master_cidrs: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>45628ca7-1a87-4813-8f35-579257a3e417<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_cidrs: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>bd45ecfc-1b48-48f2-b160-af02a185b4c6<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_api_server: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>0f983f5d-5c60-4421-ae91-2d792cbf2b67<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>data.nsxt_policy_service.ssh: Read <span style=color:#204a87>complete</span> after 2s <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>SSH<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_security_policy.k8s_policy: Refreshing state... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>e6ce6f27-3dc4-43ab-bf90-fd46681f4446<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>... <span style=color:#8f5902;font-style:italic># terraform plan preview here, lots of output</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Plan: <span style=color:#0000cf;font-weight:700>0</span> to add, <span style=color:#0000cf;font-weight:700>0</span> to change, <span style=color:#0000cf;font-weight:700>8</span> to destroy.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Do you really want to destroy all resources?
+</span></span><span style=display:flex><span>  Terraform will destroy all your managed infrastructure, as shown above.
+</span></span><span style=display:flex><span>  There is no undo. Only <span style=color:#4e9a06>&#39;yes&#39;</span> will be accepted to confirm.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  Enter a value: yes
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>nsxt_policy_security_policy.k8s_policy: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>e6ce6f27-3dc4-43ab-bf90-fd46681f4446<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_security_policy.k8s_policy: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>nsxt_policy_group.all_segments: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>08a73c98-cb55-40f1-91a0-863cf26821b9<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.bastionhost: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>a502410c-caa8-4893-a533-b95999d20fbb<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_api_server: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>0f983f5d-5c60-4421-ae91-2d792cbf2b67<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_node_cidrs: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>5dd6e26d-1cbc-4c83-bcf3-b2e2a47428cd<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_master_cidrs: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>45628ca7-1a87-4813-8f35-579257a3e417<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_kubelet_api: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>7ccc1b64-db72-4a69-b344-1e3d5b3a3963<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_group.all_cidrs: Destroying... <span style=color:#ce5c00;font-weight:700>[</span><span style=color:#000>id</span><span style=color:#ce5c00;font-weight:700>=</span>bd45ecfc-1b48-48f2-b160-af02a185b4c6<span style=color:#ce5c00;font-weight:700>]</span>
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_api_server: Destruction <span style=color:#204a87>complete</span> after 0s
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_node_cidrs: Destruction <span style=color:#204a87>complete</span> after 0s
+</span></span><span style=display:flex><span>nsxt_policy_service.k8s_kubelet_api: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>nsxt_policy_group.all_cidrs: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>nsxt_policy_group.all_segments: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>nsxt_policy_group.k8s_master_cidrs: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>nsxt_policy_group.bastionhost: Destruction <span style=color:#204a87>complete</span> after 1s
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Destroy complete! Resources: <span style=color:#0000cf;font-weight:700>8</span> destroyed.
+</span></span></code></pre></div><p>And there we go, all of our infrastructure was properly cleaned up.. 😃</p></div><div class=post-footer></div></article></main></body></html>
