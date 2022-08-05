@@ -1,16 +1,23 @@
 ---
 title: "Setting up NSX-T Distributed Firewall with Terraform"
 description: "How to setup NSX-T DFW rules with Terraform, the Infrastructure-as-Code way"
-tags: [terraform,nsx-t,vmware,firewall]
+tags: [terraform,nsx-t,vmware,firewall,kubernetes,exoscale]
 author: Fabio Berchtold
 date: 2022-07-31T12:33:24+02:00
-draft: true
+draft: false
 ---
 
 ## NSX-T
 
-// TODO: explain what is NSX-T/sdn here very briefly, mention DFW..
-// TODO: https://docs.vmware.com/en/VMware-NSX-T-Data-Center/3.2/administration/GUID-6AB240DB-949C-4E95-A9A7-4AC6EF5E3036.html
+> _[NSX-T](https://docs.vmware.com/en/VMware-NSX-T-Data-Center/) is a [software-defined networking](https://en.wikipedia.org/wiki/Software-defined_networking) (SDN) platform by VMware to build and connect environments together. It can be used for any cloud-native workload, bare metal or hypervisor, public, private or multi-cloud environments. It allows you to abstract your phyiscal network and to create and define networks for your workloads entirely in software._
+
+One of the features in NSX-T is the so-called "[Distributed Firewall](https://docs.vmware.com/en/VMware-NSX-T-Data-Center/3.2/administration/GUID-6AB240DB-949C-4E95-A9A7-4AC6EF5E3036.html)" (DFW), with which you can configure firewall rules for all your east-west traffic inside an NSX-T network.
+
+Now why is this so interesting? Well, because a few weeks ago I needed to create a bunch of DFW policies and rules in NSX-T, and was wondering about what would probably be the best approach to do that.
+
+Trying to figure out the overly complicated NSX-T API to try and automate any such rule creation that way unfortunately only resulted in frustration and ultimately resignation. But I explicitly wanted to have everything automated, there's no way I'm going to manually maintain a set of firewall rules in a UI via _ClickOps_.
+
+Hmm, what can we do?
 
 ## Infrastructure-as-Code (IaC)
 
@@ -21,13 +28,262 @@ One of the most popular and commonly used tools for IaC is HashiCorp [Terraform]
 
 ## Terraform
 
-// TODO: quick explanation of what Terraform is/does, etc.. not too much, there's enough docs/posts out there already
-// TODO: show quick example of using TF for provisioning SKS cluster
-// TODO: also show quick example of using TF for helm deployment on SKS cluster
+[Terraform](https://www.terraform.io/) is (arguably) the most popular open-source Infrastructure-as-Code tool out there. It allows to easily define, provision and manage your entire infrastructure using a declarative configuration language. It works out-of-the-box with most of the well-known infrastructure provider like GCP, AWS, Azure, etc. and all of their services.
+
+Terraform functionality and support for different infrastructure platforms and resources can also easily be extended by installing additional Terraform [provider plugins](https://www.terraform.io/language/providers).
+
+Here's a quick example of using the [Exoscale provider plugin](https://registry.terraform.io/providers/exoscale/exoscale/latest), to provision and manage an entire Kubernetes cluster on [Exoscale](https://www.exoscale.com/):
+
+```terraform
+########################################################################################################################
+# Exoscale Terraform provider plugin
+########################################################################################################################
+terraform {
+  required_providers {
+    exoscale = {
+      source  = "exoscale/exoscale"
+      version = "~> 0.40.0"
+    }
+  }
+  required_version = ">= 1.2.0"
+}
+
+provider "exoscale" {
+  key    = "EXOcbdef9755bd4fce8bfc5e2a5"
+  secret = "xFh2vZcXyASGuZ-rEW272hiz-b8Xu75DLH5ef7Y2MhB"
+}
+
+########################################################################################################################
+# Security groups
+########################################################################################################################
+data "exoscale_security_group" "default" {
+  name = "default"
+}
+
+resource "exoscale_security_group" "sks_security_group" {
+  name = "sks-k8s-security-group"
+}
+
+resource "exoscale_security_group_rule" "kubelet" {
+  security_group_id      = exoscale_security_group.sks_security_group.id
+  description            = "Kubelet"
+  type                   = "INGRESS"
+  protocol               = "TCP"
+  start_port             = 10250
+  end_port               = 10250
+  user_security_group_id = exoscale_security_group.sks_security_group.id
+}
+
+resource "exoscale_security_group_rule" "calico_vxlan" {
+  security_group_id      = exoscale_security_group.sks_security_group.id
+  description            = "VXLAN (Calico)"
+  type                   = "INGRESS"
+  protocol               = "UDP"
+  start_port             = 4789
+  end_port               = 4789
+  user_security_group_id = exoscale_security_group.sks_security_group.id
+}
+
+resource "exoscale_security_group_rule" "nodeport_tcp" {
+  security_group_id = exoscale_security_group.sks_security_group.id
+  description       = "Nodeport TCP services"
+  type              = "INGRESS"
+  protocol          = "TCP"
+  start_port        = 30000
+  end_port          = 32767
+  cidr              = "0.0.0.0/0"
+}
+
+resource "exoscale_security_group_rule" "nodeport_udp" {
+  security_group_id = exoscale_security_group.sks_security_group.id
+  description       = "Nodeport UDP services"
+  type              = "INGRESS"
+  protocol          = "UDP"
+  start_port        = 30000
+  end_port          = 32767
+  cidr              = "0.0.0.0/0"
+}
+
+########################################################################################################################
+# SKS cluster and nodepool
+########################################################################################################################
+resource "exoscale_sks_cluster" "sks_cluster" {
+  zone           = "ch-dk-2"
+  name           = "sks-k8s-cluster"
+  description    = "An example Kubernetes cluster on Exoscale"
+  auto_upgrade   = true
+  metrics_server = true
+  service_level  = "starter"
+  version        = "1.23.9"
+}
+
+resource "exoscale_sks_nodepool" "sks_nodepool" {
+  zone          = "ch-dk-2"
+  cluster_id    = exoscale_sks_cluster.sks_cluster.id
+  name          = "sks-k8s-nodepool"
+  instance_type = "standard.medium"
+  size          = 5
+  security_group_ids = [
+    data.exoscale_security_group.default.id,
+    resource.exoscale_security_group.sks_security_group.id,
+  ]
+}
+
+########################################################################################################################
+# Kubeconfig
+########################################################################################################################
+resource "exoscale_sks_kubeconfig" "sks_kubeconfig" {
+  cluster_id = exoscale_sks_cluster.sks_cluster.id
+  zone       = exoscale_sks_cluster.sks_cluster.zone
+  user       = "kubernetes-admin"
+  groups     = ["system:masters"]
+}
+
+resource "local_sensitive_file" "sks_kubeconfig_file" {
+  filename        = "sks_kubeconfig"
+  content         = exoscale_sks_kubeconfig.sks_kubeconfig.kubeconfig
+  file_permission = "0600"
+}
+
+########################################################################################################################
+# Terraform outputs
+########################################################################################################################
+output "sks_cluster_endpoint" {
+  value = exoscale_sks_cluster.sks_cluster.endpoint
+}
+
+output "sks_kubeconfig" {
+  value = local_sensitive_file.sks_kubeconfig_file.filename
+}
+
+output "sks_connection" {
+  value = format(
+    "export KUBECONFIG=%s; kubectl cluster-info; kubectl get pods -A",
+    local_sensitive_file.sks_kubeconfig_file.filename,
+  )
+}
+```
+
+The above Terraform configuration specifies a security group for K8s, a K8s cluster / management plane, a K8s node pool and the kubeconfig file for accessing the cluster.
+
+All of this will be provisioned on Exoscale by simply running `terraform apply`:
+
+```bash
+$ terraform apply
+data.exoscale_security_group.default: Reading...
+data.exoscale_security_group.default: Read complete after 0s [id=91772b4d-a404-4717-8fa4-a82dc4060b38]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+... # terraform plan preview here, lots of output
+
+Plan: 9 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + sks_cluster_endpoint = (known after apply)
+  + sks_connection       = "export KUBECONFIG=sks_kubeconfig; kubectl cluster-info; kubectl get pods -A"
+  + sks_kubeconfig       = "sks_kubeconfig"
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+exoscale_security_group.sks_security_group: Creating...
+exoscale_sks_cluster.sks_cluster: Creating...
+exoscale_security_group.sks_security_group: Creation complete after 3s [id=bf6c5ebf-1091-4ca9-a427-034ccfbdae8a]
+exoscale_security_group_rule.nodeport_udp: Creating...
+exoscale_security_group_rule.nodeport_tcp: Creating...
+exoscale_security_group_rule.kubelet: Creating...
+exoscale_security_group_rule.calico_vxlan: Creating...
+exoscale_security_group_rule.nodeport_udp: Creation complete after 4s [id=f90b6619-4559-4cc9-9d0d-91d071397501]
+exoscale_security_group_rule.nodeport_tcp: Creation complete after 4s [id=23a1293b-1a2b-4b6f-8d57-46d089e61f27]
+exoscale_security_group_rule.calico_vxlan: Creation complete after 4s [id=863bb61e-7649-44d9-8ed3-b187ebadb424]
+exoscale_security_group_rule.kubelet: Creation complete after 4s [id=e18cdcc8-2b67-4bb3-a6c9-8f29380acced]
+exoscale_sks_cluster.sks_cluster: Creation complete after 1m37s [id=6a94074f-302c-446a-821e-9acfebf5d33b]
+exoscale_sks_kubeconfig.sks_kubeconfig: Creating...
+exoscale_sks_nodepool.sks_nodepool: Creating...
+exoscale_sks_kubeconfig.sks_kubeconfig: Creation complete after 1s [id=115016320829257889883792189515326601296577323034:116838890743125145307630577456649047067124867913]
+local_sensitive_file.sks_kubeconfig_file: Creating...
+local_sensitive_file.sks_kubeconfig_file: Creation complete after 0s [id=becb4140b572bd2a622f02a116a3734921132e45]
+exoscale_sks_nodepool.sks_nodepool: Creation complete after 7s [id=85a398c3-19f6-47d8-89cf-d8feab72828d]
+
+Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+sks_cluster_endpoint = "https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io"
+sks_connection = "export KUBECONFIG=sks_kubeconfig; kubectl cluster-info; kubectl get pods -A"
+sks_kubeconfig = "sks_kubeconfig"
+```
+
+After `terraform apply` has finished it will print out the result and all of the defined `output`'s.
+
+Let's quickly check to confirm our new Kubernetes cluster is up and running:
+```bash
+$ export KUBECONFIG=sks_kubeconfig; kubectl cluster-info; kubectl get pods -A
+Kubernetes control plane is running at https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io:443
+CoreDNS is running at https://6a94074f-302c-446a-821e-9acfebf5d33b.sks-ch-dk-2.exo.io:443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-6b77fff45-hrn7h   1/1     Running   0          117s
+kube-system   calico-node-hzthv                         1/1     Running   0          65s
+kube-system   calico-node-ndvn4                         1/1     Running   0          64s
+kube-system   calico-node-zgljr                         1/1     Running   0          57s
+kube-system   coredns-7c85997-fbndk                     1/1     Running   0          113s
+kube-system   coredns-7c85997-rd79q                     1/1     Running   0          113s
+kube-system   konnectivity-agent-54dd7f4b98-8f2fd       1/1     Running   0          111s
+kube-system   konnectivity-agent-54dd7f4b98-d26kx       1/1     Running   0          111s
+kube-system   kube-proxy-9b9fl                          1/1     Running   0          64s
+kube-system   kube-proxy-9dq54                          1/1     Running   0          65s
+kube-system   kube-proxy-gdft4                          1/1     Running   0          57s
+kube-system   metrics-server-7bbd99559d-xlskh           0/1     Running   0          109s
+```
+
+It's like magic! 🥳
+
+You can now even go a step further and also add Helm chart deployments to your Terraform configuration files, by courtesy of the Helm provider plugin: https://github.com/hashicorp/terraform-provider-helm
+
+We could for example easily add and deploy the Ingress-NGINX controller too by adding this here to our configuration:
+
+```terraform
+provider "helm" {
+  kubernetes {
+    config_path = "./sks_kubeconfig"
+  }
+}
+
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress-controller"
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "nginx-ingress-controller"
+  set {
+    name  = "service.type"
+    value = "ClusterIP"
+  }
+}
+```
+
+After running `terraform apply` again, we get this:
+
+```bash
+$ export KUBECONFIG=sks_kubeconfig; kubectl get pods -n default
+NAME                                                        READY   STATUS    RESTARTS   AGE
+nginx-ingress-controller-6b9cf4684f-dk6gc                   1/1     Running   0          96s
+nginx-ingress-controller-default-backend-6798d86668-984dw   1/1     Running   0          96s
+```
+
+There are many more additional possibilities out there, for example using the [Carvel provider plugin](https://github.com/vmware-tanzu/terraform-provider-carvel) to use [ytt](https://carvel.dev/ytt) templates and deploy with [kapp](https://carvel.dev/kapp) instead of Helm.
+But let's safe that for another time.
 
 ## Define your NSX-T DFW rules
 
-Now let's go back to our NSX-T firewall rules we want to setup. For this we are going to use the [NSX-T provider plugin](https://github.com/vmware/terraform-provider-nsxt) for Terraform.
+Now let's go back to our NSX-T firewall rules we want to setup after this small detour into the world of IaC and Terraform.
+
+You might have already guessed it at this point, but there actually is a [NSX-T provider plugin](https://github.com/vmware/terraform-provider-nsxt) for Terraform, and obviously we are going to use it! 😁
 
 The documentation of this plugin can be found here: [https://www.terraform.io/docs/providers/nsxt/](https://registry.terraform.io/providers/vmware/nsxt/latest/docs)
 
