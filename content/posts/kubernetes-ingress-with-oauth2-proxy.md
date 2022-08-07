@@ -44,13 +44,12 @@ spec:
 #### grafana-ingress.yml
 ```yaml
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana
   namespace: grafana
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     # enforce TLS/HTTPS
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -60,6 +59,7 @@ metadata:
     # instruct ingress-nginx and cert-manager to use the clusterissuer we've created earlier for TLS certificates
     cert-manager.io/cluster-issuer: "lets-encrypt"
 spec:
+  ingressClassName: nginx
   tls:
   - secretName: grafana-ingress-tls
     hosts:
@@ -68,7 +68,11 @@ spec:
   - host: grafana.my-domain.com
     http:
       paths:
-      - backend:
-          serviceName: grafana
-          servicePort: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 80
 ```
