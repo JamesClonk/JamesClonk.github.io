@@ -23,7 +23,7 @@ metadata:
   namespace: cert-manager
 spec:
   acme:
-  	# use Let's Encrypt
+    # use Let's Encrypt
     server: https://acme-v02.api.letsencrypt.org/directory
     email: my-email@my-domain.com
     privateKeySecretRef:
