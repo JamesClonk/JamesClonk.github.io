@@ -23,11 +23,13 @@ metadata:
   namespace: cert-manager
 spec:
   acme:
+  	# use Let's Encrypt
     server: https://acme-v02.api.letsencrypt.org/directory
     email: my-email@my-domain.com
     privateKeySecretRef:
       name: lets-encrypt
     solvers:
+    # use a http01 solver with our ingress-nginx (https://cert-manager.io/docs/configuration/acme/http01/)
     - http01:
         ingress:
           class: nginx
@@ -61,7 +63,7 @@ spec:
   tls:
   - secretName: grafana-ingress-tls
     hosts:
-    - grafana.my-domain.com # what certificate should cert-manager request from Lets-Encrypt
+    - grafana.my-domain.com # what certificate should cert-manager request from Let's Encrypt
   rules:
   - host: grafana.my-domain.com
     http:
