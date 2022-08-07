@@ -1,17 +1,46 @@
 ---
-title: "Ingress with automatic TLS certificates and GitHub OAuth2"
-description: "How to setup a K8s Ingress with automatic TLS certificates from Let's Encrypt and GitHub authentication via oauth2-proxy"
+title: "Web applications with automatic TLS certificates and GitHub OAuth2"
+description: "How to setup a Kubernetes Ingress with automatic TLS certificates from Let's Encrypt and GitHub authentication via oauth2-proxy"
 tags: [kubernetes,ingress,oauth2-proxy,github,cert-manager,lets-encrypt]
 author: Fabio Berchtold
 date: 2022-01-11T19:22:49+02:00
 draft: true
 ---
 
-// TODO: explain k8s ingress-nginx with oauth2-proxy with github auth
+// TODO: explain k8s ingress-nginx with cert-manager and oauth2-proxy with github auth
 
 ## Ingress Controller
 
+```bash
+$ kubectl -n ingress-nginx get all
+NAME                                READY   STATUS      RESTARTS   AGE
+pod/ingress-nginx-7de24cbef-sdv9q   1/1     Running     1          234d
+
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/ingress-nginx   NodePort    10.43.134.29    <none>        80:31370/TCP,443:31422/TCP   423d
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ingress-nginx   1/1     1            1           423d
+```
+
 ## Cert-Manager
+
+```bash
+$ kubectl -n cert-manager get all
+NAME                                           READY   STATUS    RESTARTS   AGE
+pod/cert-manager-webhook-f88ccb77f-xctfm       1/1     Running   1          234d
+pod/cert-manager-6f6bd879b7-npbtc              1/1     Running   1          234d
+pod/cert-manager-cainjector-55b4759d9c-znz6m   1/1     Running   1          234d
+
+NAME                           TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/cert-manager           ClusterIP   10.43.44.0     <none>        9402/TCP   617d
+service/cert-manager-webhook   ClusterIP   10.43.254.39   <none>        443/TCP    617d
+
+NAME                                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cert-manager-webhook      1/1     1            1           617d
+deployment.apps/cert-manager              1/1     1            1           617d
+deployment.apps/cert-manager-cainjector   1/1     1            1           617d
+```
 
 #### cluster-issuer.yml
 ```yaml
@@ -35,11 +64,55 @@ spec:
           class: nginx
 ```
 
-## oauth2-proxy
-
 ## GitHub OAuth2
 
+https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+
+![GitHub OAuth2 Application](/images/oauth2_github_new_app.png)
+
+![GitHub OAuth2 Client](/images/oauth2_github_new_client.png)
+
+## oauth2-proxy
+
+https://github.com/oauth2-proxy/oauth2-proxy
+
+https://oauth2-proxy.github.io/oauth2-proxy/
+
+https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider
+
+```bash
+$ kubectl -n oauth2-proxy get all
+NAME                               READY   STATUS    RESTARTS   AGE
+pod/oauth2-proxy-5cd58b4dd-8bn2m   1/1     Running   1          287d
+
+NAME                   TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)              AGE
+service/oauth2-proxy   ClusterIP   10.43.48.9   <none>        4180/TCP,44180/TCP   287d
+
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/oauth2-proxy   1/1     1            1           287d
+```
+
+```bash
+$ curl https://oauth2-proxy.my-domain.com/ping
+OK
+
+$ curl https://oauth2-proxy.my-domain.com/ping -I
+HTTP/2 200
+```
+
 ## Ingress annotations
+
+```bash
+$ kubectl -n grafana get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/grafana-d546f875b-8whml   1/1     Running   4          471d
+
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/grafana   ClusterIP   10.43.220.120   <none>        80/TCP    617d
+
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/grafana   1/1     1            1           617d
+```
 
 #### grafana-ingress.yml
 ```yaml
@@ -76,3 +149,7 @@ spec:
             port:
               number: 80
 ```
+
+![GitHub OAuth2 Login](/images/oauth2_github_login.png)
+
+![Grafana](/images/oauth2_grafana.png)
