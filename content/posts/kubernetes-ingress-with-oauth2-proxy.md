@@ -102,6 +102,9 @@ HTTP/2 200
 
 ## Ingress annotations
 
+Now that we have everything up and running it's time to create a "route" for accessing a web app. Let's pick Grafana for example.
+On my example K8s cluster I already have it running in the `grafana` namespace:
+
 ```bash
 $ kubectl -n grafana get all
 NAME                          READY   STATUS    RESTARTS   AGE
@@ -113,6 +116,13 @@ service/grafana   ClusterIP   10.43.220.120   <none>        80/TCP    617d
 NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/grafana   1/1     1            1           617d
 ```
+
+In order to expose this Grafana instance publicly we have to create an Ingress resource. This resource is what's going to instruct the ingress-nginx controller to route all traffic for a specific domain/hostname to the Grafana service in the cluster. Let's use `grafana.my-domain.com` as an example.
+
+Apart from all the obvious spec configuration as described by the Kubernetes [Ingress documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/), we'll also have to specifically set a few special annotations on our Ingress resource, instructing the ingress-nginx controller to require authentication for all traffic related to that Ingress.
+These are [*nginx.ingress.kubernetes.io/auth-signin*](https://kubernetes.github.io/ingress-nginx/examples/auth/oauth-external-auth/) and [*nginx.ingress.kubernetes.io/auth-url*](https://kubernetes.github.io/ingress-nginx/examples/auth/oauth-external-auth/), pointing them to the oauth2-proxy.
+
+We also set [*cert-manager.io/cluster-issuer*](https://cert-manager.io/docs/usage/ingress/) to the ClusterIssuer we've created previously. Cert-Manager will automatically handle certificate creation and TLS secret management for all Ingress resources with this annotation.
 
 #### grafana-ingress.yml
 ```yaml
@@ -150,6 +160,13 @@ spec:
               number: 80
 ```
 
+Once the `grafana-ingress.yml` has been applied to Kubernetes, cert-manager should have automatically requested and created a valid Let's Encrypt certificate for our domain, `grafana.my-domain.com` in this example.
+
+You should now be able to reach Grafana by opening the browser and going to `https://grafana.my-domain.com`.
+When doing, you'll be greeted automatically by a login page from GitHub, since any traffic going to `grafana.my-domain.com` has to pass the authentication process provided the previously deployed oauth2-proxy first:
+
 ![GitHub OAuth2 Login](/images/oauth2_github_login.png)
+
+And there we go, after a successful login via GitHub account you can now access and see your Grafana dashboards:
 
 ![Grafana](/images/oauth2_grafana.png)
