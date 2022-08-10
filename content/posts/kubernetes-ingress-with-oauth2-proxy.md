@@ -74,15 +74,16 @@ https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth
 
 ## oauth2-proxy
 
-https://github.com/oauth2-proxy/oauth2-proxy
+Now that we've created a GitHub OAuth2 application we need something thats able to talk to it, and do the whole mystical oauth dance. This is where [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) comes into play.
 
-https://oauth2-proxy.github.io/oauth2-proxy/
+oauth2-proxy is a simple reverse proxy that provides authentication using various OAuth2 providers such as Google, GitHub, GitLab, and many others.
+Together with NGINX we can have it running on Kubernetes and configured to be in front / in the path of traffic to any other web application we want, granting access to them through OAuth2 authentication.
 
-https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider
+Since we've previously created a GitHub OAuth2 application, we are going to configure oauth2-proxy to use that one. The GitHub specific documentation can be found here: https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider
 
 For a quick deployment we're going to use this [Helm chart](https://github.com/oauth2-proxy/manifests) as our basis.
 
-There's two important things we need to properly configure. These are the Secret, containing our GitHub ClientID and Client Secret, and the ConfigMap, containing the the GitHub provider configuration for oauth2-proxy, for example like this:
+There's two important things we need to properly configure. These are the Secret, containing our GitHub OAuth2 application Client ID and Client Secret, and the ConfigMap, containing the the GitHub provider configuration for oauth2-proxy, for example like this:
 
 #### oauth2-proxy-configuration.yml
 ```yaml
