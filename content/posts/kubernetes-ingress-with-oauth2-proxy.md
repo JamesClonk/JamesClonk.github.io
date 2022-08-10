@@ -80,6 +80,56 @@ https://oauth2-proxy.github.io/oauth2-proxy/
 
 https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider#github-auth-provider
 
+For a quick deployment we're going to use this [Helm chart](https://github.com/oauth2-proxy/manifests) as our basis.
+
+There's two important things we need to properly configure. These are the Secret, containing our GitHub ClientID and Client Secret, and the ConfigMap, containing the the GitHub provider configuration for oauth2-proxy, for example like this:
+
+#### oauth2-proxy-configuration.yml
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: oauth2-proxy-secrets
+  namespace: oauth2-proxy
+type: Opaque
+stringData:
+  # read https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview#generating-a-cookie-secret
+  cookie-secret: <my-cookie-secret>
+  # these should be the values from our previous GitHub OAuth2 app we've created
+  client-secret: <my-github-oauth2-app-client-secret>
+  client-id: <my-github-oauth2-app-client-id>
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-config
+  namespace: oauth2-proxy
+data:
+  oauth2_proxy.cfg: |-
+    reverse_proxy = "false"
+    redirect_url = "https://oauth2-proxy.my-domain.com/oauth2/callback"
+
+    upstreams = "file:///dev/null"
+    email_domains = "my-domain.com"
+
+    provider = "github"
+    github_org = "my-github-org"
+    github_users = "MyGitHubUsername"
+
+    whitelist_domains=".my-domain.com"
+    cookie_domains = ".my-domain.com"
+
+    cookie_expire = "168h"
+    cookie_secure = "true"
+    cookie_httponly = "true"
+    cookie_samesite = "lax"
+
+    skip_provider_button="false"
+```
+
+After deploying it we should have our oauth2-proxy up and running:
 ```bash
 $ kubectl -n oauth2-proxy get all
 NAME                               READY   STATUS    RESTARTS   AGE
@@ -92,6 +142,46 @@ NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/oauth2-proxy   1/1     1            1           287d
 ```
 
+Finally, we also need to create an Ingress resource so that oauth2-proxy can be accessed on our domain/hostname:
+
+#### oauth2-proxy-ingress.yml
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: oauth2-proxy
+  namespace: oauth2-proxy
+  annotations:
+    # enforce TLS/HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      large_client_header_buffers 4 32k;
+    # instruct ingress-nginx and cert-manager to use the clusterissuer we've created earlier for TLS certificates
+    cert-manager.io/cluster-issuer: "lets-encrypt"
+spec:
+  ingressClassName: nginx
+  tls:
+  - secretName: oauth2-proxy-ingress-tls
+    hosts:
+    - oauth2-proxy.my-domain.com # what certificate should cert-manager request from Let's Encrypt
+  rules:
+  - host: oauth2-proxy.my-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: oauth2-proxy
+            port: 4180
+```
+
+See the section below about [Ingress annotations](#ingress-annotations) to fully understand what's going on here. There's a lot of magic involved behind the scenes by using an Ingress with these special annotations.
+
+Once the Ingress has been created though and cert-manager / Let's Encrypt has issued a certificate for `oauth2-proxy.my-domain.com`, we can check if it's available and responding properly:
+
 ```bash
 $ curl https://oauth2-proxy.my-domain.com/ping
 OK
@@ -102,7 +192,7 @@ HTTP/2 200
 
 ## Ingress annotations
 
-Now that we have everything up and running it's time to create a "route" for accessing a web app. Let's pick Grafana for example.
+Now that we have cert-manager and oauth2-proxy up and running it's time to create a "route" for accessing an actual web app we want to expose and have authentication for. Let's pick Grafana for example.
 On my example K8s cluster I already have it running in the `grafana` namespace:
 
 ```bash
