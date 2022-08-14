@@ -7,8 +7,8 @@ date: 2022-01-11T19:22:49+02:00
 draft: false
 ---
 
-> "Web applications with TLS and OAuth2 on Kubernetes?
-> Surely you're joking, Mr. JamesClonk!"
+> *"Web applications with TLS and OAuth2 on Kubernetes?*
+> *Surely you're joking, Mr. JamesClonk!"*
 
 I've been ranting a lot recently about how inferior Kubernetes is compared to Cloud Foundry. There isn't any redeeming factor, not a single thing it does even remotely as well as CF when it comes to the developer experience in terms of running web applications. Its inherent complexity requires an insane amount of DevOps / operations overhead by comparison.
 
@@ -106,11 +106,11 @@ Once we've applied that yaml file the ClusterIssuer is ready to be used.
 
 ## GitHub OAuth2
 
-All of the above so far enables us to expose our web applications via HTTPS routes to the internet. *"But what about security? I don't want my admin dashboard to be available for anyone!"*
+All of the above so far enables us to expose our web applications via HTTPS routes to the internet. *"But what about security? I don't want my admin dashboard to be available to anyone!"*
 
-No worries, that's where we're going to setup OAuth2 authentication/authorization for accessing those web applications. The benefit for you of doing this on the Kubernetes cluster's ingress routing layer is that you do not need to write any specific code in your applications for dealing with logins or authentication of any kind. It's completely transparent to the web app itself.
+No worries, that's where we're going to setup OAuth2 authentication and authorization for accessing those web applications. The benefit for you of doing this on the Kubernetes cluster's ingress routing layer is that you do not need to write any specific code in your applications for dealing with logins or authentication of any kind. It's completely transparent to the web app itself.
 
-The most commonly used standard for the login / authentication procedure in web applications is to use [OAuth2](https://oauth.net/2/) with an external provider. Since we are nerdy developers of course we are going to be using GitHub as our OAuth2 provider. 🤓
+The most commonly used standard for this procedure in web applications is to use [OAuth2](https://oauth.net/2/) with an external provider. Since we are nerdy developers of course we are going to be using GitHub as our OAuth2 provider. 🤓
 
 We need to create and setup a GitHub OAuth2 application for that, but this is again pretty straightforward and well documented here: https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
 
@@ -119,13 +119,13 @@ Just follow that guide, fill our out some values and click some buttons. The imp
 
 ![GitHub OAuth2 Application](/images/oauth2_github_new_app.png)
 
-Don't forget to create a new set of credentials that we'll use in oauth2-proxy. Write down the Client ID and Client secret, we need these in the next step.
+Don't forget to create a new set of credentials that we'll use in oauth2-proxy. Write down the Client ID and Client secret, we need those in the next step.
 
 ![GitHub OAuth2 Client](/images/oauth2_github_new_client.png)
 
 ## oauth2-proxy
 
-Now that we've created a GitHub OAuth2 application we need something that's able to talk to it, and do the whole mystical OAuth dance. This is where [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) comes into play.
+Now that we've created a GitHub OAuth2 application we need something that's able to talk to it and do the whole mystical OAuth dance. This is where [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) comes into play.
 
 oauth2-proxy is a simple reverse proxy that provides authentication using various OAuth2 providers such as Google, GitHub, GitLab, and many others.
 Together with NGINX we can have it running on Kubernetes and configured to be in front / in the path of traffic to any other web application we want, granting access to them through OAuth2 authentication.
@@ -181,7 +181,7 @@ data:
     skip_provider_button="false"
 ```
 
-After deploying it we should have our oauth2-proxy up and running:
+After deploying it we should have oauth2-proxy up and running:
 ```bash
 $ kubectl -n oauth2-proxy get all
 NAME                               READY   STATUS    RESTARTS   AGE
@@ -232,7 +232,7 @@ spec:
 
 See the section below about [Ingress annotations](#ingress-annotations) to fully understand what's going on here. There's a lot of magic involved behind the scenes by using an Ingress with these special annotations.
 
-Once the Ingress has been created though and cert-manager / Let's Encrypt has issued a certificate for `oauth2-proxy.my-domain.com`, we can check if it's available and responding properly:
+Once the Ingress has been created though and cert-manager has issued a Let's Encrypt certificate for `oauth2-proxy.my-domain.com`, we can check if it's available and responding properly:
 
 ```bash
 $ curl https://oauth2-proxy.my-domain.com/ping
@@ -261,7 +261,7 @@ deployment.apps/grafana   1/1     1            1           617d
 
 In order to expose this Grafana instance publicly we have to create an Ingress resource. This resource is what's going to instruct the ingress-nginx controller to route all traffic for a specific domain/hostname to the Grafana service in the cluster. Let's use `grafana.my-domain.com` as an example.
 
-Apart from all the obvious spec configuration as described by the Kubernetes [Ingress documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/), we'll also have to specifically set a few special annotations on our Ingress resource, instructing the ingress-nginx controller to require authentication for all traffic related to that Ingress.
+Apart from all the obvious spec configuration as described by the Kubernetes [Ingress documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/), we also have to specifically set a few special annotations on this Ingress resource, instructing the ingress-nginx controller to require authentication for all traffic related to that Ingress.
 These are [*nginx.ingress.kubernetes.io/auth-signin*](https://kubernetes.github.io/ingress-nginx/examples/auth/oauth-external-auth/) and [*nginx.ingress.kubernetes.io/auth-url*](https://kubernetes.github.io/ingress-nginx/examples/auth/oauth-external-auth/), pointing them to the oauth2-proxy.
 
 We also set [*cert-manager.io/cluster-issuer*](https://cert-manager.io/docs/usage/ingress/) to the ClusterIssuer we've created previously. Cert-Manager will automatically handle certificate creation and TLS secret management for all Ingress resources with this annotation.
@@ -305,7 +305,7 @@ spec:
 Once the `grafana-ingress.yml` has been applied to Kubernetes, cert-manager should have automatically requested and created a valid Let's Encrypt certificate for our domain, `grafana.my-domain.com` in this example.
 
 You should now be able to reach Grafana by opening the browser and going to `https://grafana.my-domain.com`.
-When doing, you'll be greeted automatically by a login page from GitHub, since any traffic going to `grafana.my-domain.com` has to pass the authentication process provided the previously deployed oauth2-proxy first:
+When doing so, you'll be greeted automatically by a login page from GitHub, since any traffic going to `grafana.my-domain.com` first has to pass the authentication process provided by the previously deployed oauth2-proxy:
 
 ![GitHub OAuth2 Login](/images/oauth2_github_login.png)
 
