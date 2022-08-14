@@ -22,7 +22,7 @@ We will install an ingress controller, a certificate manager and an oauth proxy.
 
 What is an [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)?
 
-An ingress controller an extra component that's necessary to be installed on your Kubernetes cluster if you want to make use of [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources. Ingress controllers are not part of Kubernetes itself, and there's many different ones available, for example NGINX, HAProxy, Contour, Traefik, Gloo, etc..
+An ingress controller is an extra component that's necessary to be installed on your Kubernetes cluster if you want to make use of Ingress resources. Ingress controllers are not part of Kubernetes itself, and there's many different ones available, for example NGINX, HAProxy, Contour, Traefik, Gloo, etc..
 The most common one probably being [ingress-nginx](https://kubernetes.github.io/ingress-nginx/), which uses NGINX internally for handling traffic and routing.
 
 The [Ingress resource](https://kubernetes.io/docs/concepts/services-networking/ingress/) then enables us to expose HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on such Ingress resources.
@@ -52,6 +52,15 @@ deployment.apps/ingress-nginx   1/1     1            1           423d
 
 ## Cert-Manager
 
+Next step: [cert-manager.io](https://cert-manager.io/)
+
+Yet another controller we'll need to install, but quite a useful one though. Cert-Manager will handle all TLS certificate madness and automation for you, and allow you to use free [Let's Encrypt](https://letsencrypt.org/) certificates for using HTTPS with all web applications you have running on your cluster. It will automatically obtain certificates from Let's Encrypt and ensure these are valid, up-to-date and will renew them before they expire.
+
+Same thing as before, installation is simple and straightforward and doesn't require any customization. Just apply the standalone deployment manifest again:
+
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
+```
 ```bash
 $ kubectl -n cert-manager get all
 NAME                                           READY   STATUS    RESTARTS   AGE
@@ -69,6 +78,8 @@ deployment.apps/cert-manager              1/1     1            1           617d
 deployment.apps/cert-manager-cainjector   1/1     1            1           617d
 ```
 
+What we now need to do though as a second step is to create a [ClusterIssuer](https://cert-manager.io/docs/configuration/acme/#creating-a-basic-acme-issuer) for using Let's Encrypt via ACME.
+But again, this is pretty straightforward and all that's needed is this:
 #### cluster-issuer.yml
 ```yaml
 ---
@@ -90,6 +101,8 @@ spec:
         ingress:
           class: nginx
 ```
+
+Once we've applied that yaml file the ClusterIssuer is ready to be used.
 
 ## GitHub OAuth2
 
