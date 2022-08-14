@@ -7,9 +7,34 @@ date: 2022-01-11T19:22:49+02:00
 draft: true
 ---
 
-// TODO: explain k8s ingress-nginx with cert-manager and oauth2-proxy with github auth
+> "Web applications with TLS and OAuth2 on Kubernetes?
+> Surely you're joking, Mr. JamesClonk!"
+
+I've been ranting a lot recently about how inferior Kubernetes is compared to Cloud Foundry. There isn't any redeeming factor, not a single thing it does even remotely as well as CF when it comes to the developer experience in terms of running web applications. Its inherent complexity requires an insane amount of DevOps / operations overhead by comparison.
+
+Kubernetes is a great tool from an Infrastructure-as-a-Service perspective. No vendor lock-in, platform agnostic, a standardized framework for building on top of any infrastructure, etc.. This is all great, but the misconception a lot of people seem to have (especially the more removed they are from any day-to-day engineering work) is that it is also a Platform-as-a-Service by itself, and that's the area it falls completely flat. There's just zero batteries included in a vanilla K8s installation.
+
+But now that the world has converged on using Kubernetes, what can we do to at least alleviate the most obvious and painful points with using it for running web apps?
+
+We will install an ingress controller, a certificate manager and an oauth proxy. 😀
 
 ## Ingress Controller
+
+What is an [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)?
+
+An ingress controller an extra component that's necessary to be installed on your Kubernetes cluster if you want to make use of [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources. Ingress controllers are not part of Kubernetes itself, and there's many different ones available, for example NGINX, HAProxy, Contour, Traefik, Gloo, etc..
+The most common one probably being [ingress-nginx](https://kubernetes.github.io/ingress-nginx/), which uses NGINX internally for handling traffic and routing.
+
+The [Ingress resource](https://kubernetes.io/docs/concepts/services-networking/ingress/) then enables us to expose HTTP and HTTPS routes from outside the cluster to services within the cluster. Traffic routing is controlled by rules defined on such Ingress resources.
+
+Installation of ingress-nginx is rather easy and straightforward. You can either use the provided [Helm chart](https://github.com/kubernetes/ingress-nginx/tree/main/charts/ingress-nginx), or just directly apply the standalone deployment manifest:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
+
+```
+
+That's it, it doesn't really require any customization or configuration by default. We've got our first ingress-controller up and running:
 
 ```bash
 $ kubectl -n ingress-nginx get all
@@ -22,6 +47,8 @@ service/ingress-nginx   NodePort    10.43.134.29    <none>        80:31370/TCP,4
 NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
 deployment.apps/ingress-nginx   1/1     1            1           423d
 ```
+
+> **Note**: A keen observer might have realized something odd about the output above. Why is it a NodePort and not a LoadBalancer (or ClusterIP). Well, I actually *did* do some customization for my installation, I've configured it to a) use HostPorts for the Pods, and b) be exposed via NodePorts externally too. I'm running that controller on a single-node cluster and explicitly do not want to use a cloud-provider LoadBalancer, so this makes sense there.
 
 ## Cert-Manager
 
