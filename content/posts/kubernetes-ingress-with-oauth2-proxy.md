@@ -4,7 +4,7 @@ description: "How to setup a Kubernetes Ingress with automatic TLS certificates 
 tags: [kubernetes,ingress,oauth2-proxy,github,cert-manager,lets-encrypt]
 author: Fabio Berchtold
 date: 2022-01-11T19:22:49+02:00
-draft: true
+draft: false
 ---
 
 > "Web applications with TLS and OAuth2 on Kubernetes?
@@ -106,15 +106,26 @@ Once we've applied that yaml file the ClusterIssuer is ready to be used.
 
 ## GitHub OAuth2
 
-https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+All of the above so far enables us to expose our web applications via HTTPS routes to the internet. *"But what about security? I don't want my admin dashboard to be available for anyone!"*
+
+No worries, that's where we're going to setup OAuth2 authentication/authorization for accessing those web applications. The benefit for you of doing this on the Kubernetes cluster's ingress routing layer is that you do not need to write any specific code in your applications for dealing with logins or authentication of any kind. It's completely transparent to the web app itself.
+
+The most commonly used standard for the login / authentication procedure in web applications is to use [OAuth2](https://oauth.net/2/) with an external provider. Since we are nerdy developers of course we are going to be using GitHub as our OAuth2 provider. 🤓
+
+We need to create and setup a GitHub OAuth2 application for that, but this is again pretty straightforward and well documented here: https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+
+
+Just follow that guide, fill our out some values and click some buttons. The important thing is that we anticipate what our OAuth2 callback URL is going to look like. We'll deploy *oauth2-proxy* further down and will register it with an Ingress on the route `oauth2-proxy.my-domain.com`, thus the callback URL is expected to be `https://oauth2-proxy.my-domain.com/oauth2/callback`
 
 ![GitHub OAuth2 Application](/images/oauth2_github_new_app.png)
+
+Don't forget to create a new set of credentials that we'll use in oauth2-proxy. Write down the Client ID and Client secret, we need these in the next step.
 
 ![GitHub OAuth2 Client](/images/oauth2_github_new_client.png)
 
 ## oauth2-proxy
 
-Now that we've created a GitHub OAuth2 application we need something thats able to talk to it, and do the whole mystical oauth dance. This is where [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) comes into play.
+Now that we've created a GitHub OAuth2 application we need something that's able to talk to it, and do the whole mystical OAuth dance. This is where [oauth2-proxy](https://oauth2-proxy.github.io/oauth2-proxy/) comes into play.
 
 oauth2-proxy is a simple reverse proxy that provides authentication using various OAuth2 providers such as Google, GitHub, GitLab, and many others.
 Together with NGINX we can have it running on Kubernetes and configured to be in front / in the path of traffic to any other web application we want, granting access to them through OAuth2 authentication.
