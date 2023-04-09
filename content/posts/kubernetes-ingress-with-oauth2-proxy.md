@@ -3,7 +3,7 @@ title: "Web applications with automatic TLS certificates and GitHub OAuth2"
 description: "How to setup a Kubernetes Ingress with automatic TLS certificates from Let's Encrypt and GitHub authentication via oauth2-proxy"
 tags: [kubernetes,ingress,oauth2-proxy,github,cert-manager,lets-encrypt]
 author: Fabio Berchtold
-date: 2022-01-11T19:22:49+02:00
+date: 2022-01-11T19:22:49
 draft: false
 ---
 

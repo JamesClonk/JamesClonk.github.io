@@ -3,7 +3,7 @@ title: "Using Knative Serving on Kubernetes"
 description: "How to use Knative Serving for your applications"
 tags: [kubernetes,knative,containers]
 author: Fabio Berchtold
-date: 2021-03-13T13:54:27+02:00
+date: 2021-03-13T13:54:27
 draft: false
 ---
 

@@ -3,7 +3,7 @@ title: "Running WireGuard VPN (with ad-blocking) on Kubernetes"
 description: "How to deploy a WireGuard VPN server and DNS ad-blocker on Kubernetes"
 tags: [kubernetes,vpn,wireguard,adblock]
 author: Fabio Berchtold
-date: 2021-10-15T17:19:41+02:00
+date: 2021-10-15T17:19:41
 draft: false
 ---
 

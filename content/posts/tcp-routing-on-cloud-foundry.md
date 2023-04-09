@@ -3,7 +3,7 @@ title: "TCP-Routing on Cloud Foundry"
 description: "The Swisscom Application Cloud, which is based on the open source industry standard Cloud Foundry, offers an exciting new feature for its users. TCP routing, the ability to support and expose any TCP-based, non-HTTP application to the world. Let's have a closer look and learn how to use TCP routing."
 tags: [cloud foundry,containers,networking,routing,app cloud]
 author: Fabio Berchtold
-date: 2018-04-15T10:33:42+02:00
+date: 2018-04-15T10:33:42
 draft: false
 ---
 

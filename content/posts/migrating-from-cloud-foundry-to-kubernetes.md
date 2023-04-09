@@ -3,7 +3,7 @@ title: "Migrating from Cloud Foundry to Kubernetes"
 description: "How to migrate applications from Cloud Foundry to Kubernetes, getting Kubernetes ready for cloud-native workload"
 tags: [cloud foundry,kubernetes,app cloud,containers]
 author: Fabio Berchtold
-date: 2020-06-29T17:28:34+02:00
+date: 2020-06-29T17:28:34
 draft: false
 ---
 

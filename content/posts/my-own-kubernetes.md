@@ -3,7 +3,7 @@ title: "My own personal Kubernetes"
 description: "How I setup my own personal Kubernetes cluster on Hetzner Cloud"
 tags: [kubernetes,hetzner,continuous deployment,github actions,github,containers,k3s]
 author: Fabio Berchtold
-date: 2020-11-30T12:49:34+02:00
+date: 2020-11-30T12:49:34
 draft: false
 ---
 

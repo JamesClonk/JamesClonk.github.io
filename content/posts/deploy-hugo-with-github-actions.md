@@ -3,7 +3,7 @@ title: "A blog with Hugo on GitHub"
 description: Deploying a Hugo blog as personal GitHub-Pages via GitHub Actions
 tags: [github,github actions,hugo,deployment]
 author: Fabio Berchtold
-date: 2021-07-28T20:57:18+02:00
+date: 2021-07-28T20:57:18
 draft: false
 ---
 

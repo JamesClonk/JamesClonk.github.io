@@ -3,7 +3,7 @@ title: "Setting up NSX-T Distributed Firewall with Terraform"
 description: "How to setup NSX-T DFW rules with Terraform, the Infrastructure-as-Code way"
 tags: [terraform,nsx-t,vmware,firewall,kubernetes,exoscale]
 author: Fabio Berchtold
-date: 2022-07-31T12:33:24+02:00
+date: 2022-07-31T12:33:24
 draft: false
 ---
 

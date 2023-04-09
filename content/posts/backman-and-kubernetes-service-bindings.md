@@ -3,7 +3,7 @@ title: "Using Kubernetes Service Bindings in Backman"
 description: "How to use Backman on Kubernetes and automatically configure databases through service bindings"
 tags: [database,backups,backman,kubernetes,service binding]
 author: Fabio Berchtold
-date: 2022-07-10T19:22:51+02:00
+date: 2022-07-10T19:22:51
 draft: false
 ---
 

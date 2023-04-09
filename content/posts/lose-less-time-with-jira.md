@@ -3,7 +3,7 @@ title: "Lose less time with Jira"
 description: "Using a custom Android app for easy Jira Task management"
 tags: [jira,android]
 author: Fabio Berchtold
-date: 2017-01-21T20:55:45+02:00
+date: 2017-01-21T20:55:45
 draft: false
 ---
 

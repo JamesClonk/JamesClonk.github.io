@@ -1,4 +1,7 @@
 /public
 /resources/_gen
 hugo
+hugo.exe
 hugo_extended
+hugo_extended.exe
+.hugo_build.lock

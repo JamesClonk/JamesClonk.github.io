@@ -3,7 +3,7 @@ title: "Using a Service Broker in Cloud Foundry and Kubernetes"
 description: "The Open Service Broker API spec and what it's good for"
 tags: [osbapi,cloud foundry,service broker,kubernetes,app cloud]
 author: Fabio Berchtold
-date: 2019-12-31T11:23:54+02:00
+date: 2019-12-31T11:23:54
 draft: false
 ---
 

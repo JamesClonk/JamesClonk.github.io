@@ -3,7 +3,7 @@ title: "Service Discovery with Consul"
 description: "Consul provides automatic service discovery in a cloud-native world of microservices"
 tags: [service discovery,consul,unbound,dns]
 author: Fabio Berchtold
-date: 2015-06-11T14:40:58+02:00
+date: 2015-06-11T14:40:58
 draft: false
 ---
 

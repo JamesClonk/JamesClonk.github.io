@@ -3,7 +3,7 @@ title: "Cloud Foundry and Prometheus"
 description: "Get your app metrics from Cloud Foundry / the Application Cloud"
 tags: [cloud foundry,prometheus,metrics,containers,app cloud]
 author: Fabio Berchtold
-date: 2019-11-26T11:40:41+02:00
+date: 2019-11-26T11:40:41
 draft: false
 ---
 
