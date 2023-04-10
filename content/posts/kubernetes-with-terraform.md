@@ -55,3 +55,154 @@ It provides you with all the basic components you'd usually expect from an Infra
 ## Automated testing
 
 // TODO: write..
+
+And as a final 3rd job we run the [Kubernetes-Testing](https://github.com/swisscom/kubernetes-testing) end-to-end test suite, which covers all the actual deployments and their functionality on the Kubernetes cluster, ranging from using the dashboard, testing grafana, checking for correct logforwarding, metric ingestion, PVC's with longhorn, etc..
+
+### The result
+
+Here's an excerpt from one of the [workflow definitions](https://github.com/swisscom/terraform-dcs-kubernetes/tree/develop/.github/workflows) for automated building, deployment and end-to-end testing of the Terraform module, with annotated comments:
+
+```yaml
+name: Update Development cluster
+
+on:
+  push:
+    branches: [ develop ] # only act on the "develop" branch
+
+jobs:
+  terraform-apply: # deploy all infrastructure, kubernetes and deployments
+    name: 'terraform apply'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # prepare tfvars configuration data
+    - name: Setup Terraform tfvars
+      if: github.ref == 'refs/heads/develop' # only run this step if we are on the "develop" branch
+      env:
+        TF_TFVARS: ${{ secrets.TF_TFVARS }}
+      run: echo "${TF_TFVARS}" > terraform.tfvars
+
+    - name: Setup Terraform CLI
+      uses: hashicorp/setup-terraform@v2
+      with: # setup Terraform Cloud token, we store the tfstate there instead of locally
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+        terraform_version: ~1.2.8
+
+    # prepare the environment, download all provider plugins and dependencies
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    # update all infrastructure, the kubernetes cluster and its deployments
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/develop' # only run this step if we are on the "develop" branch
+      run: terraform apply -auto-approve -input=false
+
+    # remove all sensitive files again
+    - name: Cleanup
+      if: ${{ always() }} # always run this step, even if earlier steps failed
+      run: |
+        rm -f kubeconfig || true
+        rm -f terraform.tfvars || true
+
+  sonobuoy-run: # run a quick sonobuoy test against the kubernetes cluster
+    name: 'sonobuoy run'
+    needs: [ terraform-apply ] # configure this job to be a follow-up of the one above
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # prepare the kubeconfig for sonobuoy to use
+    - name: Setup kubeconfig
+      if: github.ref == 'refs/heads/develop' # only run this step if we are on the "develop" branch
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      run: echo "${KUBECONFIG}" > kubeconfig
+
+    # only run a "quick" test for simplicity
+    - name: Run Sonobuoy
+      run: |
+        wget --quiet https://github.com/vmware-tanzu/sonobuoy/releases/download/v0.56.10/sonobuoy_linux_amd64.tar.gz
+        tar -xvzf sonobuoy_0.56.10_linux_amd64.tar.gz
+        chmod +x sonobuoy
+        export KUBECONFIG=kubeconfig
+        ./sonobuoy delete --wait || true
+        ./sonobuoy run --mode quick --wait --plugin-env=e2e.E2E_EXTRA_ARGS=--non-blocking-taints=CriticalAddonsOnly
+        ./sonobuoy status
+        results=$(./sonobuoy retrieve)
+        ./sonobuoy results $results
+        ./sonobuoy delete --wait
+
+    # remove all sensitive files again
+    - name: Cleanup
+      if: ${{ always() }} # always run this step, even if earlier steps failed
+      run: |
+        rm -f kubeconfig || true
+
+  kubernetes-testing: # run kubernetes end-to-end testing suite
+    name: 'kubernetes-testing'
+    needs: [ sonobuoy-run ] # configure this job to be a follow-up of the one above
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout kubernetes-testing
+      uses: actions/checkout@v3
+      with: # get kubernetes-testing test suite from github
+        repository: swisscom/kubernetes-testing
+        ref: master
+
+    # prepare the config files for the test suite
+    - name: Setup configs
+      if: github.ref == 'refs/heads/develop' # only run this step if we are on the "develop" branch
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        TESTING_CONFIG: ${{ secrets.TESTING_CONFIG }}
+      run: |
+        echo "${KUBECONFIG}" > kubeconfig
+        echo "${TESTING_CONFIG}" > config.yml
+
+    # the test suite needs chrome and chromedriver to run headless web-browser tests
+    - name: Setup Chrome
+      uses: ./.github/actions/setup-chrome
+
+    - name: Run kubernetes-testing specs
+      run: |
+        export KUBECONFIG=kubeconfig
+        make test
+
+    # remove all sensitive files again
+    - name: Cleanup
+      if: ${{ always() }} # always run this step, even if earlier steps failed
+      run: |
+        rm -f kubeconfig || true
+        rm -f config.yml || true
+```
+
+### Screenshots
+
+I couldn't resist to also add some screenshots of how that workflow actually looks like in action, taken from [develop.yml GitHub Action](https://github.com/swisscom/terraform-dcs-kubernetes/actions/workflows/develop.yml):
+
+#### Workflow History / Runs
+
+![GitHub Actions - Overview](/images/dcs_develop_action.png)
+
+#### Workflow
+
+![GitHub Actions - Workflow](/images/dcs_develop_workflow.png)
+
+#### Terraform Apply
+
+![GitHub Actions - Terraform](/images/dcs_develop_terraform.png)
+
+#### End-to-End Testing
+
+![GitHub Actions - Testing](/images/dcs_develop_testing.png)
+
+---
+
+Looks like I had a lot of fun with this project, doesn't it? 😄
