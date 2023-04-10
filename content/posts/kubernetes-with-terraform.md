@@ -54,9 +54,15 @@ It provides you with all the basic components you'd usually expect from an Infra
 
 ## Automated testing
 
-// TODO: write..
+Now, I've you've read some of my other blog posts here you'll know that I'm a big fan of automation. Automate all the things! 🛠️⚙️✈️
 
-And as a final 3rd job we run the [Kubernetes-Testing](https://github.com/swisscom/kubernetes-testing) end-to-end test suite, which covers all the actual deployments and their functionality on the Kubernetes cluster, ranging from using the dashboard, testing grafana, checking for correct logforwarding, metric ingestion, PVC's with longhorn, etc..
+So naturally I've also added an entire pipeline with [GitHub Actions](https://github.com/features/actions) that gets triggered on every commit and pull request on the repository.
+
+The first job defined in the pipeline is to check, validate and apply the entire Terraform module. This will will spin up and update any infrastructure parts, deploy and update the K3s cluster installation, and finally also deploy all additional Helm charts on the cluster.
+
+The second job is a quick run of [Sonobuoy](https://sonobuoy.io/) against the resulting Kubernetes cluster. Sonobuoy is a simple diagnostic tool to check the state of a Kubernetes cluster by running a set of configuration tests in an accessible and non-destructive manner. It's also used for the [CNCF Certification](https://www.cncf.io/certification/software-conformance/) of a cluster.
+
+And as a final third job we run the [Kubernetes-Testing](https://github.com/swisscom/kubernetes-testing) end-to-end test suite, which covers all the actual deployments and their functionality on the Kubernetes cluster, ranging from using the dashboard, testing grafana, checking for correct logforwarding, metric ingestion, PVC's with longhorn, etc..
 
 ### The result
 
