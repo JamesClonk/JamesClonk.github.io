@@ -11,7 +11,7 @@ Since [Infrastructure-as-Code](https://en.wikipedia.org/wiki/Infrastructure_as_c
 
 Behold: ✨ [https://github.com/JamesClonk/terraform-vcloud-kubernetes](https://github.com/JamesClonk/terraform-vcloud-kubernetes) 🎉
 
-The resulting Terraform module I've written supports you in creating a Kubernetes cluster with K3s on Swisscom DCS+ infrastructure. It sets up all necessary infrastructure on DCS+ through the [vCloud provider](https://www.terraform.io/docs/providers/vcd/), then installs K3s on all VMs and joins them into a Kubernetes cluster, and finally also installs and manages additional [Helm](https://helm.sh/) charts on the cluster, such as [cilium](https://cilium.io/), [ingress-nginx](https://kubernetes.github.io/ingress-nginx/), [cert-manager](https://cert-manager.io/), [longhorn](https://longhorn.io/), and a whole set of logging/metrics/monitoring related components.
+The resulting Terraform module supports you in creating a Kubernetes cluster with K3s on Swisscom DCS+ infrastructure. It sets up all necessary infrastructure on DCS+ through the [vCloud provider](https://www.terraform.io/docs/providers/vcd/), then installs K3s on all VMs and joins them into a Kubernetes cluster, and finally also installs and manages additional [Helm](https://helm.sh/) charts on the cluster, such as [cilium](https://cilium.io/), [ingress-nginx](https://kubernetes.github.io/ingress-nginx/), [cert-manager](https://cert-manager.io/), [longhorn](https://longhorn.io/), and a whole set of logging/metrics/monitoring related components.
 
 ## K3s
 
@@ -31,11 +31,26 @@ If you want to know more about Terraform, have a look at another one of my previ
 
 ## VMware vCloud Director
 
-// TODO: write..
+[VMware vCloud Director](https://www.vmware.com/products/cloud-director.html) (vCD) is a tool with which you can build your own Infrastructure-as-a-Service platform, that can provide and manage on-premise infrastructure and virtual data centers, containing all the necessary building blocks for a *"cloud"* service, such virtual machines, disks, networks, firewalls, loadbalancers, deployments and automation.
+
+vCD allows you to turn existing data centers into scalable and elastic software-defined virtual data centers (so called VDCs).
+With it you can convert and combine all your physical data center resources, VMware vSphere and vCenters, NSX networks, storage, etc., into VDC resources which you then make available to developers and users through a web portal or API.
+
+In short, it basically enables you to have your own on-premise *"cloud"*, analogous to medium-scalers like **DigitalOcean, Linode, Hetzer, Exoscale, Scaleway,** etc..
+
+It provides a solid web UI, a mostly modern and useful API (for VMware or typical enterprisey-sluggish standards anyway), and has an official [Terraform provider for vCloud](https://github.com/vmware/terraform-provider-vcd) that allows full control over all its resources and features with Terraform.
+And while I'm not privy to the efforts needed behind the scenes to run and operate it (having to deal with VMware vSphere, vCenter, NSX-V/T, etc. is not something I would particularly envy), I can say that at least vCD from a developer and end-user perspective it is very nice and productive to work with.
+It provides you with all the basic components you'd usually expect from an Infrastructure-as-a-Service provider and allows you to build and deploy your own platform and software solutions on top of it.
 
 ## Putting it all together
 
 // TODO: write..
+
+![vCloud UI](https://raw.githubusercontent.com/JamesClonk/terraform-vcloud-kubernetes/data/dcs_dashboard.png)
+
+![Architecture](https://raw.githubusercontent.com/JamesClonk/terraform-vcloud-kubernetes/data/dcs_k8s.png)
+
+![K3s on vCloud](https://raw.githubusercontent.com/JamesClonk/terraform-vcloud-kubernetes/data/dcs_k8s_dashboard.png)
 
 ## Automated testing
 
