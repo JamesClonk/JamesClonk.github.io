@@ -19,7 +19,7 @@ Naturally this means after coming back to Switzerland I'm now trying to replicat
 
 ### Ingredients
 
-- ca. 1.5 - 1.8cm dicke Schweinshalssteaks
+- ca. 1 - 1.5cm dicke Schweinshalssteaks
 - Sushi Reis / Japanischer Reis
 - Tonkatsu Sauce ([Bull-Dog](http://tonkatsu.bulldog.jp/)!)
 - Weisskohl
@@ -29,7 +29,7 @@ Naturally this means after coming back to Switzerland I'm now trying to replicat
 - Sesamöl
 - Miso
 - Kartoffelstärke oder Maizena
-- Urdinkelmehl
+- Urdinkelmehl oder Weissmehl
 - Eier
 - Panko / Japanisches Paniermehl
 - High-Oleic Sonnenblumenöl / Frittieröl
@@ -52,7 +52,7 @@ Naturally this means after coming back to Switzerland I'm now trying to replicat
 
 2. Alles in eine Schüssel geben und gut rühren (Salz und Zucker sind schwierig aufzulösen in kaltem Wasser, aber das muss so sein!)
 
-3. Schweinshalssteaks in Salzsole einlegen für ca. 8-12h (Nicht länger, sonst wirds zu salzig!)
+3. Schweinshalssteaks in Salzsole einlegen für ca. 12h (Nicht länger, sonst wirds zu salzig!)
 	- Das Fleisch muss komplett mit Sole bedeckt sein
 	- Die Schüssel mit Folie abdecken und in den Kühlschrank stellen
 
@@ -78,10 +78,11 @@ Naturally this means after coming back to Switzerland I'm now trying to replicat
 	- In Panko legen
 
 8. Frittieren:
-	- 1.5 - 2 Liter Öl in grossem Topf bei maximaler Hitze heiss werden lassen
-	- 3-4min. maximal pro Fleischstück frittieren
+	- 2+ Liter Öl in grossem Topf bei maximaler Hitze heiss werden lassen
+	- 4-5min. maximal pro Fleischstück frittieren
 	- 3-4x wenden, das Fleisch darf möglichst nicht den Boden oder die Ränder berühren
-	- Frittieren bis goldbraun und oben auf schwimmend (Vorsicht: Wird zu lange frittiert ist das Ganze viel zu trocken danach!)
+	- Frittieren bei 180°C bis goldbraun und oben auf schwimmend (Vorsicht: Wird zu lange frittiert ist das Ganze viel zu trocken danach!)
+ 	- Electrolux Induktionsherd: Stufe 14-P um auf Temperatur zu bringen, danach Stufe 8 und abwarten bis exakt auf 180°C
 
 9. Fertigstellen:
 	- Frittiergut herausnehem
