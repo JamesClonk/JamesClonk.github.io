@@ -68,7 +68,7 @@ Naturally this means after coming back to Switzerland I'm now trying to replicat
 	- Alles zusammen verühren und beiseite stellen
 
 6. Reis:
-	- Mit einem Reiskocher kochen (Uncle Roger kriegt sonst nen Herzkasper!)
+	- Mit einem Reiskocher kochen (Uncle Roger kriegt sonst einen Herzkasper!)
 	- Vehältnis ca. 0.9 Becher Reis auf 1.2 Becher Wasser
 
 7. Panieren:
