@@ -1,5 +1,5 @@
 ---
-title: "Template rendering and secret management with Plato"
+title: "Template rendering and secrets management with Plato"
 description: "Plato is a template renderer with automatic SOPS secret injection, written in Golang"
 tags: [golang,sops,secrets,kubernetes,github,continuous deployment,k3s,hetzner,templating]
 author: Fabio Berchtold
